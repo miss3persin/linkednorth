@@ -12,7 +12,7 @@ const openSans = Open_Sans({ subsets: ['latin'] })
 
 export const ConnectSection = () => {
   return (
-    <div className='container flex px-24 mb-48'>
+    <div className='container flex px-24 mb-20'>
     <div className='w-full relative'>
         <Image src={stration_5} layout='intrinsic' objectFit='contain' quality={100}/>
     </div>
