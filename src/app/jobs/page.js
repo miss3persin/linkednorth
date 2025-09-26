@@ -16,71 +16,75 @@ const inter = Inter({ subsets: ['latin'] })
 export default function JobBoard() {
   const [jobs] = useState([
     {
-    id: 1,
-    jobTitle: 'Frontend Developer',
-    company: 'Apple',
-    location: 'United Kingdom',
-    jobType: 'On-site',
-    description: "We're looking for a skilled frontend developer to join our team in London.",
-    imageSrc: '/apple.png',
-    applyLink: 'https://google.com/careers'
-  },
-  {
-    id: 2,
-    jobTitle: 'Backend Developer',
-    company: 'Uber',
-    location: 'United States',
-    jobType: 'Remote',
-    description: 'Join our team to build scalable backend systems.',
-    imageSrc: '/Uber.png',
-    applyLink: 'https://amazon.jobs'
-  },
-  {
-    id: 3,
-    jobTitle: 'Product Manager',
-    company: 'Microsoft',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/microsoft.png',
-    applyLink: 'https://microsoft.com/careers'
-  },
-  {
-    id: 4,
-    jobTitle: 'Product Manager',
-    company: 'Netflix',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/Netflix.png',
-    applyLink: 'https://microsoft.com/careers'
-  },
-  {
-    id: 5,
-    jobTitle: 'Product Manager',
-    company: 'Tesla',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/Tesla.png',
-    applyLink: 'https://microsoft.com/careers'
-  },
-  {
-    id: 6,
-    jobTitle: 'Product Manager',
-    company: 'Reddit',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/reddit.png',
-    applyLink: 'https://microsoft.com/careers'
-  }
+      id: 1,
+      jobTitle: 'Frontend Developer',
+      company: 'Apple',
+      location: 'United Kingdom',
+      jobType: 'On-site',
+      description: "We're looking for a skilled frontend developer to join our team in London.",
+      imageSrc: '/apple.png',
+      applyLink: 'https://google.com/careers'
+    },
+    {
+      id: 2,
+      jobTitle: 'Backend Developer',
+      company: 'Uber',
+      location: 'United States',
+      jobType: 'Remote',
+      description: 'Join our team to build scalable backend systems.',
+      imageSrc: '/Uber.png',
+      applyLink: 'https://amazon.jobs'
+    },
+    {
+      id: 3,
+      jobTitle: 'Product Manager',
+      company: 'Microsoft',
+      location: 'Canada',
+      jobType: 'Hybrid',
+      description: 'Lead the product development for next-gen tools.',
+      imageSrc: '/microsoft.png',
+      applyLink: 'https://microsoft.com/careers'
+    },
+    {
+      id: 4,
+      jobTitle: 'Product Manager',
+      company: 'Netflix',
+      location: 'Canada',
+      jobType: 'Hybrid',
+      description: 'Lead the product development for next-gen tools.',
+      imageSrc: '/Netflix.png',
+      applyLink: 'https://microsoft.com/careers'
+    },
+    {
+      id: 5,
+      jobTitle: 'Product Manager',
+      company: 'Tesla',
+      location: 'Canada',
+      jobType: 'Hybrid',
+      description: 'Lead the product development for next-gen tools.',
+      imageSrc: '/Tesla.png',
+      applyLink: 'https://microsoft.com/careers'
+    },
+    {
+      id: 6,
+      jobTitle: 'Product Manager',
+      company: 'Reddit',
+      location: 'Canada',
+      jobType: 'Hybrid',
+      description: 'Lead the product development for next-gen tools.',
+      imageSrc: '/reddit.png',
+      applyLink: 'https://microsoft.com/careers'
+    }
   ])
 
   // Get query params from search
-  const searchParams = useSearchParams()
-  const jobTitleQuery = searchParams.get('jobTitle') || ''
-  const countryQuery = searchParams.get('country') || ''
+  let jobTitleQuery = ''
+  let countryQuery = ''
+  if (typeof window !== 'undefined') {
+    const searchParams = useSearchParams()
+    jobTitleQuery = searchParams.get('jobTitle') || ''
+    countryQuery = searchParams.get('country') || ''
+  }
 
   // Filter jobs
   const filteredJobs = useMemo(() => {
@@ -98,35 +102,35 @@ export default function JobBoard() {
   return (
     <div className="min-h-screen flex flex-col mt-20">
       {/* Hero */}
-<section className="relative bg-gray-50 w-full overflow-hidden py-5">
-  {/* Overlay image on the right */}
-  <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none">
-    <Image
-      src={overlay}
-      alt="overlay"
-      className="w-auto h-full object-fill"
-      priority
-    />
-  </div>
+      <section className="relative bg-gray-50 w-full overflow-hidden py-5">
+        {/* Overlay image on the right */}
+        <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none">
+          <Image
+            src={overlay}
+            alt="overlay"
+            className="w-auto h-full object-fill"
+            priority
+          />
+        </div>
 
-  {/* Content */}
-  <div className="relative max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-    <div>
-      <h2 className="text-[2.8rem] font-bold mb-2">Find your Dream Job</h2>
-      <p className={`${inter.className} text-[#737373] mb-6 font-light`}>
-        Explore our job search platform, built to simplify your job hunt. <br/>
-Navigate opportunities with ease and find the right position quickly and efficiently.
-      </p>
+        {/* Content */}
+        <div className="relative max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div>
+            <h2 className="text-[2.8rem] font-bold mb-2">Find your Dream Job</h2>
+            <p className={`${inter.className} text-[#737373] mb-6 font-light`}>
+              Explore our job search platform, built to simplify your job hunt. <br />
+              Navigate opportunities with ease and find the right position quickly and efficiently.
+            </p>
 
-      <SearchBar />
-    </div>
-  </div>
+            <SearchBar />
+          </div>
+        </div>
 
-  {/* Hero image pinned to bottom */}
-  <div className="absolute -bottom-4 left-3/4 -translate-x-3/4 w-[25rem]">
-    <Image src={stration_6} alt="hero" width={1000} height={1000} />
-  </div>
-</section>
+        {/* Hero image pinned to bottom */}
+        <div className="absolute -bottom-4 left-3/4 -translate-x-3/4 w-[25rem]">
+          <Image src={stration_6} alt="hero" width={1000} height={1000} />
+        </div>
+      </section>
 
 
       {/* Job Listings */}
