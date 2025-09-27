@@ -93,12 +93,14 @@ export default function HomePage() {
     <div className="absolute bottom-0 flex items-center justify-between w-full px-10">
       <Image 
         src={stration_2} 
+        alt=""
         layout="intrinsic" 
         quality={100} 
         className="mt-20" 
       />
       <Image 
         src={stration_1} 
+        alt=""
         layout="intrinsic" 
         quality={100} 
         className="mb-52" 
@@ -134,12 +136,12 @@ export default function HomePage() {
       <div className="container px-52">
         <Marquee gradient={true} speed={30} autoFill={true}>
           <div className="flex gap-8">
-            <Image src={reddit} width={100} height={100} className="w-full ml-8" />
-            <Image src={airbnb} width={100} height={100} className="w-full" />
-            <Image src={tesla} width={100} height={100} className="w-full" />
-            <Image src={uber} width={100} height={100} className="w-full" />
-            <Image src={netflix} width={100} height={100} className="w-full" />
-            <Image src={microsoft} width={100} height={100} className="w-full" />
+            <Image src={reddit} alt="" width={100} height={100} className="w-full ml-8" />
+            <Image src={airbnb} alt="" width={100} height={100} className="w-full" />
+            <Image src={tesla} alt="" width={100} height={100} className="w-full" />
+            <Image src={uber} alt="" width={100} height={100} className="w-full" />
+            <Image src={netflix} alt="" width={100} height={100} className="w-full" />
+            <Image src={microsoft} alt="" width={100} height={100} className="w-full" />
           </div>
         </Marquee>
       </div>
@@ -154,7 +156,7 @@ export default function HomePage() {
           <div className="w-full">
             <p className={`${inter.className} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-6 sm:mb-10 font-bold max-w-lg`}>What Makes Us Different</p>
             <div className="mb-6 sm:mb-10 w-full sm:w-[26rem] relative">
-              <Image src={features} quality={100} />
+              <Image src={features} alt="" quality={100} />
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button text="Check Career Resources" img={arrow_right} link="https://www.google.com/" variant="black" />
@@ -163,7 +165,7 @@ export default function HomePage() {
           </div>
 
           <div className="w-full relative">
-            <Image src={startion_3} quality={100} />
+            <Image src={startion_3} alt="" quality={100} />
             <div className="w-full h-16 sm:h-24 bg-gradient-to-b from-transparent via-white/95 to-white absolute bottom-0"></div>
           </div>
         </div>
@@ -173,7 +175,7 @@ export default function HomePage() {
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0">
           <div className="w-full lg:w-4/6 relative">
-            <Image src={stration_4} quality={100} />
+            <Image src={stration_4} alt="" quality={100} />
           </div>
 
           <div className="w-full">
@@ -232,7 +234,7 @@ export default function HomePage() {
           </div>
 
           <div className="w-full lg:w-5/6 relative">
-            <Image src={feedback_img} quality={100} />
+            <Image src={feedback_img} alt="" quality={100} />
           </div>
         </div>
       </section>
@@ -241,7 +243,7 @@ export default function HomePage() {
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-20 items-center gap-10 lg:gap-0">
           <div className="w-full relative">
-            <Image src={stration_5} quality={100} />
+            <Image src={stration_5} alt="" quality={100} />
           </div>
 
           <div className="w-full">

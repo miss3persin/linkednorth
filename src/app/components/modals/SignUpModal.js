@@ -1,17 +1,17 @@
 'use client'
 import Modal from '../ui/Modal'
-import { SignIn } from '@clerk/nextjs'
+import { SignUp } from '@clerk/nextjs'
 
-export default function SignInModal({ open, setOpen, switchToSignUp }) {
+export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   return (
     <Modal open={open} onClose={() => setOpen(false)} size="max-w-md">
       <div className="text-left p-2">
-        <h2 className="text-xl font-semibold mb-2">Sign in</h2>
+        <h2 className="text-xl font-semibold mb-2">Join LinkedNorth</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Stay updated on your professional world
+          Make the most of your professional life
         </p>
 
-        <SignIn
+        <SignUp
           appearance={{
             layout: {
               logoImageUrl: null,
@@ -35,18 +35,18 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
             },
           }}
           routing="hash"
-          afterSignInUrl="/dashboard"
-          signUpUrl="/auth/signup"
+          afterSignUpUrl="/dashboard"
+          signInUrl="/auth/signin"
         />
 
-        {/* Footer link to Sign Up */}
+        {/* Footer link to Sign In */}
         <p className="text-sm text-center mt-4 text-gray-500">
-          New to LinkedNorth?{' '}
+          Already on LinkedNorth?{' '}
           <span
-            onClick={switchToSignUp}
+            onClick={switchToSignIn}
             className="text-blue-600 cursor-pointer hover:underline"
           >
-            Join now
+            Sign in
           </span>
         </p>
       </div>

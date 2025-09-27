@@ -25,24 +25,43 @@ export const SearchBar = () => {
   const countries = ['United States', 'Canada', 'United Kingdom', 'Remote']
 
   const handleJobTitleChange = (e) => {
-    setJobTitle(e.target.value)
+    const value = e.target.value
+    setJobTitle(value)
     setFilteredJobs(
       jobTitles.filter((job) =>
-        job.toLowerCase().includes(e.target.value.toLowerCase())
+        job.toLowerCase().includes(value.toLowerCase())
       )
     )
   }
 
   const handleCountryChange = (e) => {
-    setCountry(e.target.value)
+    const value = e.target.value
+    setCountry(value)
     setFilteredCountries(
       countries.filter((c) =>
-        c.toLowerCase().includes(e.target.value.toLowerCase())
+        c.toLowerCase().includes(value.toLowerCase())
       )
     )
   }
 
   const handleSearch = () => {
+    // Validation: both fields cannot be empty
+    if (!jobTitle.trim() && !country.trim()) {
+      alert('Please enter a job title or country to search.')
+      return
+    }
+
+    // Optional: validate minimum characters (e.g., at least 2)
+    if (jobTitle && jobTitle.trim().length < 2) {
+      alert('Please enter at least 2 characters for the job title.')
+      return
+    }
+
+    if (country && country.trim().length < 2) {
+      alert('Please enter at least 2 characters for the country.')
+      return
+    }
+
     // Navigate to /jobs with query params
     router.push(`/jobs?title=${encodeURIComponent(jobTitle)}&country=${encodeURIComponent(country)}`)
   }
@@ -54,6 +73,7 @@ export const SearchBar = () => {
         <Image src={job} alt="job icon" className="absolute sm:top-[1.79rem] sm:left-4 top-[1.1rem] left-9" />
         <input
           type="text"
+          aria-label="Job Title or Keyword"
           placeholder="Job Title or Keyword"
           value={jobTitle}
           onChange={handleJobTitleChange}
@@ -93,6 +113,7 @@ export const SearchBar = () => {
         <Image src={location} alt="location icon" className="absolute sm:top-[1.75rem] sm:right-[19.8rem] top-[4.4rem] right-[10.7rem]" />
         <input
           type="text"
+          aria-label="Country or timezone"
           placeholder="Country or timezone"
           value={country}
           onChange={handleCountryChange}
@@ -128,6 +149,7 @@ export const SearchBar = () => {
         {/* Search Button */}
         <button
           onClick={handleSearch}
+          aria-label="Search jobs"
           className={`${openSans.className} border flex items-center justify-center gap-2 border-[#181818] bg-[#181818] px-12 py-6 text-[13px] text-white`}
         >
           Search

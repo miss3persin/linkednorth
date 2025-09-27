@@ -2,6 +2,7 @@
 import "./globals.css";
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
+import { ClerkProvider } from '@clerk/nextjs'
 
 // const inter = Inter({ subsets: ["latin"] });
 // const openSans = Open_Sans({ subsets: ["latin"]});
@@ -13,6 +14,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <Navbar />
@@ -20,5 +22,6 @@ export default function RootLayout({ children }) {
         <Footer />
       </body>
     </html>
+    </ClerkProvider>
   );
 }

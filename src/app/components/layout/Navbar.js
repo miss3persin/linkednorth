@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import logo from '/public/linkednorth-logo.png'
 import Image from 'next/image'
-import SignInModal from '../modals/SignInModal'
+import AuthModals from '../modals/AuthModals'
 import { Open_Sans } from 'next/font/google'
 import { Button } from '../ui/Button'
 import { HiMenu, HiX } from 'react-icons/hi'
@@ -72,7 +72,8 @@ export default function Navbar() {
         )}
       </nav>
 
-      <SignInModal open={open} setOpen={setOpen} />
+      <AuthModals open={open} setOpen={setOpen} />
+
     </>
   )
 }
