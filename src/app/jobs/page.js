@@ -4,14 +4,14 @@ import Image from 'next/image'
 import { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
-import { JobCard } from '../components/jobs/JobCard'
+import { JobListingCard } from '../components/jobs/JobListingCard'
 import { SearchBar } from '../components/ui/SearchBar'
 import { Inter, Open_Sans } from 'next/font/google'
 import stration_6 from '/public/Open Doodles Chilling.png'
 import overlay from '/public/Overlay.png'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter'  })
 
 export default function JobBoard() {
   const [jobs] = useState([
@@ -21,9 +21,12 @@ export default function JobBoard() {
       company: 'Apple',
       location: 'United Kingdom',
       jobType: 'On-site',
-      description: "We're looking for a skilled frontend developer to join our team in London.",
+      contractType: 'Full-Time',
+      postedTime: '2 hours ago',
+      description: "We're looking for a skilled frontend developer to join our team in London.We're looking for a skilled frontend developer to join our team in London.We're looking for a skilled frontend developer to join our team in London.We're looking for a skilled frontend developer to join our team in London.We're looking for a skilled frontend developer to join our team in London.",
       imageSrc: '/apple.png',
-      applyLink: 'https://google.com/careers'
+      applyLink: 'https://google.com/careers',
+      detailsLink: 'https://google.com/careers/frontend-developer'
     },
     {
       id: 2,
@@ -31,9 +34,12 @@ export default function JobBoard() {
       company: 'Uber',
       location: 'United States',
       jobType: 'Remote',
+      contractType: 'Contract',
+      postedTime: '1 day ago',
       description: 'Join our team to build scalable backend systems.',
       imageSrc: '/Uber.png',
-      applyLink: 'https://amazon.jobs'
+      applyLink: 'https://amazon.jobs',
+      detailsLink: 'https://amazon.jobs/backend-developer'
     },
     {
       id: 3,
@@ -41,9 +47,12 @@ export default function JobBoard() {
       company: 'Microsoft',
       location: 'Canada',
       jobType: 'Hybrid',
+      contractType: 'Full-Time',
+      postedTime: '3 hours ago',
       description: 'Lead the product development for next-gen tools.',
       imageSrc: '/microsoft.png',
-      applyLink: 'https://microsoft.com/careers'
+      applyLink: 'https://microsoft.com/careers',
+      detailsLink: 'https://microsoft.com/careers/product-manager'
     },
     {
       id: 4,
@@ -51,9 +60,12 @@ export default function JobBoard() {
       company: 'Netflix',
       location: 'Canada',
       jobType: 'Hybrid',
+      contractType: 'Part-Time',
+      postedTime: '5 hours ago',
       description: 'Lead the product development for next-gen tools.',
       imageSrc: '/Netflix.png',
-      applyLink: 'https://microsoft.com/careers'
+      applyLink: 'https://microsoft.com/careers',
+      detailsLink: 'https://netflix.com/jobs/product-manager'
     },
     {
       id: 5,
@@ -61,9 +73,12 @@ export default function JobBoard() {
       company: 'Tesla',
       location: 'Canada',
       jobType: 'Hybrid',
+      contractType: 'Internship',
+      postedTime: '6 days ago',
       description: 'Lead the product development for next-gen tools.',
       imageSrc: '/Tesla.png',
-      applyLink: 'https://microsoft.com/careers'
+      applyLink: 'https://microsoft.com/careers',
+      detailsLink: 'https://tesla.com/careers/product-manager'
     },
     {
       id: 6,
@@ -71,9 +86,12 @@ export default function JobBoard() {
       company: 'Reddit',
       location: 'Canada',
       jobType: 'Hybrid',
+      contractType: 'Full-Time',
+      postedTime: '1 week ago',
       description: 'Lead the product development for next-gen tools.',
       imageSrc: '/reddit.png',
-      applyLink: 'https://microsoft.com/careers'
+      applyLink: 'https://microsoft.com/careers',
+      detailsLink: 'https://redditinc.com/careers/product-manager'
     }
   ])
 
@@ -117,7 +135,7 @@ export default function JobBoard() {
         <div className="relative max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div>
             <h2 className="text-[2.8rem] font-bold mb-2">Find your Dream Job</h2>
-            <p className={`${inter.className} text-[#737373] mb-6 font-light`}>
+            <p className={`${inter.variable} text-[#737373] mb-6 font-light`}>
               Explore our job search platform, built to simplify your job hunt. <br />
               Navigate opportunities with ease and find the right position quickly and efficiently.
             </p>
@@ -149,15 +167,18 @@ export default function JobBoard() {
           <div className="flex flex-col gap-6">
             {filteredJobs.length > 0 ? (
               filteredJobs.map((job) => (
-                <JobCard
+                <JobListingCard
                   key={job.id}
                   jobTitle={job.jobTitle}
                   company={job.company}
                   location={job.location}
-                  jobType={job.jobType}
+                  postedTime={job.postedTime}       // e.g. "3 hours ago"
+                  jobType={job.jobType}             // e.g. "Full-Time"
+                  contractType={job.contractType}   // e.g. "Contract"
                   description={job.description}
                   imageSrc={job.imageSrc}
                   applyLink={job.applyLink}
+                  detailsLink={job.detailsLink}     // new button link
                 />
               ))
             ) : (

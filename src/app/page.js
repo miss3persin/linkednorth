@@ -23,7 +23,7 @@ import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 const jobData = [
   {
@@ -95,14 +95,12 @@ export default function HomePage() {
         src={stration_2} 
         alt=""
         layout="intrinsic" 
-        quality={100} 
         className="mt-20" 
       />
       <Image 
         src={stration_1} 
         alt=""
         layout="intrinsic" 
-        quality={100} 
         className="mb-52" 
       />
     </div>
@@ -110,7 +108,7 @@ export default function HomePage() {
     {/* Headings */}
     <div>
       <p
-        className={`${inter.className} mb-5 px-16 text-center text-[4.1rem] font-extrabold leading-tight text-[#333333]`}
+        className={`${inter.variable} mb-5 px-16 text-center text-[4.1rem] font-extrabold leading-tight text-[#333333]`}
       >
         Find Your Next Role, Verified and{" "}
         <span className="text-[#A0A6B1]">Secured.</span>
@@ -154,9 +152,9 @@ export default function HomePage() {
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0">
           <div className="w-full">
-            <p className={`${inter.className} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-6 sm:mb-10 font-bold max-w-lg`}>What Makes Us Different</p>
+            <p className={`${inter.variable} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-6 sm:mb-10 font-bold max-w-lg`}>What Makes Us Different</p>
             <div className="mb-6 sm:mb-10 w-full sm:w-[26rem] relative">
-              <Image src={features} alt="" quality={100} />
+              <Image src={features} alt="" />
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button text="Check Career Resources" img={arrow_right} link="https://www.google.com/" variant="black" />
@@ -165,7 +163,7 @@ export default function HomePage() {
           </div>
 
           <div className="w-full relative">
-            <Image src={startion_3} alt="" quality={100} />
+            <Image src={startion_3} alt="" />
             <div className="w-full h-16 sm:h-24 bg-gradient-to-b from-transparent via-white/95 to-white absolute bottom-0"></div>
           </div>
         </div>
@@ -175,11 +173,11 @@ export default function HomePage() {
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0">
           <div className="w-full lg:w-4/6 relative">
-            <Image src={stration_4} alt="" quality={100} />
+            <Image src={stration_4} alt="" />
           </div>
 
           <div className="w-full">
-            <p className={`${inter.className} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-7 pt-3 font-bold`}>
+            <p className={`${inter.variable} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-7 pt-3 font-bold`}>
               Get Your Resume Reviewed by Top <span className="text-headingGrey">Recruiters</span>
             </p>
             <p className={`${openSans.className} mb-6 sm:mb-7 leading-loose max-w-lg text-textColor`}>
@@ -194,7 +192,7 @@ export default function HomePage() {
       <section>
         <div className="container mb-24 sm:mb-36 md:mb-48">
           <div className="mb-6 sm:mb-10">
-            <p className={`${inter.className} px-4 sm:px-8 md:px-16 xl:px-52 text-center text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-headingBlack`}>
+            <p className={`${inter.variable} px-4 sm:px-8 md:px-16 xl:px-52 text-center text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-headingBlack`}>
               Discover a world of opportunities that align with your skills
             </p>
           </div>
@@ -224,7 +222,7 @@ export default function HomePage() {
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0">
           <div className="w-full">
-            <p className={`${inter.className} text-[#333333] text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-3 font-bold max-w-lg`}>
+            <p className={`${inter.variable} text-[#333333] text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-3 font-bold max-w-lg`}>
               Real Feedback from Job Seekers <span className="text-[#A0A6B1]">Like You</span>
             </p>
             <p className={`${openSans.className} mb-6 sm:mb-5 leading-loose max-w-lg text-[#868D9B]`}>
@@ -234,7 +232,7 @@ export default function HomePage() {
           </div>
 
           <div className="w-full lg:w-5/6 relative">
-            <Image src={feedback_img} alt="" quality={100} />
+            <Image src={feedback_img} alt="" />
           </div>
         </div>
       </section>
@@ -243,18 +241,18 @@ export default function HomePage() {
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-20 items-center gap-10 lg:gap-0">
           <div className="w-full relative">
-            <Image src={stration_5} alt="" quality={100} />
+            <Image src={stration_5} alt="" />
           </div>
 
           <div className="w-full">
-            <p className={`${inter.className} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-6 sm:pt-14 font-bold`}>
+            <p className={`${inter.variable} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-6 sm:pt-14 font-bold`}>
               Connect with likeminded people
             </p>
             <p className={`${openSans.className} mb-6 sm:mb-5 leading-loose max-w-lg text-textColor`}>
               Connect, share insights, and get support from a network of professionals on the same journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button text="Join Our Discord" img={discord_img} link="https://www.google.com/" variant="black" />
+              <Button text="Join Our Discord" img={arrow_right} link="https://www.google.com/" variant="black" />
               <Button text="Join Our Newsletter" link="https://www.google.com/" variant="white" />
             </div>
           </div>
