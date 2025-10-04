@@ -41,9 +41,9 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
   return (
     <Modal open={open} onClose={() => setOpen(false)} size="max-w-md">
-      <div className="text-left p-2">
+      <div className="text-left">
         {/* Header */}
-        <h2 className="text-xl font-semibold mb-2">Join LinkedNorth</h2>
+        <h2 className="text-xl font-bold mb-1">Join LinkedNorth</h2>
         <p className="text-sm text-gray-500 mb-4">
           Make the most of your professional life
         </p>
@@ -51,51 +51,71 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex gap-2">
+            <div className="w-1/2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                First name
+              </label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm border-gray-300"
+                required
+              />
+            </div>
+
+            <div className="w-1/2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Last name
+              </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm border-gray-300"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
-              type="text"
-              placeholder="First name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-1/2 border rounded px-3 py-2 text-sm border-gray-300"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-1/2 border rounded px-3 py-2 text-sm border-gray-300"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm border-gray-300"
               required
             />
           </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm border-gray-300"
-            required
-          />
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Password (6 or more characters)
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm border-gray-300"
+              required
+            />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password (6 or more characters)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm border-gray-300"
-            required
-          />
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           {/* Clerk CAPTCHA placeholder */}
           <div id="clerk-captcha" className='flex item-center' />
 
+          <p className='text-xs text-gray-500 !mt-0'>By clicking Agree & Join, you agree to the LinkedNorth User Agreement, Privacy Policy, and Cookie Policy.</p>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded text-sm font-medium hover:bg-gray-800 transition"
+            className="w-full bg-black text-white py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition"
           >
             {loading ? 'Creating account...' : 'Agree & Join'}
           </button>
@@ -118,9 +138,9 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
                 redirectUrlComplete: '/dashboard',
               })
             }
-            className="w-full border rounded py-2 flex items-center justify-center gap-3 text-sm"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
           >
-            <img src="/icons/google.svg" alt="Google" className="w-4 h-4" />
+            <img src="/google.svg" alt="Google" className="w-4 h-4" />
             Continue with Google
           </button>
 
@@ -132,9 +152,9 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
                 redirectUrlComplete: '/dashboard',
               })
             }
-            className="w-full border rounded py-2 flex items-center justify-center gap-3 text-sm"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
           >
-            <img src="/icons/facebook.svg" alt="Facebook" className="w-4 h-4" />
+            <img src="/facebook.svg" alt="Facebook" className="w-4 h-4" />
             Continue with Facebook
           </button>
 
@@ -146,19 +166,19 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
                 redirectUrlComplete: '/dashboard',
               })
             }
-            className="w-full border rounded py-2 flex items-center justify-center gap-3 text-sm"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
           >
-            <img src="/icons/apple.svg" alt="Apple" className="w-4 h-4" />
+            <img src="/apple.svg" alt="Apple" className="w-4 h-4" />
             Continue with Apple
           </button>
         </div>
 
         {/* Footer */}
-        <p className="text-sm text-center mt-4 text-gray-500">
+        <p className="text-sm text-center mt-4 mb-6 text-gray-500">
           Already on LinkedNorth?{' '}
           <span
             onClick={switchToSignIn}
-            className="text-blue-600 cursor-pointer hover:underline"
+            className="text-blue-600 cursor-pointer hover:underline font-medium pl-2"
           >
             Sign in
           </span>
