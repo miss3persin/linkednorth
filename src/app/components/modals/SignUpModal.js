@@ -108,7 +108,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           {/* Clerk CAPTCHA placeholder */}
-          <div id="clerk-captcha" className='flex item-center' />
+          {/* <div id="clerk-captcha" className='flex item-center' /> */}
 
           <p className='text-xs text-gray-500 !mt-0'>By clicking Agree & Join, you agree to the LinkedNorth User Agreement, Privacy Policy, and Cookie Policy.</p>
 
