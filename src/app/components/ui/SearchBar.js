@@ -137,7 +137,7 @@ const debouncedFetchCountries = debounce(fetchLocationSuggestions, 300);
   }
 
   return (
-    <div className={`${openSans.className} flex items-center justify-center py-4 w-[35rem]`}>
+    <div className={`${openSans.className} flex items-center justify-center py-4 sm:w-[35rem]`}>
       <div className="relative w-full flex flex-col sm:flex-row sm:gap-0 gap-2">
 
         {/* --- Job Input --- */}

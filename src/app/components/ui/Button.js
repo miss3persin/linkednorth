@@ -14,7 +14,7 @@ export const Button = ({
   onClick, // accept onClick
 }) => {
   const baseStyles =
-    "border flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 text-sm w-full sm:w-auto rounded-sm"
+    "border flex items-center justify-center gap-2 px-4 sm:px-6 xl:px-8 py-2 sm:py-3 text-xs xl:text-sm w-full sm:w-auto rounded-sm"
   const variants = {
     white: "border-[#181818] bg-white font-semibold text-[#181818]",
     black: "border-[#181818] bg-[#181818] text-white",

@@ -18,7 +18,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`${openSans.className} relative w-screen`}>
-        <div className="fixed z-50 flex w-screen items-center justify-between bg-white px-8 sm:px-16 lg:px-32 py-4 shadow-sm">
+        <div className="fixed z-50 flex w-screen items-center justify-between bg-white px-8 sm:px-16 xl:px-32 py-4 shadow-sm">
           {/* Logo Centered */}
           <div className="relative h-10 w-[150px] flex-shrink-0 mx-auto mt-4 lg:mx-0">
             <Link href="/">
@@ -34,13 +34,13 @@ export default function Navbar() {
 
           {/* Desktop Links */}
           <div className="hidden lg:flex lg:items-center lg:gap-10 text-[13px]  text-[#868D9B]">
-            <ul className="flex gap-10">
+            <ul className="flex gap-8 xl:gap-10">
               <li><Link href="/">Home</Link></li>
               <li><Link href="/jobs">Job Listings</Link></li>
               <li><Link href="/resources">Career Resources</Link></li>
               <li><Link href="/contact">Contact Us</Link></li>
             </ul>
-            <div className="flex items-center gap-3 ml-8">
+            <div className="flex items-center gap-3 ml-6">
               <Button text="Post A Job" img="" link="https://discord.com" variant="white" />
               <Button text="Login/SignUp" img="" variant="black" onClick={() => setOpen(true)} />
             </div>
