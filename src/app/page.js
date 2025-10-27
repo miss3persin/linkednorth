@@ -86,66 +86,66 @@ export default function HomePage() {
   return (
     <div className="relative">
 
-{/* Hero Section */}
-<section>
-  <div className="container relative px-16 pt-40 mb-48 flex flex-col items-center">
-    {/* Background Illustrations */}
-    <div className="absolute bottom-0 flex items-center justify-between w-full px-10">
-      <Image 
-        src={stration_2} 
-        alt=""
-        layout="intrinsic" 
-        className="mt-20" 
-      />
-      <Image 
-        src={stration_1} 
-        alt=""
-        layout="intrinsic" 
-        className="mb-52" 
-      />
-    </div>
-
-    {/* Headings */}
-    <div>
-      <p
-        className={`${inter.variable} mb-5 px-16 text-center text-[4.1rem] font-extrabold leading-tight text-[#333333]`}
-      >
-        Find Your Next Role, Verified and{" "}
-        <span className="text-[#A0A6B1]">Secured.</span>
-      </p>
-      <p
-        className={`${openSans.className} mb-5 px-[22rem] text-center leading-loose text-[#868D9B]`}
-      >
-        Job search platform worldwide. We connect freelancers and startups
-        in an easy way and good collaboration
-      </p>
-    </div>
-
-    {/* Search Bar */}
-    <div className="mb-36 flex items-center justify-center">
-      <SearchBar />
-    </div>
-
-    {/* Trusted Companies */}
-    <div>
-      <p className="mb-7 text-center text-sm text-[#868D9B]">
-        Trusted by 500+ Companies
-      </p>
-      <div className="container px-52">
-        <Marquee gradient={true} speed={30} autoFill={true}>
-          <div className="flex gap-8">
-            <Image src={reddit} alt="" width={100} height={100} className="w-full ml-8" />
-            <Image src={airbnb} alt="" width={100} height={100} className="w-full" />
-            <Image src={tesla} alt="" width={100} height={100} className="w-full" />
-            <Image src={uber} alt="" width={100} height={100} className="w-full" />
-            <Image src={netflix} alt="" width={100} height={100} className="w-full" />
-            <Image src={microsoft} alt="" width={100} height={100} className="w-full" />
+      {/* Hero Section */}
+      <section>
+        <div className="container relative px-16 pt-40 mb-48 flex flex-col items-center">
+          {/* Background Illustrations */}
+          <div className="absolute bottom-0 flex items-center justify-between w-full px-10">
+            <Image
+              src={stration_2}
+              alt=""
+              layout="intrinsic"
+              className="mt-20"
+            />
+            <Image
+              src={stration_1}
+              alt=""
+              layout="intrinsic"
+              className="mb-52"
+            />
           </div>
-        </Marquee>
-      </div>
-    </div>
-  </div>
-</section>
+
+          {/* Headings */}
+          <div>
+            <p
+              className={`${inter.variable} mb-5 px-16 text-center text-[4.1rem] font-extrabold leading-tight text-[#333333]`}
+            >
+              Find Your Next Role, Verified and{" "}
+              <span className="text-[#A0A6B1]">Secured.</span>
+            </p>
+            <p
+              className={`${openSans.className} mb-5 px-[22rem] text-center leading-loose text-[#868D9B]`}
+            >
+              Job search platform worldwide. We connect freelancers and startups
+              in an easy way and good collaboration
+            </p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-36 flex items-center justify-center">
+            <SearchBar />
+          </div>
+
+          {/* Trusted Companies */}
+          <div>
+            <p className="mb-7 text-center text-sm text-[#868D9B]">
+              Trusted by 500+ Companies
+            </p>
+            <div className="container px-52">
+              <Marquee gradient={true} speed={30} autoFill={true}>
+                <div className="flex gap-8">
+                  <Image src={reddit} alt="" width={100} height={100} className="w-full ml-8" />
+                  <Image src={airbnb} alt="" width={100} height={100} className="w-full" />
+                  <Image src={tesla} alt="" width={100} height={100} className="w-full" />
+                  <Image src={uber} alt="" width={100} height={100} className="w-full" />
+                  <Image src={netflix} alt="" width={100} height={100} className="w-full" />
+                  <Image src={microsoft} alt="" width={100} height={100} className="w-full" />
+                </div>
+              </Marquee>
+            </div>
+          </div>
+        </div>
+      </section>
 
 
       {/* Features Section */}
@@ -157,7 +157,7 @@ export default function HomePage() {
               <Image src={features} alt="" />
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button text="Check Career Resources" img={arrow_right} link="https://www.google.com/" variant="black" />
+              <Button text="Check Career Resources" img={arrow_right} link="/resources" variant="black" />
               <Button text="Join Our Discord" img={discord_img} link="https://www.google.com/" variant="white" />
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center justify-center">
-            <Button text="Check More Job Listings" img={arrow_right} link="" variant="black" />
+            <Button text="Check More Job Listings" img={arrow_right} link="/jobs" variant="black" />
           </div>
         </div>
       </section>
@@ -228,8 +228,11 @@ export default function HomePage() {
             <p className={`${openSans.className} mb-6 sm:mb-5 leading-loose max-w-lg text-[#868D9B]`}>
               Discover genuine reviews and experiences from our community of job seekers. Discover genuine reviews and experiences from our community of job seekers.
             </p>
-            <Button text="Check More Job Listings" img={arrow_right} link="" variant="black" />
+            <div className="w-fit">
+              <Button text="Check More Job Listings" img={arrow_right} link="/jobs" variant="black" />
+            </div>
           </div>
+
 
           <div className="w-full lg:w-5/6 relative">
             <Image src={feedback_img} alt="" />

@@ -13,6 +13,27 @@ import { Button } from '../ui/Button'
 const openSans = Open_Sans({ subsets: ['latin'] })
 const inter = Inter({ subsets: ['latin'] })
 
+const formatPostedTime = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now - date
+
+  const seconds = Math.floor(diffMs / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  const months = Math.floor(days / 30)
+  const years = Math.floor(days / 365)
+
+  if (seconds < 60) return 'Just now'
+  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`
+  if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`
+  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`
+  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`
+  return `${years} year${years !== 1 ? 's' : ''} ago`
+}
+
+
 export const JobListingCard = ({
   jobTitle,
   company,
@@ -34,7 +55,7 @@ export const JobListingCard = ({
 
           <div className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
             <Image
-              src={imageSrc}
+              src={imageSrc || '/linkednorth-logo.png'}
               alt="Company Logo"
               fill
               className="object-contain p-1"
@@ -48,7 +69,7 @@ export const JobListingCard = ({
               <span>•</span>
               <span>{location}</span>
               <span>•</span>
-              <span>{postedTime}</span>
+              <span>{formatPostedTime(postedTime)}</span>
             </div>
           </div>
         </div>
