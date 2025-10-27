@@ -11,6 +11,9 @@ import overlay from '/public/Overlay.png'
 import stration_6 from '/public/Open Doodles Chilling.png'
 import { Button } from '../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
+import logo from '/public/linkednorth-logo.png'
+
+export const dynamic = "force-dynamic";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -96,9 +99,9 @@ export default function JobsPage() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-3xl">
               {loading
-                ? 'Loading jobs...'
+                ? 'Getting jobs, hold on...'
                 : error
-                  ? 'Error loading jobs'
+                  ? 'There seems to be a problem, try again later.'
                   : `${jobs.length} jobs found`}
             </h3>
             <button className="flex items-center border px-3 py-1 rounded text-sm">
@@ -109,7 +112,7 @@ export default function JobsPage() {
           {/* Job cards */}
           <div className="flex flex-col gap-6">
             {loading ? (
-              <p className="text-gray-500">Fetching jobs...</p>
+              <p className="text-gray-500">Looking for jobs...</p>
             ) : error ? (
               <p className="text-red-500">{error}</p>
             ) : jobs.length > 0 ? (
@@ -123,7 +126,7 @@ export default function JobsPage() {
                   jobType={job.jobType}
                   contractType={job.contractType}
                   description={job.description}
-                  imageSrc={job.imageSrc}
+                  imageSrc={job.imageSrc || logo}
                   applyLink={job.applyLink}
                   detailsLink={job.detailsLink}
                   onViewDetails={() => setSelectedJob(job)}
@@ -176,7 +179,7 @@ export default function JobsPage() {
               <div className="overflow-y-auto pr-1 flex-1 thin-scroll">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="relative w-12 h-12 rounded-md overflow-hidden">
-                    <Image src={selectedJob.imageSrc} alt="Company Logo" fill className="object-contain" />
+                    <Image src={selectedJob.imageSrc ? selectedJob.imageSrc : logo} alt="Company Logo" fill className="object-contain" />
                   </div>
                   <div>
                     <p className="font-semibold text-base">{selectedJob.jobTitle}</p>

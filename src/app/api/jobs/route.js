@@ -62,7 +62,7 @@ export async function GET(request) {
       contractType: job.contract_type || "N/A",
       postedTime: job.created || "Unknown",
       description: job.description || "N/A",
-      imageSrc: "/default-logo.png",
+      imageSrc: "",
       applyLink: job.redirect_url || "#",
       detailsLink: job.redirect_url || "#",
     }))

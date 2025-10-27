@@ -57,7 +57,7 @@ export const JobListingCard = ({
 
           <div className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
             <Image
-              src={imageSrc || logo}
+              src={imageSrc ? imageSrc : logo}
               alt="Company Logo"
               fill
               className="object-contain p-1"
