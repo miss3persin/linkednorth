@@ -1,11 +1,11 @@
-import { Suspense } from "react"
-import JobsPage from "./wrapper/page"
+'use client'
 
-export const dynamic = "force-dynamic";
+import { Suspense } from 'react'
+import JobsPage from './wrapper/JobsPageContent'
 
-export default function Jobs() {
+export default function Wrapper() {
   return (
-    <Suspense fallback={<div className="mt-20 text-center">Loading jobs...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <JobsPage />
     </Suspense>
   )
