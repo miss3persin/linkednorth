@@ -50,8 +50,16 @@ export async function GET(request) {
       next: { revalidate: 3600 }, // cache for 1 hour
     })
 
-    if (!res.ok) throw new Error(`Adzuna API Error: ${res.status}`)
-    const data = await res.json()
+    if (!res.ok) {
+      console.warn(`Adzuna API returned ${res.status} for ${countryCode.toUpperCase()}`);
+      return new Response(JSON.stringify({ jobs: [] }), {
+        status: 200, // ✅ return success with empty array
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const data = await res.json();
+
 
     const jobs = (data.results || []).map((job, index) => ({
       id: job.id || index + 1,

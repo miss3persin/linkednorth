@@ -55,15 +55,30 @@ export default function JobsPage() {
         const res = await fetch(
           `/api/jobs?jobTitle=${encodeURIComponent(jobTitleQuery)}&country=${encodeURIComponent(countryQuery)}`
         )
-        if (!res.ok) throw new Error('Failed to fetch jobs')
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+        }
+
         const data = await res.json()
-        setJobs(data.jobs || [])
+
+        // ✅ If response is valid but jobs array is empty, it's *not* an error
+        if (!data.jobs || data.jobs.length === 0) {
+          setJobs([])
+          setError(null) // no error, just 0 results
+        } else {
+          setJobs(data.jobs)
+          setError(null)
+        }
+
       } catch (err) {
-        console.error(err)
-        setError('Error loading jobs.')
+        console.error("Error fetching jobs:", err)
+        setError("Something went wrong while fetching jobs.")
+        setJobs([]) // ensure we don’t show stale data
       } finally {
         setLoading(false)
       }
+
     }
 
     fetchJobs()
@@ -101,7 +116,7 @@ export default function JobsPage() {
               {loading
                 ? 'Getting jobs, hold on...'
                 : error
-                  ? 'There seems to be a problem, try again later.'
+                  ? 'Something\'s not right, try again later.'
                   : `${jobs.length} jobs found`}
             </h3>
             <button className="flex items-center border px-3 py-1 rounded text-sm">
@@ -139,9 +154,8 @@ export default function JobsPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className={`border rounded p-6 sticky top-24 self-start flex flex-col transition-all duration-300 ${
-    selectedJob ? 'h-[85vh]' : 'h-fit'
-  }`}>
+        <aside className={`border rounded p-6 sticky top-24 self-start flex flex-col transition-all duration-300 ${selectedJob ? 'h-[85vh]' : 'h-fit'
+          }`}>
           {!selectedJob ? (
             <>
               <h4 className="font-semibold mb-2 flex items-center gap-2">
