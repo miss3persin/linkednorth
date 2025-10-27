@@ -8,6 +8,7 @@ import arrow_right_black from '/public/chevron right black.png'
 import save_btn from '/public/job_save_btn.png'
 // import job from '/public/work_blue.png'
 // import location_icon from '/public/location_blue.png'
+import logo from '/public/linkednorth-logo.png'
 import { Button } from '../ui/Button'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
@@ -45,6 +46,7 @@ export const JobListingCard = ({
   imageSrc,
   applyLink,
   detailsLink,
+  onViewDetails = () => {},
 }) => {
   return (
     <div className="flex w-full max-w-[48rem] flex-col rounded-sm border border-[#E5E7EB] bg-white p-6 shadow-sm">
@@ -55,7 +57,7 @@ export const JobListingCard = ({
 
           <div className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
             <Image
-              src={imageSrc || '/linkednorth-logo.png'}
+              src={imageSrc || logo}
               alt="Company Logo"
               fill
               className="object-contain p-1"
@@ -110,15 +112,17 @@ export const JobListingCard = ({
         </a> */}
 
         <a
-          href={detailsLink}
-          target="_blank"
-          rel="noopener noreferrer"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault()
+            onViewDetails?.()
+          }}
           className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 text-sm w-full sm:w-auto rounded-sm"
         >
           View Details
-
           <Image src={arrow_right_black} alt="arrow" width={24} height={24} />
         </a>
+
       </div>
     </div >
   )
