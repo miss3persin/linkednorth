@@ -90,9 +90,9 @@ export default function HomePage() {
       <section>
         <div className="container relative px-16 pt-40 mb-48 flex flex-col items-center max-xl:px-8 max-lg:px-6 max-md:px-4 max-lg:pt-24 max-sm:pt-20 max-sm:mb-24">
           {/* Background Illustrations */}
-          <div className="absolute bottom-0 flex items-center justify-between w-full px-10 max-lg:hidden">
-            <Image src={stration_2} alt="" layout="intrinsic" className="mt-10 xl:mt-20 w-44 xl:w-full" />
-            <Image src={stration_1} alt="" layout="intrinsic" className="mb-52 w-44 xl:w-full" />
+          <div className="absolute bottom-0 flex items-center justify-between w-full px-10 max-md:hidden">
+            <Image src={stration_2} alt="" layout="intrinsic" className="mt-10" />
+            <Image src={stration_1} alt="" layout="intrinsic" className="mb-52" />
           </div>
 
           {/* Headings */}
