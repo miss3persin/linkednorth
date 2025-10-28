@@ -1,13 +1,14 @@
 'use client'
 
+import { useUser } from "@clerk/nextjs"
+import { useState } from "react"
+import AuthModals from "../modals/AuthModals"
 import React from 'react'
 import Image from 'next/image'
 import { Inter, Open_Sans } from 'next/font/google'
 import arrow_right from '/public/chevron right.png'
 import arrow_right_black from '/public/chevron right black.png'
 import save_btn from '/public/job_save_btn.png'
-// import job from '/public/work_blue.png'
-// import location_icon from '/public/location_blue.png'
 import logo from '/public/linkednorth-logo.png'
 import { Button } from '../ui/Button'
 
@@ -34,6 +35,19 @@ const formatPostedTime = (dateString) => {
   return `${years} year${years !== 1 ? 's' : ''} ago`
 }
 
+// Truncate description to a specific number of sentences
+const truncateDescription = (text, sentenceLimit = 3) => {
+  if (!text) return ''
+
+  // Split by sentence-ending punctuation
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text]
+
+  if (sentences.length <= sentenceLimit) return text
+
+  // Join first few sentences and add ellipsis
+  return sentences.slice(0, sentenceLimit).join(' ').trim() + '...'
+}
+
 
 export const JobListingCard = ({
   jobTitle,
@@ -46,16 +60,25 @@ export const JobListingCard = ({
   imageSrc,
   applyLink,
   detailsLink,
-  onViewDetails = () => {},
+  onViewDetails = () => { },
 }) => {
+  const { isSignedIn } = useUser()
+  const [openAuthModal, setOpenAuthModal] = useState(false)
+
+  const requireAuth = (action) => {
+    if (!isSignedIn) {
+      setOpenAuthModal(true)
+      return
+    }
+    action?.()
+  }
   return (
     <div className="flex w-full max-w-[48rem] flex-col rounded-sm border border-[#E5E7EB] bg-white p-6 shadow-sm">
-      {/* Top section */}
-      <div className="flex items-start justify-between">
+      {/* === Top Section === */}
+      <div className="flex items-start justify-between flex-wrap gap-3 sm:gap-0">
 
-        <div className='flex gap-4'>
-
-          <div className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
+        <div className="flex gap-3 sm:gap-4">
+          <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
             <Image
               src={imageSrc ? imageSrc : logo}
               alt="Company Logo"
@@ -64,9 +87,11 @@ export const JobListingCard = ({
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <p className="text-xl font-bold text-[#111827]">{jobTitle}</p>
-            <div className="flex flex-wrap items-center gap-1 text-xs text-[#4F98FF]">
+          <div className="flex flex-col gap-0.5 sm:gap-1">
+            <p className="font-bold text-lg sm:text-xl md:text-2xl text-[#111827] leading-snug">
+              {jobTitle}
+            </p>
+            <div className="flex flex-wrap items-center gap-1 text-[0.65rem] sm:text-xs md:text-sm text-[#4F98FF]">
               <span>{company}</span>
               <span>•</span>
               <span>{location}</span>
@@ -79,51 +104,48 @@ export const JobListingCard = ({
         <div className="flex flex-col gap-1">
           <Image src={save_btn} alt="save" width={16} height={16} className="cursor-pointer" />
         </div>
-
       </div>
 
-      {/* Description */}
-      <p className="text-sm text-[#4B5563] leading-relaxed pl-[4.5rem] mb-2 max-w-[40rem]">
-        {description}
+      {/* === Description === */}
+      <p className="text-xs sm:text-sm md:text-base text-[#4B5563] leading-relaxed pl-0 sm:pl-[4.5rem] mb-3 sm:mb-2 max-w-[40rem] mt-2 sm:mt-0">
+        {truncateDescription(description, 2)}
       </p>
 
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2 pl-[4.5rem] mb-5">
-        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+      {/* === Tags === */}
+      <div className="flex flex-wrap gap-2 pl-0 sm:pl-[4.5rem] mb-4 sm:mb-5">
+        <span className="rounded-full bg-green-100 px-2 sm:px-3 py-0.5 sm:py-1 text-[0.65rem] sm:text-xs font-medium text-green-800">
           {jobType}
         </span>
-        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+        <span className="rounded-full bg-blue-100 px-2 sm:px-3 py-0.5 sm:py-1 text-[0.65rem] sm:text-xs font-medium text-blue-800">
           {contractType}
         </span>
       </div>
 
-
-      {/* Buttons */}
-      <div className="flex flex-col gap-2 sm:flex-row pl-[4.5rem]">
-        <Button text="Apply Now" img={arrow_right} link="https://www.google.com/" variant="black" />
-        {/* <a
-          href={applyLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-black px-5 py-2 text-sm font-semibold text-white hover:bg-[#111]"
-        >
-          Apply Now
-          <Image src={arrow_right_black} alt="arrow" width={16} height={16} />
-        </a> */}
+      {/* === Buttons === */}
+      <div className="flex flex-col sm:flex-row gap-2 pl-0 sm:pl-[4.5rem]">
+        <Button text="Apply Now" img={arrow_right} variant="black"
+          onClick={(e) => {
+            e.preventDefault()
+            requireAuth(() => {
+              if (applyLink) window.open(applyLink, "_blank")
+            })
+          }} />
 
         <a
           href="#"
           onClick={(e) => {
             e.preventDefault()
-            onViewDetails?.()
+            requireAuth(onViewDetails)
           }}
-          className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 text-sm w-full sm:w-auto rounded-sm"
+          className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-3 sm:px-6 md:px-8 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto rounded-sm"
         >
           View Details
-          <Image src={arrow_right_black} alt="arrow" width={24} height={24} />
+          <Image src={arrow_right_black} alt="arrow" width={20} height={20} className="sm:w-6 sm:h-6" />
         </a>
-
       </div>
-    </div >
+
+      <AuthModals open={openAuthModal} setOpen={setOpenAuthModal} />
+
+    </div>
   )
 }

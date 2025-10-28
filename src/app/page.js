@@ -90,7 +90,7 @@ export default function HomePage() {
       <section>
         <div className="container relative px-16 pt-40 mb-48 flex flex-col items-center max-xl:px-8 max-lg:px-6 max-md:px-4 max-lg:pt-24 max-sm:pt-20 max-sm:mb-24">
           {/* Background Illustrations */}
-          <div className="absolute bottom-0 flex items-center justify-between w-full px-10 max-md:hidden">
+          <div className="absolute bottom-0 items-center justify-between w-full px-10 hidden xl:flex">
             <Image src={stration_2} alt="" layout="intrinsic" className="mt-10" />
             <Image src={stration_1} alt="" layout="intrinsic" className="mb-52" />
           </div>
@@ -149,7 +149,7 @@ export default function HomePage() {
               What Makes Us Different
             </p>
 
-            <div className="mb-6 sm:mb-10 w-[24rem] sm:block hidden relative mx-auto lg:mx-0">
+            <div className="mb-6 sm:mb-10 w-[24rem] lg:block hidden relative mx-auto lg:mx-0">
               <Image src={features} alt="" />
             </div>
 
@@ -183,7 +183,7 @@ export default function HomePage() {
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0">
 
           {/* Image — stays left on large, but moves right below heading on xs */}
-          <div className="sm:block hidden lg:w-4/6 relative max-sm:order-2 lg:order-1">
+          <div className="lg:block hidden lg:w-4/6 relative max-sm:order-2 lg:order-1">
             <Image src={stration_4} alt="" />
           </div>
 
@@ -191,25 +191,25 @@ export default function HomePage() {
           <div className="w-full flex flex-col max-sm:order-1 lg:order-2">
             {/* Heading */}
             <p
-              className={`${inter.variable} text-[#333333] text-center sm:text-left text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-7 pt-3 font-bold`}
+              className={`${inter.variable} text-[#333333] text-center lg:text-left text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-7 pt-3 font-bold`}
             >
               Get Your Resume Reviewed by Top{" "}
               <span className="text-[#A0A6B1]">Recruiters</span>
             </p>
 
             {/* On small screens, we re-insert the image here so it comes right after the heading */}
-            <div className="w-full relative my-4 sm:hidden">
+            <div className="w-full relative my-4 lg:hidden items-center justify-center flex">
               <Image src={stration_4} alt="" />
             </div>
 
             {/* Paragraph + Button stay at the bottom */}
             <p
-              className={`${openSans.className} mb-5 text-center sm:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full sm:max-w-lg`}
+              className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
               Receive expert feedback from recruiters who've worked with leading
               brands to elevate your resume.
             </p>
-            <div className="sm:w-full w-5/6 mx-auto">
+            <div className="lg:w-full mx-auto">
               <Button
                 text="Check Resume -$25"
                 img={arrow_right}
@@ -261,7 +261,7 @@ export default function HomePage() {
           <div className="w-full flex flex-col max-sm:order-1 lg:order-1">
             {/* Heading */}
             <p
-              className={`${inter.variable} text-[#333333] sm:text-left text-center text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-3 font-bold max-w-lg`}
+              className={`${inter.variable} text-[#333333] lg:text-left text-center text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-3 font-bold lg:max-w-lg`}
             >
               Real Feedback from Job Seekers{" "}
               <span className="text-[#A0A6B1]">Like You</span>
@@ -274,14 +274,14 @@ export default function HomePage() {
 
             {/* Paragraph + Button stay below */}
             <p
-              className={`${openSans.className} mb-5 text-center sm:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full sm:max-w-lg`}
+              className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
               Discover genuine reviews and experiences from our community of job
               seekers. Discover genuine reviews and experiences from our community of
               job seekers.
             </p>
 
-            <div className="w-fit justify-center sm:justify-start mx-auto sm:mx-0">
+            <div className="w-fit justify-center lg:justify-start mx-auto lg:mx-0">
               <Button
                 text="Check More Job Listings"
                 img={arrow_right}
@@ -292,7 +292,7 @@ export default function HomePage() {
           </div>
 
           {/* Image - large screens only */}
-          <div className="w-full lg:w-5/6 relative max-sm:hidden">
+          <div className="w-full lg:w-5/6 relative flex max-md:hidden">
             <Image src={feedback_img} alt="" />
           </div>
         </div>
@@ -304,7 +304,7 @@ export default function HomePage() {
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-20 items-center gap-10 lg:gap-0">
 
           {/* Image - large screens only */}
-          <div className="w-full relative max-sm:hidden">
+          <div className="w-full relative max-lg:hidden">
             <Image src={stration_5} alt="" />
           </div>
 
@@ -312,24 +312,24 @@ export default function HomePage() {
           <div className="w-full flex flex-col">
             {/* Heading */}
             <p
-              className={`${inter.variable} text-[#333333] sm:text-left text-center text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-6 sm:pt-14 font-bold`}
+              className={`${inter.variable} text-[#333333] lg:text-left text-center text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-6 sm:pt-14 font-bold`}
             >
               Sign Up to Get Job Alerts
             </p>
 
             {/* Image - shows below heading on small screens */}
-            <div className="w-full relative my-4 sm:hidden">
+            <div className="w-full relative my-4 lg:hidden items-center justify-center flex">
               <Image src={stration_5} alt="" />
             </div>
 
             {/* Paragraph + Buttons stay below */}
             <p
-              className={`${openSans.className} mb-5 text-center sm:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full sm:max-w-lg`}
+              className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
               Our powerful job matching technology will send job matches right into your inbox.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start mx-auto lg:mx-0">
               <Button
                 text="Find Your Future Job"
                 link="https://www.google.com/"
