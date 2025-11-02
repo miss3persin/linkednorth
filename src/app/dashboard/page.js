@@ -24,18 +24,21 @@ export default async function Dashboard() {
       text: "Your application for Senior Product Designer at Google has moved to the interview stage.",
       action: "View Application",
       time: "2 hours ago",
+      color: "text-green-500",
     },
     {
       title: "New Job Match",
       text: "We found 5 new jobs that match your profile and preferences.",
       action: "View Jobs",
       time: "Yesterday",
+      color: "text-blue-500",
     },
     {
       title: "Resume Feedback",
       text: "AI suggests improvements that could increase your chances by 35%.",
       action: "Edit Resume",
       time: "2 days ago",
+      color: "text-purple-500",
     },
   ];
 
@@ -63,7 +66,7 @@ export default async function Dashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <p className="text-gray-500 text-sm flex w-full justify-between items-center">Jobs Viewed <FiEye className="text-3xl text-green-500" /></p>
             <h2 className="text-3xl font-bold inline-flex items-center gap-1">
-              {stats.viewed} 
+              {stats.viewed}
             </h2>
             <p className="text-xs text-green-600 mt-1">+15 this week</p>
           </div>
@@ -81,26 +84,35 @@ export default async function Dashboard() {
         <div className="bg-white p-6 rounded-xl shadow-sm border mb-8">
           <div className="flex justify-between mb-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
-              <IoMdNotificationsOutline size={20} /> Notifications
+
+              Notifications
             </h3>
             <button className="text-sm text-blue-600 hover:underline">
               Mark all as read
             </button>
           </div>
 
-          <div className="divide-y">
+          <div className="">
             {notifications.map((n, i) => (
-              <div key={i} className="py-4">
-                <p className="font-medium">{n.title}</p>
-                <p className="text-sm text-gray-500 mt-1">{n.text}</p>
-                <Link
-                  href="#"
-                  className="text-blue-600 text-sm mt-2 inline-block font-medium"
-                >
-                  {n.action}
-                </Link>
-                <p className="text-xs text-gray-400 mt-1">{n.time}</p>
+              <div key={i} className="py-4 px-4 bg-[#F9FAFB] flex w-full gap-4 items-start mb-2 rounded-md">
+                <IoMdNotificationsOutline className={`text-3xl ${n.color}`} />
+
+                {/* Content */}
+                <div className="flex-1">
+                  <p className="font-medium">{n.title}</p>
+                  <p className="text-sm text-gray-500 mt-1">{n.text}</p>
+                  <Link
+                    href="#"
+                    className="text-blue-600 text-sm mt-2 inline-block font-medium"
+                  >
+                    {n.action}
+                  </Link>
+                </div>
+
+                {/* Time stamp pushed to the end */}
+                <p className="text-xs text-gray-400 mt-1 ml-auto">{n.time}</p>
               </div>
+
             ))}
           </div>
         </div>
