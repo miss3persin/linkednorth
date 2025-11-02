@@ -4,14 +4,14 @@ import Link from 'next/link'
 import { useState } from 'react'
 import logo from '/public/linkednorth-logo.png'
 import Image from 'next/image'
-import AuthModals from '../modals/AuthModals'
+import AuthModals from '../../modals/AuthModals'
 import { Open_Sans } from 'next/font/google'
-import { Button } from '../ui/Button'
+import { Button } from '../../ui/Button'
 import { HiMenu, HiX } from 'react-icons/hi'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
 
-export default function Navbar() {
+export default function PublicNavbar() {
   const [open, setOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 

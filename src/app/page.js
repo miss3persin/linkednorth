@@ -88,7 +88,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section>
-        <div className="container relative px-16 pt-40 mb-48 flex flex-col items-center max-xl:px-8 max-lg:px-6 max-md:px-4 max-lg:pt-24 max-sm:pt-20 max-sm:mb-24">
+        <div className="container relative px-16 pt-32 mb-48 flex flex-col items-center max-xl:px-8 max-lg:px-6 max-md:px-4 max-lg:pt-24 max-sm:pt-20 max-sm:mb-24">
           {/* Background Illustrations */}
           <div className="absolute bottom-0 items-center justify-between w-full px-10 hidden xl:flex">
             <Image src={stration_2} alt="" layout="intrinsic" className="mt-10" />
