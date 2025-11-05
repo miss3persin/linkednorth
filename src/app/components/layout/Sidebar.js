@@ -13,9 +13,9 @@ export default function Sidebar() {
 
   const items = [
     { href: "/dashboard", label: "Dashboard", icon: <HiOutlineSquares2X2 size={18} /> },
-    { href: "/job-listings", label: "Jobs Listings", icon: <FiBriefcase size={18} /> },
+    { href: "/joblistings", label: "Jobs Listings", icon: <FiBriefcase size={18} /> },
     { href: "/library", label: "Library", icon: <FiFolder size={18} /> },
-    { href: "/resume-builder", label: "Resume Builder", icon: <FiFileText size={18} /> },
+    { href: "/resumebuilder", label: "Resume Builder", icon: <FiFileText size={18} /> },
     { href: "/premium", label: "Premium Features", icon: <FiStar size={18} /> },
   ];
 

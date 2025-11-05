@@ -8,5 +8,9 @@ export const config = {
     "/((?!.+\\.[\\w]+$|_next).*)", 
     "/",
     "/dashboard(.*)", // ✅ Protect dashboard routes
+    "/library(.*)",
+    "/joblistings(.*)",
+    "/resumebuilder(.*)",
+    "/premium(.*)",
   ],
 };

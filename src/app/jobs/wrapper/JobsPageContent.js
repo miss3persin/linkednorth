@@ -99,8 +99,8 @@ export default function JobsPage() {
           />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-6 sm:px-12 py-12 sm:py-8 grid grid-cols-1 xl:grid-cols-2 gap-10 sm:gap-6 items-center">
-          <div className="text-center md:text-left">
+        <div className="relative max-w-6xl mx-auto px-6 sm:px-12 py-12 sm:py-8 flex flex-col xl:flex-row items-center gap-10">
+          <div className="text-center md:text-left w-full">
             <h2 className="text-[2.8rem] md:text-[2.4rem] sm:text-[2rem] font-bold mb-2 leading-tight">
               Find your Dream Job
             </h2>
@@ -119,7 +119,7 @@ export default function JobsPage() {
               alt="hero"
               width={700}
               height={700}
-              className="w-[20rem] sm:w-[16rem] md:w-[22rem] lg:w-[25rem] mx-auto md:mx-0"
+              className="w-[20rem] sm:w-[16rem] md:w-[22rem] lg:w-[35rem] mx-auto md:mx-0"
             />
           </div>
         </div>
