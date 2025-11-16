@@ -55,7 +55,7 @@ export default function AuthNavbar({ userData }) {
                     <div className="relative cursor-pointer">
                         <FiMessageSquare size={20} />
                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                            2
+                            0
                         </span>
                     </div>
 

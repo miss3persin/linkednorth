@@ -12,7 +12,11 @@ import stration_6 from '/public/Open Doodles Chilling.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
 import logo from '/public/linkednorth-logo.png'
-import Sidebar from '../../components/layout/Sidebar' // <- imported Sidebar
+import { useUser } from "@clerk/nextjs"
+
+// ✅ Add imports for tracking
+import { trackJobView, trackJobInteraction } from './../../lib/activityClient'
+import Sidebar from '@/app/components/layout/Sidebar'
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +51,39 @@ export default function JobsPage() {
   const searchParams = useSearchParams()
   const jobTitleQuery = searchParams.get('jobTitle') || ''
   const countryQuery = searchParams.get('country') || ''
+  
+  const { isSignedIn } = useUser();
 
+const handleJobClick = async (job) => {
+  if (!job?.id) return;
+
+  const apiJob = {
+    id: job.id,
+    title: job.jobTitle,
+    company: { display_name: job.company },
+    location: { display_name: job.location },
+    description: job.description,
+    redirect_url: job.applyLink
+  };
+
+  try {
+    await fetch('/api/saveJob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(apiJob)
+    });
+  } catch (err) {
+    console.error("Failed to save job before redirect:", err);
+    // Optional: decide whether to continue redirect or block
+  }
+
+  const route = isSignedIn ? `/joblistings/${job.id}` : `/jobs/${job.id}`;
+  window.location.href = route;
+};
+
+
+
+  // ✅ Track when user loads a new job search
   useEffect(() => {
     async function fetchJobs() {
       setLoading(true)
@@ -61,6 +97,14 @@ export default function JobsPage() {
 
         const data = await res.json()
         setJobs(data.jobs || [])
+
+        // ✅ Log search interaction (not just view)
+        await trackJobInteraction({
+          type: 'search',
+          query: jobTitleQuery,
+          country: countryQuery,
+          timestamp: new Date(),
+        })
       } catch (err) {
         console.error("Error fetching jobs:", err)
         setError("Something went wrong while fetching jobs.")
@@ -71,14 +115,36 @@ export default function JobsPage() {
     }
 
     fetchJobs()
+
   }, [jobTitleQuery, countryQuery])
 
+  // ✅ Track when user views a specific job
+  const handleViewDetails = async (job) => {
+    setSelectedJob(job)
+    await trackJobView({
+      jobId: job.id,
+      title: job.jobTitle,
+      company: job.company,
+      location: job.location,
+      timestamp: new Date(),
+    })
+  }
+
+  // ✅ Track “Easy Apply” or “Save” clicks
+  const handleInteraction = async (type, job) => {
+    await trackJobInteraction({
+      type,
+      jobId: job.id,
+      title: job.jobTitle,
+      company: job.company,
+      timestamp: new Date(),
+    })
+  }
+
   return (
-    // Layout includes Sidebar (keeps placement consistent with other pages)
     <div className="min-h-screen flex bg-white mt-16">
       <Sidebar />
 
-      {/* Content column */}
       <main className="flex-1 flex flex-col">
         {/* === Hero Section === */}
         <section className="relative bg-gray-50 w-full overflow-hidden py-10 sm:py-8">
@@ -127,6 +193,7 @@ export default function JobsPage() {
                 jobs.map((job) => (
                   <JobListingCard
                     key={job.id}
+                    id={job.id}
                     jobTitle={job.jobTitle}
                     company={job.company}
                     location={job.location}
@@ -137,7 +204,7 @@ export default function JobsPage() {
                     imageSrc={job.imageSrc || logo}
                     applyLink={job.applyLink}
                     detailsLink={job.detailsLink}
-                    onViewDetails={() => setSelectedJob(job)}
+                    onViewDetails={() => handleViewDetails(job)} // ✅ tracking
                   />
                 ))
               ) : (
@@ -146,7 +213,7 @@ export default function JobsPage() {
             </div>
           </div>
 
-          {/* Sidebar details panel (desktop) */}
+          {/* Sidebar details panel */}
           <aside className={`border rounded p-6 sm:p-4 sticky top-24 self-start flex flex-col ${selectedJob ? 'h-[85vh]' : 'h-fit'} hidden lg:block`}>
             {!selectedJob ? (
               <>
@@ -181,51 +248,27 @@ export default function JobsPage() {
                   </div>
 
                   <div className="flex gap-2 mb-4">
-                    <button className="bg-black text-white text-sm px-4 py-2 rounded w-full">Easy Apply</button>
-                    <button className="border text-sm px-4 py-2 rounded w-full">Save</button>
+                    <button
+                      onClick={() => handleInteraction('apply', selectedJob)} // ✅ tracking
+                      className="bg-black text-white text-sm px-4 py-2 rounded w-full"
+                    >
+                      Easy Apply
+                    </button>
+                    <button
+                      onClick={() => handleInteraction('save', selectedJob)} // ✅ tracking
+                      className="border text-sm px-4 py-2 rounded w-full"
+                    >
+                      Save
+                    </button>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-4">{selectedJob.description}</p>
-
-                  <Button text="Show more details" img={arrow_right} link="https://www.google.com/" variant="black" />
+                  <Button text="Show more details" img={arrow_right} variant="black" onClick={() => handleJobClick(selectedJob)}/>
                 </div>
               </div>
             )}
           </aside>
         </div>
-
-        {/* Mobile selected job panel */}
-        {selectedJob && (
-          <div className="lg:hidden fixed inset-0 bg-white z-50 p-5 overflow-y-auto">
-            <div className="flex justify-between items-start mb-3">
-              <h4 className="font-bold text-lg">Job Details</h4>
-              <button onClick={() => setSelectedJob(null)} className="text-gray-400 hover:text-black text-sm">✕</button>
-            </div>
-            <div className="w-full h-[1px] bg-gray-200 mb-4"></div>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="relative w-12 h-12 rounded-md overflow-hidden">
-                <Image src={selectedJob.imageSrc || logo} alt="Company Logo" fill className="object-contain" />
-              </div>
-              <div>
-                <p className="font-semibold text-base">{selectedJob.jobTitle}</p>
-                <p className="text-sm text-gray-600">{selectedJob.company}</p>
-                <p className="text-xs text-gray-500">
-                  {selectedJob.location} • {formatPostedTime(selectedJob.postedTime)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2 mb-4">
-              <button className="bg-black text-white text-sm px-4 py-2 rounded w-full">Easy Apply</button>
-              <button className="border text-sm px-4 py-2 rounded w-full">Save</button>
-            </div>
-
-            <p className="text-sm text-gray-600 mb-4">{selectedJob.description}</p>
-
-            <Button text="Show more details" img={arrow_right} link="https://www.google.com/" variant="black" />
-          </div>
-        )}
       </main>
     </div>
   )

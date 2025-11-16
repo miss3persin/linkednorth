@@ -1,10 +1,18 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SignInModal from './SignInModal'
 import SignUpModal from './SignUpModal'
 
 export default function AuthModals({ open, setOpen }) {
   const [activeModal, setActiveModal] = useState('signin') // default to signin
+
+  useEffect(() => {
+    if (open) {
+      // Store current URL only when the auth modal is opened
+      const currentUrl = window.location.href
+      localStorage.setItem('redirectAfterLogin', currentUrl)
+    }
+  }, [open])
 
   return (
     <>

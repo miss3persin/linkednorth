@@ -50,6 +50,7 @@ const truncateDescription = (text, sentenceLimit = 3) => {
 
 
 export const JobListingCard = ({
+  id,
   jobTitle,
   company,
   location,
@@ -102,7 +103,39 @@ export const JobListingCard = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <Image src={save_btn} alt="save" width={16} height={16} className="cursor-pointer" />
+          <Image
+            src={save_btn}
+            alt="save"
+            width={16}
+            height={16}
+            className="cursor-pointer"
+            onClick={async () => {
+              // 1️⃣ Save the job to your database via API
+              try {
+                await fetch("/api/saveJob", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    id,
+                    title: jobTitle,
+                    company: { display_name: company },
+                    location: { display_name: location },
+                    description,
+                    redirect_url: applyLink
+                  }),
+                });
+
+                // 2️⃣ Copy the shareable link
+                const jobUrl = `${window.location.origin}/jobs/${id}`;
+                navigator.clipboard.writeText(jobUrl);
+                alert("Job link copied and saved!");
+              } catch (err) {
+                console.error(err);
+                alert("Failed to save job. Please try again.");
+              }
+            }}
+          />
+
         </div>
       </div>
 

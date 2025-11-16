@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model UserActivity {
+  id            Int            @id @default(autoincrement())
+  userId        String         @unique // ensures one activity record per user
+  viewedJobs    Int            @default(0)
+  appliedJobs   Int            @default(0)
+  interviews    Int            @default(0)
+  lastUpdated   DateTime       @updatedAt
+  notifications Notification[] // one-to-many relation
+}
+
+model Notification {
+  id             Int      @id @default(autoincrement())
+  userActivityId Int // foreign key pointing to UserActivity
+  title          String
+  message        String
+  actionLink     String?
+  color          String?
+  createdAt      DateTime @default(now())
+
+  // relation setup
+  userActivity UserActivity @relation(fields: [userActivityId], references: [id])
+}
+
+model Job {
+  id          String   @id // Use Adzuna's job id as string
+  jobTitle    String
+  company     String
+  location    String
+  description String
+  applyLink   String
+  createdAt   DateTime @default(now())
+}
+
+

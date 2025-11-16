@@ -27,7 +27,20 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        window.location.href = '/dashboard'
+        // === 🔥 Redirect Logic Starts Here ===
+        const redirectUrl = localStorage.getItem('redirectAfterLogin')
+
+        if (redirectUrl) {
+          const url = new URL(redirectUrl)
+          const queryString = url.search // e.g. ?search=developer&location=london
+          const newUrl = '/joblistings' + queryString
+
+          localStorage.removeItem('redirectAfterLogin')
+          window.location.href = newUrl
+        } else {
+          window.location.href = '/joblistings'
+        }
+        // === 🔥 Redirect Logic Ends Here ===
       }
     } catch (err) {
       setError(err.errors ? err.errors[0].message : 'Something went wrong.')
@@ -110,13 +123,19 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
         {/* Social logins */}
         <div className="space-y-2">
           <button
-            onClick={() =>
+            onClick={() => {
+              // 🔹 Add this block first
+              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin')
+              const url = new URL(redirectAfterLogin || window.location.href)
+              const queryString = url.search
+              const redirectUrlComplete = '/joblistings' + queryString
+
               signIn.authenticateWithRedirect({
                 strategy: 'oauth_google',
                 redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/dashboard',
+                redirectUrlComplete,
               })
-            }
+            }}
             className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
           >
             <img src="/google.svg" alt="Google" className="w-4 h-4" />
@@ -124,13 +143,18 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
           </button>
 
           <button
-            onClick={() =>
+            onClick={() => {
+              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin')
+              const url = new URL(redirectAfterLogin || window.location.href)
+              const queryString = url.search
+              const redirectUrlComplete = '/joblistings' + queryString
+
               signIn.authenticateWithRedirect({
                 strategy: 'oauth_facebook',
                 redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/dashboard',
+                redirectUrlComplete,
               })
-            }
+            }}
             className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
           >
             <img src="/facebook.svg" alt="Facebook" className="w-4 h-4" />
@@ -138,13 +162,18 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
           </button>
 
           <button
-            onClick={() =>
+            onClick={() => {
+              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin')
+              const url = new URL(redirectAfterLogin || window.location.href)
+              const queryString = url.search
+              const redirectUrlComplete = '/joblistings' + queryString
+
               signIn.authenticateWithRedirect({
                 strategy: 'oauth_apple',
                 redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/dashboard',
+                redirectUrlComplete,
               })
-            }
+            }}
             className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
           >
             <img src="/apple.svg" alt="Apple" className="w-4 h-4" />

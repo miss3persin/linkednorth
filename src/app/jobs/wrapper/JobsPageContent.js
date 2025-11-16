@@ -52,6 +52,36 @@ export default function JobsPage() {
   const jobTitleQuery = searchParams.get('jobTitle') || ''
   const countryQuery = searchParams.get('country') || ''
 
+
+const handleJobClick = async (job) => {
+  if (!job?.id) return;
+
+  const apiJob = {
+    id: job.id,
+    title: job.jobTitle,
+    company: { display_name: job.company },
+    location: { display_name: job.location },
+    description: job.description,
+    redirect_url: job.applyLink
+  };
+
+  try {
+    await fetch('/api/saveJob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(apiJob)
+    });
+  } catch (err) {
+    console.error("Failed to save job before redirect:", err);
+    // Optional: decide whether to continue redirect or block
+  }
+
+  const route = isSignedIn ? `/joblistings/${job.id}` : `/jobs/${job.id}`;
+  window.location.href = route;
+};
+
+
+
   useEffect(() => {
     async function fetchJobs() {
       setLoading(true)
@@ -268,17 +298,10 @@ export default function JobsPage() {
                 <Button
                   text="Show more details"
                   img={arrow_right}
-                  link="https://www.google.com/"
                   variant="black"
-                  onClick={() => {
-                    if (!isSignedIn) {
-                      setOpenAuthModal(true)
-                      return
-                    }
-                    // Normal behavior when signed in
-                    console.log("Applying for job…")
-                  }}
+                  onClick={() => handleJobClick(selectedJob)}
                 />
+
               </div>
             </div>
           )}
@@ -328,9 +351,10 @@ export default function JobsPage() {
             <Button
               text="Show more details"
               img={arrow_right}
-              link="https://www.google.com/"
               variant="black"
+              onClick={() => handleJobClick(selectedJob)}
             />
+
           </div>
         )}
       </main>
