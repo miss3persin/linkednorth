@@ -55,31 +55,40 @@ export default function JobsPage() {
   const { isSignedIn } = useUser();
 
 const handleJobClick = async (job) => {
-  if (!job?.id) return;
+  if (!job) return;
 
+  // 1️⃣ Build a safe job object for the API
   const apiJob = {
-    id: job.id,
+    id: job.id || job.adref || (job.applyLink ? job.applyLink.split("/").pop() : null),
     title: job.jobTitle,
     company: { display_name: job.company },
     location: { display_name: job.location },
     description: job.description,
-    redirect_url: job.applyLink
+    redirect_url: job.applyLink,
   };
 
+  if (!apiJob.id) {
+    console.error("Cannot save job: missing job ID");
+    return;
+  }
+
   try {
+    // 2️⃣ Save/upsert job in the database
     await fetch('/api/saveJob', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(apiJob)
+      body: JSON.stringify(apiJob),
     });
   } catch (err) {
     console.error("Failed to save job before redirect:", err);
     // Optional: decide whether to continue redirect or block
   }
 
-  const route = isSignedIn ? `/joblistings/${job.id}` : `/jobs/${job.id}`;
+  // 3️⃣ Redirect the user
+  const route = isSignedIn ? `/joblistings/${apiJob.id}` : `/jobs/${apiJob.id}`;
   window.location.href = route;
 };
+
 
 
 
