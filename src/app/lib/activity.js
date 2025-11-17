@@ -1,4 +1,6 @@
 import { prisma } from "./prisma";
+export const runtime = "nodejs";
+
 
 // Fetch or create the activity row for a user
 export async function getUserActivity(userId) {

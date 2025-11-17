@@ -1,4 +1,6 @@
 import { prisma } from "./prisma";
+export const runtime = "nodejs";
+
 
 const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
 const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
