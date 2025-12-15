@@ -14,7 +14,7 @@
     "@prisma/client": "^6.19.0",
     "axios": "^1.12.2",
     "lucide-react": "^0.544.0",
-    "next": "15.5.4",
+    "next": "15.5.9",
     "react": "^18",
     "react-dom": "^18",
     "react-fast-marquee": "^1.6.5",
