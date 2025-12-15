@@ -1,4 +1,6 @@
 // lib/activityClient.js
+export const runtime = "nodejs";
+
 export async function trackJobView(data) {
   try {
     await fetch('/api/activity/view', {
