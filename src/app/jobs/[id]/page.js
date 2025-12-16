@@ -2,10 +2,10 @@
 import { prisma } from "../../lib/prisma";
 
 export default async function JobPage({ params }) {
-  const { id } = params;
+  const { id } = await params;
 
   const job = await prisma.job.findUnique({
-    where: { id },
+    where: { externalId: id },
   });
 
   if (!job) return <p className="min-h-screen flex bg-white items-center justify-center text-2xl font-bold">Job not found</p>;

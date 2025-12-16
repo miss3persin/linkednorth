@@ -12,11 +12,12 @@ export async function fetchAndStoreJobs({ countryCode, jobTitle, country }) {
 
   const data = await res.json();
 
-  for (const job of data.results) {
+  console.log(data.results)
+
+for (const job of data.results) {
+  try {
     await prisma.job.upsert({
-      where: {
-        externalId: String(job.id), // ✅ USE externalId
-      },
+      where: { externalId: String(job.id) },
       update: {
         jobTitle: job.title,
         company: job.company.display_name,
@@ -33,7 +34,11 @@ export async function fetchAndStoreJobs({ countryCode, jobTitle, country }) {
         applyLink: job.redirect_url,
       },
     });
+  } catch (err) {
+    console.error("Failed to upsert job:", job.id, err);
   }
+}
+
 
   return data.results;
 }

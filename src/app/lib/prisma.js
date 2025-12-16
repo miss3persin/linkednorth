@@ -1,14 +1,14 @@
 // src/app/lib/prisma.js
-import { PrismaClient } from '@prisma/client'
-export const runtime = "nodejs";
+import { PrismaClient } from "@prisma/client";
 
-let prisma
+const globalForPrisma = globalThis;
 
-if (!global.prisma) {
-  prisma = new PrismaClient()
-  if (process.env.NODE_ENV === 'development') global.prisma = prisma
-} else {
-  prisma = global.prisma
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === "development" ? ["query", "error"] : ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
 }
-
-export { prisma }
