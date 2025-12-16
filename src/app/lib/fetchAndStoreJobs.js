@@ -1,7 +1,6 @@
 import { prisma } from "./prisma";
 export const runtime = "nodejs";
 
-
 const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
 const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
 
@@ -15,10 +14,18 @@ export async function fetchAndStoreJobs({ countryCode, jobTitle, country }) {
 
   for (const job of data.results) {
     await prisma.job.upsert({
-      where: { id: job.id },
-      update: {},
+      where: {
+        externalId: String(job.id), // ✅ USE externalId
+      },
+      update: {
+        jobTitle: job.title,
+        company: job.company.display_name,
+        location: job.location.display_name,
+        description: job.description,
+        applyLink: job.redirect_url,
+      },
       create: {
-        id: job.id,
+        externalId: String(job.id),
         jobTitle: job.title,
         company: job.company.display_name,
         location: job.location.display_name,

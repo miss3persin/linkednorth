@@ -54,39 +54,37 @@ export default function JobsPage() {
 
 
 const handleJobClick = async (job) => {
-  if (!job) return;
-
-  // 1️⃣ Build a safe job object for the API
-  const apiJob = {
-    id: job.id || job.adref || (job.applyLink ? job.applyLink.split("/").pop() : null),
-    title: job.jobTitle,
-    company: { display_name: job.company },
-    location: { display_name: job.location },
-    description: job.description,
-    redirect_url: job.applyLink,
-  };
-
-  if (!apiJob.id) {
-    console.error("Cannot save job: missing job ID");
+  if (!job?.id) {
+    console.error("Missing Prisma job ID");
     return;
   }
 
+  // Optional: save only if not already saved
   try {
-    // 2️⃣ Save/upsert job in the database
     await fetch('/api/saveJob', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(apiJob),
+      body: JSON.stringify({
+        externalId: job.externalId, // ✅ API ID
+        jobTitle: job.jobTitle,
+        company: job.company,
+        location: job.location,
+        description: job.description,
+        applyLink: job.applyLink,
+      }),
     });
   } catch (err) {
-    console.error("Failed to save job before redirect:", err);
-    // Optional: decide whether to continue redirect or block
+    console.error("Failed to save job:", err);
   }
 
-  // 3️⃣ Redirect the user
-  const route = isSignedIn ? `/joblistings/${apiJob.id}` : `/jobs/${apiJob.id}`;
+  // ✅ Redirect using PRISMA ID ONLY
+  const route = isSignedIn
+    ? `/joblistings/${job.id}`
+    : `/jobs/${job.id}`;
+
   window.location.href = route;
 };
+
 
 
 

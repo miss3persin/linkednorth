@@ -32,7 +32,8 @@ model Notification {
 }
 
 model Job {
-  id          String   @id // Use Adzuna's job id as string
+  id          String   @id @default(uuid()) // internal ID (used in URLs)
+  externalId  String?  @unique              // API job ID
   jobTitle    String
   company     String
   location    String
