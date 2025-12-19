@@ -1,5 +1,5 @@
 // import Sidebar from "../../components/layout/Sidebar";
-import { prisma } from "../../lib/prisma";
+// import { prisma } from "../../lib/prisma";
 
 export default async function JobPage({ params }) {
   // const { id } = await params;
