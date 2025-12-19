@@ -1,34 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
 
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/joblistings(.*)',
-  '/jobs(.*)',
-  '/library(.*)',
-  '/resumebuilder(.*)',
-  '/premium(.*)',
-])
+// Define which routes need a login
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/joblistings(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth() // Ensure auth is awaited
+  const { userId } = await auth();
 
-  // 1. If the user is logged in, do nothing (allow access)
-  if (userId) {
-    return NextResponse.next()
-  }
-
-  // 2. If the user is NOT logged in and trying to access a protected route
+  // If the user isn't logged in and tries to access a protected route
+  // Clerk will handle the redirect to your Sign In page automatically
   if (!userId && isProtectedRoute(req)) {
-    const homeUrl = new URL('/', req.url)
-    homeUrl.searchParams.set('redirect', req.nextUrl.pathname)
-    return NextResponse.redirect(homeUrl)
+    return (await auth()).redirectToSignIn();
   }
-})
+});
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
-}
+  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+};

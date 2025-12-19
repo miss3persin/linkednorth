@@ -1,6 +1,5 @@
 // app/dashboard/page.js
 import Sidebar from "../components/layout/Sidebar";
-import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { FiEye, FiCalendar, FiBriefcase } from "react-icons/fi";
@@ -11,7 +10,15 @@ import { getUserActivity } from "../lib/activity";
 
 export default async function Dashboard() {
   const user = await currentUser();
-  if (!user) return redirect("/");
+
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading session...</p>
+      </div>
+    );
+  }
 
   // ✅ Fetch user activity data
   const activity = await getUserActivity(user.id);

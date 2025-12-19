@@ -48,7 +48,7 @@ export default function JobsPage() {
   const router = useRouter()
   const jobTitleQuery = searchParams.get('jobTitle') || ''
   const countryQuery = searchParams.get('country') || ''
-  
+
   const { isSignedIn, user } = useUser()
 
   const handleJobClick = (job) => {
@@ -78,7 +78,11 @@ export default function JobsPage() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ jobs: fetchedJobs }),
-          }).catch(err => console.error('Failed to cache jobs:', err))
+          })
+            .then(res => {
+              if (res.status === 401) console.warn("Not logged in, skipping cache.");
+            })
+            .catch(err => console.error('Cache error:', err));
         }
       } catch (err) {
         console.error("Error fetching jobs:", err)
@@ -155,8 +159,8 @@ export default function JobsPage() {
                 {loading
                   ? 'Getting jobs...'
                   : error
-                  ? 'Error loading jobs'
-                  : `${jobs.length} jobs found`}
+                    ? 'Error loading jobs'
+                    : `${jobs.length} jobs found`}
               </h3>
 
               <button className="flex items-center border px-3 py-1 rounded text-sm sm:text-xs">
@@ -243,10 +247,10 @@ export default function JobsPage() {
                   </div>
 
                   <p className="text-sm text-gray-600 mb-4">{selectedJob.description}</p>
-                  <Button 
-                    text="Show more details" 
-                    img={arrow_right} 
-                    variant="black" 
+                  <Button
+                    text="Show more details"
+                    img={arrow_right}
+                    variant="black"
                     onClick={() => handleJobClick(selectedJob)}
                   />
                 </div>

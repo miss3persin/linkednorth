@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import AuthModals from './components/modals/AuthModals'
 import { Inter, Open_Sans } from 'next/font/google'
@@ -88,27 +88,16 @@ const jobData = [
 
 export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  const searchParams = useSearchParams()
+  // const searchParams = useSearchParams()
   const router = useRouter()
   const { isLoaded, isSignedIn } = useUser()
 
   useEffect(() => {
-    // Wait for auth to load
-    if (!isLoaded) return
-
-    // If user is signed in, always redirect to dashboard
-    if (isSignedIn) {
-      router.push('/dashboard')
-      return
+    if (isLoaded && isSignedIn) {
+      // Just a simple "Get them to the dashboard"
+      router.replace('/dashboard');
     }
-
-    // If not signed in and there's a redirect param, open modal
-    const redirectPath = searchParams.get('redirect')
-    if (redirectPath) {
-      localStorage.setItem('redirectAfterLogin', redirectPath)
-      setAuthModalOpen(true)
-    }
-  }, [searchParams, isLoaded, isSignedIn, router])
+  }, [isLoaded, isSignedIn, router]);
 
   // Show loading while checking auth
   if (!isLoaded) {
@@ -387,7 +376,7 @@ export default function HomePage() {
       </section>
 
 
-<AuthModals open={authModalOpen} setOpen={setAuthModalOpen} />
+      <AuthModals open={authModalOpen} setOpen={setAuthModalOpen} />
     </div>
   )
 }

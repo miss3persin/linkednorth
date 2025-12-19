@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <Suspense>
+    // <Suspense fallback={<Loading />}>
     <ClerkProvider>
     <html lang="en">
       <body className="min-h-screen flex flex-col">
@@ -25,6 +25,6 @@ export default function RootLayout({ children }) {
       </body>
     </html>
     </ClerkProvider>
-    </Suspense> 
+    // </Suspense> 
   );
 }
