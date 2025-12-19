@@ -93,9 +93,8 @@ export default function HomePage() {
   const { isLoaded, isSignedIn } = useUser()
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      // Just a simple "Get them to the dashboard"
-      router.replace('/dashboard');
+    if (isLoaded && isSignedIn && window.location.pathname === '/') {
+      router.push('/dashboard');
     }
   }, [isLoaded, isSignedIn, router]);
 

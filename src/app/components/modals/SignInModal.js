@@ -17,14 +17,20 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
   // Redirect after login
   useEffect(() => {
-    if (!userLoaded) return
-    if (isSignedIn) {
-      const redirectTo = localStorage.getItem('redirectAfterLogin') || '/dashboard'
+    if (!userLoaded || !isSignedIn || !open) return
+
+    const redirectTo = localStorage.getItem('redirectAfterLogin')
+    if (redirectTo) {
       localStorage.removeItem('redirectAfterLogin')
       setOpen(false)
       router.push(redirectTo)
+    } else {
+      // 2. If no specific redirect is saved, just close the modal.
+      // Do NOT force a push to /dashboard here. 
+      // Let the page the user is currently on stay as it is.
+      setOpen(false)
     }
-  }, [isSignedIn, userLoaded, router, setOpen])
+  }, [isSignedIn, userLoaded, open, router, setOpen])
 
   if (!open || !isLoaded || !userLoaded) return null
 
