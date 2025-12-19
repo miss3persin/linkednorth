@@ -1,21 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
 import { JobListingCard } from '../../components/jobs/JobListingCard'
 import { SearchBar } from '../../components/ui/SearchBar'
 import { Inter } from 'next/font/google'
 import overlay from '/public/Overlay.png'
-import stration_6 from '/public/Open Doodles Chilling.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
 import logo from '/public/linkednorth-logo.png'
 import { useUser } from "@clerk/nextjs"
-
-// ✅ Add imports for tracking
-import { trackJobView, trackJobInteraction } from './../../lib/activityClient'
 import Sidebar from '@/app/components/layout/Sidebar'
 
 export const dynamic = "force-dynamic";
@@ -49,50 +45,18 @@ export default function JobsPage() {
   const [selectedJob, setSelectedJob] = useState(null)
 
   const searchParams = useSearchParams()
+  const router = useRouter()
   const jobTitleQuery = searchParams.get('jobTitle') || ''
   const countryQuery = searchParams.get('country') || ''
   
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser()
 
-const handleJobClick = async (job) => {
-  try {
-    const res = await fetch('/api/saveJob', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        externalId: job.externalId,
-        jobTitle: job.jobTitle,
-        company: job.company,
-        location: job.location,
-        description: job.description,
-        applyLink: job.applyLink,
-      }),
-    });
-
-    const { jobId } = await res.json();
-
-    if (!jobId) {
-      console.error("No Prisma job ID returned");
-      return;
-    }
-
-    const route = isSignedIn
-      ? `/joblistings/${jobId}`
-      : `/jobs/${jobId}`;
-
-    window.location.href = route;
-
-  } catch (err) {
-    console.error("Failed to save job:", err);
+  const handleJobClick = (job) => {
+    // Navigate to job details page
+    // The job.id should already be the UUID from your external API
+    router.push(`/joblistings/${job.id}`)
   }
-};
 
-
-
-
-
-
-  // ✅ Track when user loads a new job search
   useEffect(() => {
     async function fetchJobs() {
       setLoading(true)
@@ -105,15 +69,17 @@ const handleJobClick = async (job) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
         const data = await res.json()
-        setJobs(data.jobs || [])
+        const fetchedJobs = data.jobs || []
+        setJobs(fetchedJobs)
 
-        // ✅ Log search interaction (not just view)
-        await trackJobInteraction({
-          type: 'search',
-          query: jobTitleQuery,
-          country: countryQuery,
-          timestamp: new Date(),
-        })
+        // Cache jobs in background (don't wait for it)
+        if (fetchedJobs.length > 0) {
+          fetch('/api/jobs/cache', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobs: fetchedJobs }),
+          }).catch(err => console.error('Failed to cache jobs:', err))
+        }
       } catch (err) {
         console.error("Error fetching jobs:", err)
         setError("Something went wrong while fetching jobs.")
@@ -124,30 +90,35 @@ const handleJobClick = async (job) => {
     }
 
     fetchJobs()
-
   }, [jobTitleQuery, countryQuery])
 
-  // ✅ Track when user views a specific job
-  const handleViewDetails = async (job) => {
+  const handleViewDetails = (job) => {
     setSelectedJob(job)
-    await trackJobView({
-      jobId: job.id,
-      title: job.jobTitle,
-      company: job.company,
-      location: job.location,
-      timestamp: new Date(),
-    })
   }
 
-  // ✅ Track “Easy Apply” or “Save” clicks
-  const handleInteraction = async (type, job) => {
-    await trackJobInteraction({
-      type,
-      jobId: job.id,
-      title: job.jobTitle,
-      company: job.company,
-      timestamp: new Date(),
-    })
+  const handleSaveJob = async (job) => {
+    if (!isSignedIn) {
+      alert("Please sign in to save jobs")
+      return
+    }
+
+    try {
+      const res = await fetch('/api/jobs/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          userId: user.id,
+        }),
+      })
+
+      if (!res.ok) throw new Error('Failed to save job')
+
+      alert("Job saved successfully!")
+    } catch (err) {
+      console.error("Failed to save job:", err)
+      alert("Failed to save job. Please try again.")
+    }
   }
 
   return (
@@ -213,7 +184,7 @@ const handleJobClick = async (job) => {
                     imageSrc={job.imageSrc || logo}
                     applyLink={job.applyLink}
                     detailsLink={job.detailsLink}
-                    onViewDetails={() => handleViewDetails(job)} // ✅ tracking
+                    onViewDetails={() => handleViewDetails(job)}
                   />
                 ))
               ) : (
@@ -258,21 +229,26 @@ const handleJobClick = async (job) => {
 
                   <div className="flex gap-2 mb-4">
                     <button
-                      onClick={() => handleInteraction('apply', selectedJob)} // ✅ tracking
-                      className="bg-black text-white text-sm px-4 py-2 rounded w-full"
+                      onClick={() => window.open(selectedJob.applyLink, '_blank')}
+                      className="bg-black text-white text-sm px-4 py-2 rounded w-full hover:bg-gray-800 transition"
                     >
                       Easy Apply
                     </button>
                     <button
-                      onClick={() => handleInteraction('save', selectedJob)} // ✅ tracking
-                      className="border text-sm px-4 py-2 rounded w-full"
+                      onClick={() => handleSaveJob(selectedJob)}
+                      className="border text-sm px-4 py-2 rounded w-full hover:bg-gray-50 transition"
                     >
                       Save
                     </button>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-4">{selectedJob.description}</p>
-                  <Button text="Show more details" img={arrow_right} variant="black" onClick={() => handleJobClick(selectedJob)}/>
+                  <Button 
+                    text="Show more details" 
+                    img={arrow_right} 
+                    variant="black" 
+                    onClick={() => handleJobClick(selectedJob)}
+                  />
                 </div>
               </div>
             )}

@@ -1,18 +1,32 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSignIn } from "@clerk/nextjs"
+import { useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 import Modal from '../ui/Modal'
 
 export default function SignInModal({ open, setOpen, switchToSignUp }) {
+  const { isLoaded: userLoaded, isSignedIn } = useUser()
   const { isLoaded, signIn, setActive } = useSignIn()
+  const router = useRouter()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  if (!open) return null
-  if (!isLoaded) return null
+  // Redirect after login
+  useEffect(() => {
+    if (!userLoaded) return
+    if (isSignedIn) {
+      const redirectTo = localStorage.getItem('redirectAfterLogin') || '/dashboard'
+      localStorage.removeItem('redirectAfterLogin')
+      setOpen(false)
+      router.push(redirectTo)
+    }
+  }, [isSignedIn, userLoaded, router, setOpen])
+
+  if (!open || !isLoaded || !userLoaded) return null
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,9 +41,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        
-        // Simple redirect - just go to dashboard
-        window.location.href = '/dashboard'
+        // Modal effect above will handle redirect
       }
     } catch (err) {
       setError(err.errors ? err.errors[0].message : 'Something went wrong.')
@@ -42,7 +54,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
     try {
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: '/sso-callback',
+        redirectUrl: '/',
         redirectUrlComplete: '/dashboard',
       })
     } catch (err) {
