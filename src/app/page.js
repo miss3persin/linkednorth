@@ -1,5 +1,9 @@
 'use client'
 import React from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
+import AuthModals from './components/modals/AuthModals'
 import { Inter, Open_Sans } from 'next/font/google'
 import { SearchBar } from './components/ui/SearchBar'
 import { Button } from './components/ui/Button'
@@ -83,6 +87,48 @@ const jobData = [
 ]
 
 export default function HomePage() {
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { isLoaded, isSignedIn } = useUser()
+
+  useEffect(() => {
+    // Wait for auth to load
+    if (!isLoaded) return
+
+    // If user is signed in, always redirect to dashboard
+    if (isSignedIn) {
+      router.push('/dashboard')
+      return
+    }
+
+    // If not signed in and there's a redirect param, open modal
+    const redirectPath = searchParams.get('redirect')
+    if (redirectPath) {
+      localStorage.setItem('redirectAfterLogin', redirectPath)
+      setAuthModalOpen(true)
+    }
+  }, [searchParams, isLoaded, isSignedIn, router])
+
+  // Show loading while checking auth
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center mt-30">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+      </div>
+    )
+  }
+
+  // Don't render anything if user is signed in (will redirect)
+  if (isSignedIn) {
+    return (
+      <div className="flex flex-col min-h-screen items-center justify-center mt-30">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+        <div className=" text-center text-xl text-black">Redirecting...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="relative">
 
@@ -341,6 +387,7 @@ export default function HomePage() {
       </section>
 
 
+<AuthModals open={authModalOpen} setOpen={setAuthModalOpen} />
     </div>
   )
 }

@@ -54,18 +54,12 @@ export default function JobsPage() {
 
 
 const handleJobClick = async (job) => {
-  if (!job?.id) {
-    console.error("Missing Prisma job ID");
-    return;
-  }
-
-  // Optional: save only if not already saved
   try {
-    await fetch('/api/saveJob', {
+    const res = await fetch('/api/saveJob', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        externalId: job.externalId, // ✅ API ID
+        externalId: job.externalId,
         jobTitle: job.jobTitle,
         company: job.company,
         location: job.location,
@@ -73,17 +67,25 @@ const handleJobClick = async (job) => {
         applyLink: job.applyLink,
       }),
     });
+
+    const { jobId } = await res.json();
+
+    if (!jobId) {
+      console.error("No Prisma job ID returned");
+      return;
+    }
+
+    const route = isSignedIn
+      ? `/joblistings/${jobId}`
+      : `/jobs/${jobId}`;
+
+    window.location.href = route;
+
   } catch (err) {
     console.error("Failed to save job:", err);
   }
-
-  // ✅ Redirect using PRISMA ID ONLY
-  const route = isSignedIn
-    ? `/joblistings/${job.id}`
-    : `/jobs/${job.id}`;
-
-  window.location.href = route;
 };
+
 
 
 

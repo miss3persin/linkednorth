@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useSignIn } from '@clerk/nextjs'
+import { useSignIn } from "@clerk/nextjs"
 import Modal from '../ui/Modal'
 
 export default function SignInModal({ open, setOpen, switchToSignUp }) {
@@ -27,25 +27,27 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        // === 🔥 Redirect Logic Starts Here ===
-        const redirectUrl = localStorage.getItem('redirectAfterLogin')
-
-        if (redirectUrl) {
-          const url = new URL(redirectUrl)
-          const queryString = url.search // e.g. ?search=developer&location=london
-          const newUrl = '/joblistings' + queryString
-
-          localStorage.removeItem('redirectAfterLogin')
-          window.location.href = newUrl
-        } else {
-          window.location.href = '/joblistings'
-        }
-        // === 🔥 Redirect Logic Ends Here ===
+        
+        // Simple redirect - just go to dashboard
+        window.location.href = '/dashboard'
       }
     } catch (err) {
       setError(err.errors ? err.errors[0].message : 'Something went wrong.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleOAuthSignIn = async (strategy) => {
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy,
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/dashboard',
+      })
+    } catch (err) {
+      console.error('OAuth error:', err)
+      setError('Failed to sign in with social provider')
     }
   }
 
@@ -68,7 +70,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm border-gray-300"
+              className="w-full border rounded px-3 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -81,12 +83,16 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm border-gray-300"
+              className="w-full border rounded px-3 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Clerk CAPTCHA placeholder */}
           <div id="clerk-captcha" className="flex items-center" />
@@ -107,7 +113,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition"
+            className="w-full bg-black text-white py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
@@ -123,58 +129,24 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
         {/* Social logins */}
         <div className="space-y-2">
           <button
-            onClick={() => {
-              // 🔹 Add this block first
-              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin')
-              const url = new URL(redirectAfterLogin || window.location.href)
-              const queryString = url.search
-              const redirectUrlComplete = '/joblistings' + queryString
-
-              signIn.authenticateWithRedirect({
-                strategy: 'oauth_google',
-                redirectUrl: '/sso-callback',
-                redirectUrlComplete,
-              })
-            }}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
+            onClick={() => handleOAuthSignIn('oauth_google')}
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition"
           >
             <img src="/google.svg" alt="Google" className="w-4 h-4" />
             Continue with Google
           </button>
 
           <button
-            onClick={() => {
-              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin')
-              const url = new URL(redirectAfterLogin || window.location.href)
-              const queryString = url.search
-              const redirectUrlComplete = '/joblistings' + queryString
-
-              signIn.authenticateWithRedirect({
-                strategy: 'oauth_facebook',
-                redirectUrl: '/sso-callback',
-                redirectUrlComplete,
-              })
-            }}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
+            onClick={() => handleOAuthSignIn('oauth_facebook')}
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition"
           >
             <img src="/facebook.svg" alt="Facebook" className="w-4 h-4" />
             Continue with Facebook
           </button>
 
           <button
-            onClick={() => {
-              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin')
-              const url = new URL(redirectAfterLogin || window.location.href)
-              const queryString = url.search
-              const redirectUrlComplete = '/joblistings' + queryString
-
-              signIn.authenticateWithRedirect({
-                strategy: 'oauth_apple',
-                redirectUrl: '/sso-callback',
-                redirectUrlComplete,
-              })
-            }}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium"
+            onClick={() => handleOAuthSignIn('oauth_apple')}
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition"
           >
             <img src="/apple.svg" alt="Apple" className="w-4 h-4" />
             Continue with Apple

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { UserButton } from "@clerk/nextjs";
 import { FiBell, FiMessageSquare, FiMenu } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { HiMenu, HiX } from "react-icons/hi";

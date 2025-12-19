@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth, useSignIn, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 const ForgotPasswordPage = () => {

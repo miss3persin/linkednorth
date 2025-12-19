@@ -1,7 +1,7 @@
 // components/Navbar/index.js
+import { currentUser } from "@clerk/nextjs/server";
 import PublicNavbar from "./PublicNavbar";
 import AuthNavbar from "./AuthNavbar";
-import { currentUser } from "@clerk/nextjs/server";
 
 export default async function NavbarWrapper() {
   const user = await currentUser();
@@ -16,6 +16,7 @@ export default async function NavbarWrapper() {
         imageUrl: user.imageUrl,
         username: user.username,
         email: user.emailAddresses?.[0]?.emailAddress,
+        id: user.id, // You'll need this for Supabase queries
       }}
     />
   );

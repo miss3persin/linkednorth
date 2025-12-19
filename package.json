@@ -10,15 +10,17 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.33.2",
+    "@clerk/nextjs": "^6.36.3",
     "@prisma/client": "^6.19.1",
+    "@supabase/supabase-js": "^2.88.0",
     "axios": "^1.12.2",
     "lucide-react": "^0.544.0",
     "next": "^15.5.9",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-fast-marquee": "^1.6.5",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "svix": "^1.82.0"
   },
   "devDependencies": {
     "postcss": "^8",

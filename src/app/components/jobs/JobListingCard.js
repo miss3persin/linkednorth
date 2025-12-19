@@ -1,7 +1,7 @@
 'use client'
 
-import { useUser } from "@clerk/nextjs"
 import { useState } from "react"
+import { useUser } from "@clerk/nextjs"
 import AuthModals from "../modals/AuthModals"
 import React from 'react'
 import Image from 'next/image'
@@ -63,8 +63,9 @@ export const JobListingCard = ({
   detailsLink,
   onViewDetails = () => { },
 }) => {
-  const { isSignedIn } = useUser()
+  const { isSignedIn, user } = useUser()
   const [openAuthModal, setOpenAuthModal] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const requireAuth = (action) => {
     if (!isSignedIn) {
@@ -73,6 +74,40 @@ export const JobListingCard = ({
     }
     action?.()
   }
+
+  const handleSaveJob = async () => {
+    if (!isSignedIn) {
+      setOpenAuthModal(true)
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const response = await fetch("/api/jobs/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: id,
+          userId: user.id,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save job')
+      }
+
+      // Copy the shareable link
+      const jobUrl = `${window.location.origin}/jobs/${id}`
+      await navigator.clipboard.writeText(jobUrl)
+      alert("Job saved and link copied!")
+    } catch (err) {
+      console.error(err)
+      alert("Failed to save job. Please try again.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="flex w-full max-w-[48rem] flex-col rounded-sm border border-[#E5E7EB] bg-white p-6 shadow-sm">
       {/* === Top Section === */}
@@ -108,34 +143,9 @@ export const JobListingCard = ({
             alt="save"
             width={16}
             height={16}
-            className="cursor-pointer"
-            onClick={async () => {
-              // 1️⃣ Save the job to your database via API
-              try {
-                await fetch("/api/saveJob", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    id,
-                    title: jobTitle,
-                    company: { display_name: company },
-                    location: { display_name: location },
-                    description,
-                    redirect_url: applyLink
-                  }),
-                });
-
-                // 2️⃣ Copy the shareable link
-                const jobUrl = `${window.location.origin}/jobs/${id}`;
-                navigator.clipboard.writeText(jobUrl);
-                alert("Job link copied and saved!");
-              } catch (err) {
-                console.error(err);
-                alert("Failed to save job. Please try again.");
-              }
-            }}
+            className={`cursor-pointer ${isSaving ? 'opacity-50' : 'hover:opacity-80'}`}
+            onClick={handleSaveJob}
           />
-
         </div>
       </div>
 
@@ -156,13 +166,17 @@ export const JobListingCard = ({
 
       {/* === Buttons === */}
       <div className="flex flex-col sm:flex-row gap-2 pl-0 sm:pl-[4.5rem]">
-        <Button text="Apply Now" img={arrow_right} variant="black"
+        <Button 
+          text="Apply Now" 
+          img={arrow_right} 
+          variant="black"
           onClick={(e) => {
             e.preventDefault()
             requireAuth(() => {
               if (applyLink) window.open(applyLink, "_blank")
             })
-          }} />
+          }} 
+        />
 
         <a
           href="#"
@@ -170,7 +184,7 @@ export const JobListingCard = ({
             e.preventDefault()
             requireAuth(onViewDetails)
           }}
-          className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-3 sm:px-6 md:px-8 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto rounded-sm"
+          className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-3 sm:px-6 md:px-8 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto rounded-sm hover:bg-gray-50 transition"
         >
           View Details
           <Image src={arrow_right_black} alt="arrow" width={20} height={20} className="sm:w-6 sm:h-6" />

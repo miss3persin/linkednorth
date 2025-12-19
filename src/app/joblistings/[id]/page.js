@@ -2,10 +2,10 @@ import Sidebar from "../../components/layout/Sidebar";
 import { prisma } from "../../lib/prisma";
 
 export default async function JobPage({ params }) {
-  const { id } = await params;
+  // const { id } = await params;
 
   const job = await prisma.job.findUnique({
-    where: { externalId: id },
+    where: { id: params.id },
   });
 
   if (!job) return <p className="min-h-screen flex bg-white text-2xl font-bold items-center justify-center">Job not found</p>;

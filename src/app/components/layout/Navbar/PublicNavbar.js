@@ -12,8 +12,13 @@ import { HiMenu, HiX } from 'react-icons/hi'
 const openSans = Open_Sans({ subsets: ['latin'] })
 
 export default function PublicNavbar() {
-  const [open, setOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+
+  const handleOpenAuthModal = () => {
+    setMenuOpen(false) // Close mobile menu if open
+    setAuthModalOpen(true) // Open auth modal
+  }
 
   return (
     <>
@@ -41,8 +46,18 @@ export default function PublicNavbar() {
               <li><Link href="/contact">Contact Us</Link></li>
             </ul>
             <div className="flex items-center gap-3 ml-6">
-              <Button text="Post A Job" img="" link="https://discord.com" variant="white" />
-              <Button text="Login/SignUp" img="" variant="black" onClick={() => setOpen(true)} />
+              <Button 
+                text="Post A Job" 
+                img="" 
+                link="/post-job" 
+                variant="white" 
+              />
+              <Button 
+                text="Login/SignUp" 
+                img="" 
+                variant="black" 
+                onClick={handleOpenAuthModal}
+              />
             </div>
           </div>
 
@@ -61,21 +76,40 @@ export default function PublicNavbar() {
         {menuOpen && (
           <div className="lg:hidden fixed top-0 left-0 w-screen h-screen bg-white z-40 flex flex-col items-center justify-center gap-10">
             <ul className="flex flex-col gap-8 text-[20px] text-[#868D9B] text-center">
-              <li className="hover:text-black cursor-pointer"><Link href="/">Home</Link></li>
-              <li className="hover:text-black cursor-pointer"><Link href="/jobs">Job Listings</Link></li>
-              <li className="hover:text-black cursor-pointer"><Link href="/resources">Career Resources</Link></li>
-              <li className="hover:text-black cursor-pointer"><Link href="/contact">Contact Us</Link></li>
+              <li className="hover:text-black cursor-pointer">
+                <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+              </li>
+              <li className="hover:text-black cursor-pointer">
+                <Link href="/jobs" onClick={() => setMenuOpen(false)}>Job Listings</Link>
+              </li>
+              <li className="hover:text-black cursor-pointer">
+                <Link href="/resources" onClick={() => setMenuOpen(false)}>Career Resources</Link>
+              </li>
+              <li className="hover:text-black cursor-pointer">
+                <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+              </li>
             </ul>
             <div className="flex flex-col gap-4 mt-6">
-              <Button text="Post A Job" img="" link="https://discord.com" variant="white" />
-              <Button text="Login/SignUp" img="" variant="black" onClick={() => setOpen(true)} />
+              <Button 
+                text="Post A Job" 
+                img="" 
+                link="/post-job" 
+                variant="white"
+                onClick={() => setMenuOpen(false)}
+              />
+              <Button 
+                text="Login/SignUp" 
+                img="" 
+                variant="black" 
+                onClick={handleOpenAuthModal}
+              />
             </div>
           </div>
         )}
       </nav>
 
-      <AuthModals open={open} setOpen={setOpen} />
-
+      {/* Auth Modal */}
+      <AuthModals open={authModalOpen} setOpen={setAuthModalOpen} />
     </>
   )
 }

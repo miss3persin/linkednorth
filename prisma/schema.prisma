@@ -32,8 +32,8 @@ model Notification {
 }
 
 model Job {
-  id          String   @id @default(uuid()) // internal ID (used in URLs)
-  externalId  String?  @unique              // API job ID
+  id          String   @id @default(uuid())
+  externalId  String   @unique
   jobTitle    String
   company     String
   location    String
@@ -41,5 +41,6 @@ model Job {
   applyLink   String
   createdAt   DateTime @default(now())
 }
+
 
 
