@@ -2,26 +2,32 @@ import { supabaseAdmin } from './supabase'
 
 export async function getUserActivity(userId) {
   try {
-    // Get applied jobs count
+    // Get applications count
     const { data: applications, error: appError } = await supabaseAdmin
       .from('applications')
-      .select('id')
+      .select('id, status, created_at')
       .eq('user_id', userId)
 
-    // Get saved/viewed jobs count (you can track views in your jobs table)
-    const { data: savedJobs, error: savedError } = await supabaseAdmin
-      .from('saved_jobs')
+    if (appError) throw appError
+
+    // Get job views count (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { data: jobViews, error: viewError } = await supabaseAdmin
+      .from('job_views')
       .select('id')
       .eq('user_id', userId)
+      .gte('viewed_at', thirtyDaysAgo.toISOString())
 
-    // Get interviews count (if you have an interviews table, or filter applications)
-    const { data: interviews, error: intError } = await supabaseAdmin
-      .from('applications')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('status', 'accepted') // Or whatever status indicates interview
+    if (viewError) throw viewError
 
-    // Get notifications (if you have a notifications table)
+    // Get interviews count (applications with 'accepted' or 'interviewing' status)
+    const interviews = applications?.filter(
+      app => app.status === 'accepted' || app.status === 'interviewing'
+    ) || []
+
+    // Get notifications
     const { data: notifications, error: notifError } = await supabaseAdmin
       .from('notifications')
       .select('*')
@@ -29,11 +35,54 @@ export async function getUserActivity(userId) {
       .order('created_at', { ascending: false })
       .limit(5)
 
+    if (notifError) throw notifError
+
+    // Get profile completion
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    // Calculate profile completeness
+    const profileFields = profile ? [
+      profile.resume_uploaded,
+      profile.profile_photo,
+      profile.bio_completed,
+      profile.skills_added,
+      profile.experience_added,
+      profile.education_added,
+    ] : []
+    
+    const completedFields = profileFields.filter(Boolean).length
+    const profileCompleteness = profileFields.length > 0 
+      ? Math.round((completedFields / profileFields.length) * 100)
+      : 0
+
+    // Calculate application success rate
+    const totalApplications = applications?.length || 0
+    const successfulApplications = applications?.filter(
+      app => app.status === 'accepted' || app.status === 'interviewing'
+    ).length || 0
+    
+    const successRate = totalApplications > 0
+      ? Math.round((successfulApplications / totalApplications) * 100)
+      : 0
+
+    // Calculate interview conversion rate
+    const interviewCount = interviews.length
+    const conversionRate = totalApplications > 0
+      ? Math.round((interviewCount / totalApplications) * 100)
+      : 0
+
     return {
-      appliedJobs: applications?.length || 0,
-      viewedJobs: savedJobs?.length || 0,
-      interviews: interviews?.length || 0,
+      appliedJobs: totalApplications,
+      viewedJobs: jobViews?.length || 0,
+      interviews: interviewCount,
       notifications: notifications || [],
+      profileCompleteness,
+      successRate,
+      conversionRate,
     }
   } catch (error) {
     console.error('Error fetching user activity:', error)
@@ -42,6 +91,29 @@ export async function getUserActivity(userId) {
       viewedJobs: 0,
       interviews: 0,
       notifications: [],
+      profileCompleteness: 0,
+      successRate: 0,
+      conversionRate: 0,
     }
+  }
+}
+
+// Track when user views a job
+export async function trackJobView(userId, jobId, jobTitle, company) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('job_views')
+      .insert({
+        user_id: userId,
+        job_id: jobId,
+        job_title: jobTitle,
+        company: company,
+      })
+
+    if (error) throw error
+    return { success: true }
+  } catch (error) {
+    console.error('Error tracking job view:', error)
+    return { success: false, error }
   }
 }

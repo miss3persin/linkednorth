@@ -75,6 +75,41 @@ export const JobListingCard = ({
     action?.()
   }
 
+  const handleApply = async () => {
+    if (!isSignedIn) {
+      setOpenAuthModal(true)
+      return
+    }
+
+    try {
+      // Track application in database
+      const res = await fetch('/api/applications/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: id,
+          jobTitle,
+          company,
+          applyLink,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        // Open the external apply link
+        if (applyLink) {
+          window.open(applyLink, '_blank')
+        }
+      } else {
+        alert('Failed to track application. Please try again.')
+      }
+    } catch (err) {
+      console.error('Error applying:', err)
+      alert('Failed to apply. Please try again.')
+    }
+  }
+
   const handleSaveJob = async () => {
     if (!isSignedIn) {
       setOpenAuthModal(true)

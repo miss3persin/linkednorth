@@ -50,6 +50,20 @@ export default function JobDetailsPage() {
 
         const data = await res.json()
         setJob(data.job)
+
+        // Track job view if user is signed in
+        if (isSignedIn && user) {
+          fetch('/api/jobs/track-view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              jobId: params.id,
+              jobTitle: data.job.jobTitle,
+              company: data.job.company,
+            }),
+          }).catch(err => console.error('Failed to track view:', err))
+        }
       } catch (err) {
         console.error('Error fetching job:', err)
         setError(err.message)
@@ -61,7 +75,7 @@ export default function JobDetailsPage() {
     if (params.id) {
       fetchJobDetails()
     }
-  }, [params.id])
+  }, [params.id, isSignedIn, user])
 
   const handleSaveJob = async () => {
     if (!isSignedIn) {
@@ -92,15 +106,39 @@ export default function JobDetailsPage() {
     }
   }
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!isSignedIn) {
       alert("Please sign in to apply")
       router.push('/?redirect=/joblistings/' + params.id)
       return
     }
 
-    if (job?.applyLink) {
-      window.open(job.applyLink, '_blank')
+    try {
+      // Track application in database
+      const res = await fetch('/api/applications/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: params.id,
+          jobTitle: job?.jobTitle,
+          company: job?.company,
+          applyLink: job?.applyLink,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        // Open the external apply link
+        if (job?.applyLink) {
+          window.open(job.applyLink, '_blank')
+        }
+      } else {
+        alert('Failed to track application. Please try again.')
+      }
+    } catch (err) {
+      console.error('Error applying:', err)
+      alert('Failed to apply. Please try again.')
     }
   }
 

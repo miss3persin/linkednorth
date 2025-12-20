@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import jobIcon from '/public/work.png'
 import locationIcon from '/public/location.png'
 
-const openSans = Open_Sans({ subsets: ['latin'] })
+// const openSans = Open_Sans({ subsets: ['latin'] })
 
 export const SearchBar = () => {
   const [jobTitle, setJobTitle] = useState('')
@@ -137,7 +137,7 @@ const debouncedFetchCountries = debounce(fetchLocationSuggestions, 300);
   }
 
   return (
-    <div className={`${openSans.className} flex items-center justify-center py-4 sm:w-[35rem]`}>
+    <div className="flex items-center justify-center py-4 sm:w-[35rem]">
       <div className="relative w-full flex flex-col sm:flex-row sm:gap-0 gap-2">
 
         {/* --- Job Input --- */}

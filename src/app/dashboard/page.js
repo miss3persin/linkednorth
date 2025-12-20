@@ -4,14 +4,11 @@ import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { FiEye, FiCalendar, FiBriefcase } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
-
-
 import { getUserActivity } from "../lib/activity";
 
 export default async function Dashboard() {
   const user = await currentUser();
 
-  
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,29 +20,42 @@ export default async function Dashboard() {
   // ✅ Fetch user activity data
   const activity = await getUserActivity(user.id);
 
-  // ✅ Replace mock stats with real data
+  // ✅ Real stats from database
   const stats = {
     applications: activity.appliedJobs,
     viewed: activity.viewedJobs,
     interviews: activity.interviews,
   };
 
-  // ✅ Replace mock notifications with DB notifications
+  // ✅ Real notifications from DB
   const notifications = activity.notifications
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // newest first
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .map((n) => ({
       title: n.title,
       text: n.message,
-      action: n.actionLink ? "View" : "Open",
-      time: new Date(n.createdAt).toLocaleDateString(),
+      actionLink: n.action_link,
+      action: n.action_link ? "View" : "Open",
+      time: new Date(n.created_at).toLocaleDateString(),
       color: n.color || "text-blue-500",
     }));
 
-  // Keep your static progress bars unchanged
+  // ✅ Real progress bars with calculated data
   const progressStats = [
-    { label: "Profile Completeness", value: 85, color: "bg-blue-600" },
-    { label: "Application Success Rate", value: 62, color: "bg-green-500" },
-    { label: "Interview Conversion", value: 40, color: "bg-purple-500" },
+    { 
+      label: "Profile Completeness", 
+      value: activity.profileCompleteness, 
+      color: "bg-blue-600" 
+    },
+    { 
+      label: "Application Success Rate", 
+      value: activity.successRate, 
+      color: "bg-green-500" 
+    },
+    { 
+      label: "Interview Conversion", 
+      value: activity.conversionRate, 
+      color: "bg-purple-500" 
+    },
   ];
 
   return (
@@ -53,7 +63,9 @@ export default async function Dashboard() {
       <Sidebar />
 
       <main className="flex-1 p-6 md:p-10">
-        <h1 className="text-2xl font-semibold mb-8">Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-8">
+          Welcome back, {user.firstName}!
+        </h1>
 
         {/* Top Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
@@ -63,7 +75,7 @@ export default async function Dashboard() {
               <FiBriefcase className="text-3xl text-blue-500" />
             </p>
             <h2 className="text-3xl font-bold">{stats.applications}</h2>
-            <p className="text-xs text-green-600 mt-1">+3 this week</p>
+            <p className="text-xs text-gray-400 mt-1">Total applications</p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -73,7 +85,7 @@ export default async function Dashboard() {
             <h2 className="text-3xl font-bold inline-flex items-center gap-1">
               {stats.viewed}
             </h2>
-            <p className="text-xs text-green-600 mt-1">+15 this week</p>
+            <p className="text-xs text-gray-400 mt-1">Last 30 days</p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -84,7 +96,7 @@ export default async function Dashboard() {
             <h2 className="text-3xl font-bold inline-flex items-center gap-1">
               {stats.interviews}
             </h2>
-            <p className="text-xs text-green-600 mt-1">+1 this week</p>
+            <p className="text-xs text-gray-400 mt-1">Active interviews</p>
           </div>
         </div>
 
@@ -114,12 +126,14 @@ export default async function Dashboard() {
                   <div className="flex-1">
                     <p className="font-medium">{n.title}</p>
                     <p className="text-sm text-gray-500 mt-1">{n.text}</p>
-                    <Link
-                      href={n.actionLink || "#"}
-                      className="text-blue-600 text-sm mt-2 inline-block font-medium"
-                    >
-                      {n.action}
-                    </Link>
+                    {n.actionLink && (
+                      <Link
+                        href={n.actionLink}
+                        className="text-blue-600 text-sm mt-2 inline-block font-medium"
+                      >
+                        {n.action}
+                      </Link>
+                    )}
                   </div>
 
                   {/* Time stamp */}
@@ -145,7 +159,7 @@ export default async function Dashboard() {
 
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div
-                  className={`${bar.color} h-2 rounded-full`}
+                  className={`${bar.color} h-2 rounded-full transition-all duration-500`}
                   style={{ width: `${bar.value}%` }}
                 ></div>
               </div>
