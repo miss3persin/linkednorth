@@ -85,7 +85,7 @@ export default function AuthNavbar({ userData }) {
                     </Link>
 
                     {/* Messages Badge */}
-                    <Link href="/messages" className="relative cursor-pointer hover:opacity-70 transition">
+                    <Link href="/dashboard" className="relative cursor-pointer hover:opacity-70 transition">
                         <FiMessageSquare size={20} />
                         {messageCount > 0 && (
                             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-semibold">
@@ -128,7 +128,7 @@ export default function AuthNavbar({ userData }) {
                     <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block hover:text-black">
                         Notifications {notificationCount > 0 && `(${notificationCount})`}
                     </Link>
-                    <Link href="/messages" onClick={() => setMenuOpen(false)} className="block hover:text-black">
+                    <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block hover:text-black">
                         Messages {messageCount > 0 && `(${messageCount})`}
                     </Link>
                     <Link href="/post-job" onClick={() => setMenuOpen(false)} className="block hover:text-black">Post A Job</Link>
