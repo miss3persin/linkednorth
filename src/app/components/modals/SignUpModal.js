@@ -33,7 +33,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
       // Send verification email
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-      
+
       setVerifying(true)
     } catch (err) {
       setError(err.errors ? err.errors[0].message : 'Something went wrong.')
@@ -54,10 +54,17 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
       if (completeSignUp.status === 'complete') {
         await setActive({ session: completeSignUp.createdSessionId })
-        
-        // Simple redirect - just go to dashboard
-        window.location.href = '/dashboard'
+
+        const redirectTo = localStorage.getItem('redirectAfterLogin')
+
+        if (redirectTo) {
+          localStorage.removeItem('redirectAfterLogin')
+          window.location.href = redirectTo
+        } else {
+          window.location.href = '/dashboard'
+        }
       }
+
     } catch (err) {
       setError(err.errors ? err.errors[0].message : 'Invalid verification code.')
     } finally {
@@ -70,7 +77,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
       await signUp.authenticateWithRedirect({
         strategy,
         redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/dashboard',
+
       })
     } catch (err) {
       console.error('OAuth error:', err)

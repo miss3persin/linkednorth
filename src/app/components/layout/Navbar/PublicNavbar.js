@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { saveJobsRedirect } from '../../../lib/authRedirect'
 import { useState } from 'react'
 import logo from '/public/linkednorth-logo.png'
 import Image from 'next/image'
@@ -14,11 +16,20 @@ const openSans = Open_Sans({ subsets: ['latin'] })
 export default function PublicNavbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const handleOpenAuthModal = () => {
-    setMenuOpen(false) // Close mobile menu if open
-    setAuthModalOpen(true) // Open auth modal
+    setMenuOpen(false)
+
+    if (pathname === '/jobs') {
+      saveJobsRedirect(searchParams)
+    }
+
+    setAuthModalOpen(true)
   }
+
 
   return (
     <>
@@ -46,16 +57,16 @@ export default function PublicNavbar() {
               <li><Link href="/contact">Contact Us</Link></li>
             </ul>
             <div className="flex items-center gap-3 ml-6">
-              <Button 
-                text="Post A Job" 
-                img="" 
-                link="/post-job" 
-                variant="white" 
+              <Button
+                text="Post A Job"
+                img=""
+                link="/post-job"
+                variant="white"
               />
-              <Button 
-                text="Login/SignUp" 
-                img="" 
-                variant="black" 
+              <Button
+                text="Login/SignUp"
+                img=""
+                variant="black"
                 onClick={handleOpenAuthModal}
               />
             </div>
@@ -90,17 +101,17 @@ export default function PublicNavbar() {
               </li>
             </ul>
             <div className="flex flex-col gap-4 mt-6">
-              <Button 
-                text="Post A Job" 
-                img="" 
-                link="/post-job" 
+              <Button
+                text="Post A Job"
+                img=""
+                link="/post-job"
                 variant="white"
                 onClick={() => setMenuOpen(false)}
               />
-              <Button 
-                text="Login/SignUp" 
-                img="" 
-                variant="black" 
+              <Button
+                text="Login/SignUp"
+                img=""
+                variant="black"
                 onClick={handleOpenAuthModal}
               />
             </div>

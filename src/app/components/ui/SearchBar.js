@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { Open_Sans } from 'next/font/google'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import jobIcon from '/public/work.png'
 import locationIcon from '/public/location.png'
 
@@ -22,6 +22,8 @@ export const SearchBar = () => {
   const jobDropdownRef = useRef(null)
   const countryDropdownRef = useRef(null)
   const router = useRouter()
+  const pathname = usePathname()
+
 
   // --- Debounce helper ---
   function debounce(fn, delay) {
@@ -125,16 +127,24 @@ const debouncedFetchCountries = debounce(fetchLocationSuggestions, 300);
   }
 
   // --- Handle search ---
-  const handleSearch = () => {
-    if (!jobTitle.trim() && !country.trim()) {
-      alert('Please enter a job title or location.')
-      return
-    }
-
-    router.push(
-      `/jobs?jobTitle=${encodeURIComponent(jobTitle)}&country=${encodeURIComponent(country)}`
-    )
+const handleSearch = () => {
+  if (!jobTitle.trim() && !country.trim()) {
+    alert('Please enter a job title or location.')
+    return
   }
+
+  const query = `?jobTitle=${encodeURIComponent(jobTitle)}&country=${encodeURIComponent(country)}`
+
+  // Home should redirect to jobs
+  if (pathname === '/') {
+    router.push(`/jobs${query}`)
+    return
+  }
+
+  // Jobs & JobListings should stay where they are
+  router.push(`${pathname}${query}`)
+}
+
 
   return (
     <div className="flex items-center justify-center py-4 sm:w-[35rem]">

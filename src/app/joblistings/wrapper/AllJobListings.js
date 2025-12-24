@@ -131,7 +131,7 @@ export default function JobsPage() {
 
       <main className="flex-1 flex flex-col">
         {/* === Hero Section === */}
-        <section className="relative bg-gray-50 w-full overflow-hidden py-10 sm:py-8">
+        <section className="relative bg-gray-50 w-full py-10 sm:py-8">
           <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none opacity-70 sm:opacity-50">
             <Image src={overlay} alt="overlay" className="w-auto h-full object-fill" priority />
           </div>

@@ -3,7 +3,7 @@ import Sidebar from '../components/layout/Sidebar';
 export default function ResumeBuilderPage() {
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar imported by user */}
+      {/* Sidebar */}
       <Sidebar />
       <div className="flex-1 px-8 py-6">
         <h1 className="text-xl font-semibold text-gray-800">Resume Builder</h1>

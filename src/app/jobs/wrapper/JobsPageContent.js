@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
 import { JobListingCard } from '../../components/jobs/JobListingCard'
+import { saveJobsRedirect } from '../../lib/authRedirect'
 import { SearchBar } from '../../components/ui/SearchBar'
 import { Inter } from 'next/font/google'
 import overlay from '/public/Overlay.png'
@@ -101,9 +102,11 @@ export default function JobsPage() {
 
   const handleSaveJob = async (job) => {
     if (!isSignedIn) {
+      saveJobsRedirect(searchParams)
       alert("Please sign in to save jobs")
       return
     }
+
 
     try {
       const res = await fetch('/api/jobs/save', {
@@ -129,7 +132,7 @@ export default function JobsPage() {
 
       <main className="flex-1 flex flex-col">
         {/* === Hero Section === */}
-        <section className="relative bg-gray-50 w-full overflow-hidden py-10 sm:py-8">
+        <section className="relative bg-gray-50 w-full py-10 sm:py-8">
           <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none opacity-70 sm:opacity-50">
             <Image src={overlay} alt="overlay" className="w-auto h-full object-fill" priority />
           </div>

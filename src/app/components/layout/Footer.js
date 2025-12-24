@@ -20,7 +20,7 @@ export default function Footer() {
             Connect, share insights, and get support from a network of professionals on the same
             journey.
           </p>
-          <p className="hidden sm:block">© 2025 LinkedNorth business Corporation</p>
+          <p className="hidden sm:block">© 2026 LinkedNorth business Corporation</p>
         </div>
 
         {/* Links */}
@@ -48,7 +48,7 @@ export default function Footer() {
 
       <div className="container text-center sm:text-right px-6 sm:px-12 md:px-20 lg:px-28 mb-6 sm:mb-7">
         <p className="text-[#868D9B] text-xs sm:text-[0.92rem] font-light">
-          © 2024 LinkedNorth business Corporation
+          © 2026 LinkedNorth business Corporation
         </p>
       </div>
     </div>

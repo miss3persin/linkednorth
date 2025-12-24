@@ -60,8 +60,8 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
     try {
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: '/',
-        redirectUrlComplete: '/dashboard',
+        redirectUrl: `${window.location.origin}/joblistings${window.location.search}`,
+        redirectUrlComplete: `${window.location.origin}/joblistings${window.location.search}`,
       })
     } catch (err) {
       console.error('OAuth error:', err)

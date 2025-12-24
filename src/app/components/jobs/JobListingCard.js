@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { useUser } from "@clerk/nextjs"
 import AuthModals from "../modals/AuthModals"
+import { useSearchParams, usePathname } from 'next/navigation'
+import { saveJobsRedirect } from '../../lib/authRedirect'
 import React from 'react'
 import Image from 'next/image'
 import { Inter, Open_Sans } from 'next/font/google'
@@ -67,13 +69,30 @@ export const JobListingCard = ({
   const [openAuthModal, setOpenAuthModal] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+
+
   const requireAuth = (action) => {
     if (!isSignedIn) {
+      // Save redirect ONLY when coming from jobs page
+      if (pathname === '/jobs') {
+        saveJobsRedirect(searchParams)
+      }
+
+      localStorage.setItem(
+        'redirectAfterLogin',
+        window.location.pathname + window.location.search
+        // `${pathname}?${searchParams.toString()}`
+      )
+
       setOpenAuthModal(true)
       return
     }
+
     action?.()
   }
+
 
   const handleApply = async () => {
     if (!isSignedIn) {
@@ -201,16 +220,16 @@ export const JobListingCard = ({
 
       {/* === Buttons === */}
       <div className="flex flex-col sm:flex-row gap-2 pl-0 sm:pl-[4.5rem]">
-        <Button 
-          text="Apply Now" 
-          img={arrow_right} 
+        <Button
+          text="Apply Now"
+          img={arrow_right}
           variant="black"
           onClick={(e) => {
             e.preventDefault()
             requireAuth(() => {
               if (applyLink) window.open(applyLink, "_blank")
             })
-          }} 
+          }}
         />
 
         <a
