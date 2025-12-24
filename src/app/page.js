@@ -92,11 +92,11 @@ export default function HomePage() {
   const router = useRouter()
   const { isLoaded, isSignedIn } = useUser()
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn && window.location.pathname === '/') {
-      router.push('/dashboard');
-    }
-  }, [isLoaded, isSignedIn, router]);
+useEffect(() => {
+  if (isLoaded && isSignedIn && window.location.pathname === '/') {
+    router.push('/dashboard');
+  }
+}, [isLoaded, isSignedIn, router]);
 
   // Show loading while checking auth
   if (!isLoaded) {
