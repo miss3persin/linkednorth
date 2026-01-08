@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --font-inter: 'Inter', sans-serif;
+    --font-open-sans: 'Open Sans', sans-serif;
   }
 }
 
@@ -36,4 +37,9 @@
     scrollbar-width: thin;
     scrollbar-color: #d4d4d4 transparent;
   }
+
+  .font-sans {
+  font-family: var(--font-open-sans);
+}
+
 }

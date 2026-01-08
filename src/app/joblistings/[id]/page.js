@@ -43,15 +43,10 @@ export default function JobDetailsPage() {
     async function fetchJobDetails() {
       try {
         const res = await fetch(`/api/jobs/${params.id}`)
-        
-        if (!res.ok) {
-          throw new Error('Job not found')
-        }
-
+        if (!res.ok) throw new Error('Job not found')
         const data = await res.json()
         setJob(data.job)
 
-        // Track job view if user is signed in
         if (isSignedIn && user) {
           fetch('/api/jobs/track-view', {
             method: 'POST',
@@ -72,9 +67,7 @@ export default function JobDetailsPage() {
       }
     }
 
-    if (params.id) {
-      fetchJobDetails()
-    }
+    if (params.id) fetchJobDetails()
   }, [params.id, isSignedIn, user])
 
   const handleSaveJob = async () => {
@@ -89,14 +82,9 @@ export default function JobDetailsPage() {
       const res = await fetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: params.id,
-          userId: user.id,
-        }),
+        body: JSON.stringify({ jobId: params.id, userId: user.id }),
       })
-
       if (!res.ok) throw new Error('Failed to save job')
-
       alert("Job saved successfully!")
     } catch (err) {
       console.error("Failed to save job:", err)
@@ -112,9 +100,7 @@ export default function JobDetailsPage() {
       router.push('/?redirect=/joblistings/' + params.id)
       return
     }
-
     try {
-      // Track application in database
       const res = await fetch('/api/applications/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,19 +111,10 @@ export default function JobDetailsPage() {
           applyLink: job?.applyLink,
         }),
       })
-
       const data = await res.json()
-
-      if (data.success) {
-        // Open the external apply link
-        if (job?.applyLink) {
-          window.open(job.applyLink, '_blank')
-        }
-      } else {
-        alert('Failed to track application. Please try again.')
-      }
-    } catch (err) {
-      console.error('Error applying:', err)
+      if (data.success && job?.applyLink) window.open(job.applyLink, '_blank')
+      else alert('Failed to track application. Please try again.')
+    } catch {
       alert('Failed to apply. Please try again.')
     }
   }
@@ -146,10 +123,10 @@ export default function JobDetailsPage() {
     return (
       <div className="min-h-screen flex bg-white mt-16">
         <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent mb-4"></div>
-            <p className="text-gray-600">Loading job details...</p>
+            <p className="text-gray-600 text-sm sm:text-base">Loading job details...</p>
           </div>
         </main>
       </div>
@@ -160,13 +137,10 @@ export default function JobDetailsPage() {
     return (
       <div className="min-h-screen flex bg-white mt-16">
         <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6">
           <div className="text-center">
-            <p className="text-red-500 mb-4">{error || 'Job not found'}</p>
-            <button
-              onClick={() => router.push('/joblistings')}
-              className="text-blue-600 hover:underline"
-            >
+            <p className="text-red-500 mb-4 text-sm sm:text-base">{error || 'Job not found'}</p>
+            <button onClick={() => router.push('/joblistings')} className="text-blue-600 hover:underline text-sm sm:text-base">
               Back to job listings
             </button>
           </div>
@@ -178,107 +152,68 @@ export default function JobDetailsPage() {
   return (
     <div className="min-h-screen flex bg-white mt-16">
       <Sidebar />
+      <main className="flex-1 max-w-3xl sm:max-w-4xl md:max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
 
-      <main className="flex-1 max-w-5xl mx-auto px-6 sm:px-12 py-8">
         {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="text-blue-600 hover:underline mb-6 text-sm"
-        >
+        <button onClick={() => router.back()} className="text-blue-600 hover:underline mb-2 text-sm sm:text-base">
           ← Back to listings
         </button>
 
         {/* Job Header */}
-        <div className="bg-white border rounded-lg p-6 mb-6">
-          <div className="flex items-start gap-4 mb-4">
+        <div className="bg-white border rounded-lg p-4 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
             <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
-              <Image 
-                src={job.imageSrc || logo} 
-                alt="Company Logo" 
-                fill 
-                className="object-contain p-1" 
-              />
+              <Image src={job.imageSrc || logo} alt="Company Logo" fill className="object-contain p-1" />
             </div>
-            
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{job.jobTitle}</h1>
-              <p className="text-lg text-gray-700 mb-1">{job.company}</p>
-              <p className="text-sm text-gray-500">
-                {job.location} • {formatPostedTime(job.postedTime)}
-              </p>
+            <div className="flex-1 space-y-1">
+              <h1 className="text-2xl sm:text-3xl font-bold">{job.jobTitle}</h1>
+              <p className="text-base sm:text-lg text-gray-700">{job.company}</p>
+              <p className="text-sm text-gray-500">{job.location} • {formatPostedTime(job.postedTime)}</p>
             </div>
           </div>
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {job.jobType && (
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-                {job.jobType}
-              </span>
-            )}
-            {job.contractType && (
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
-                {job.contractType}
-              </span>
-            )}
+          <div className="flex flex-wrap gap-2">
+            {job.jobType && <span className="rounded-full bg-green-100 px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-green-800">{job.jobType}</span>}
+            {job.contractType && <span className="rounded-full bg-blue-100 px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-blue-800">{job.contractType}</span>}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleApply}
-              className="bg-black text-white px-6 py-3 rounded font-medium hover:bg-gray-800 transition flex items-center gap-2"
-            >
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <button onClick={handleApply} className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded font-medium hover:bg-gray-800 transition flex items-center justify-center gap-1 sm:gap-2 w-full sm:w-auto">
               Apply Now
               <Image src={arrow_right} alt="arrow" width={20} height={20} />
             </button>
-            
-            <button
-              onClick={handleSaveJob}
-              disabled={isSaving}
-              className="border border-gray-300 px-6 py-3 rounded font-medium hover:bg-gray-50 transition disabled:opacity-50"
-            >
+            <button onClick={handleSaveJob} disabled={isSaving} className="border border-gray-300 px-4 sm:px-6 py-2 sm:py-3 rounded font-medium hover:bg-gray-50 transition disabled:opacity-50 w-full sm:w-auto">
               {isSaving ? 'Saving...' : 'Save Job'}
             </button>
           </div>
         </div>
 
         {/* Job Description */}
-        <div className="bg-white border rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Job Description</h2>
+        <div className="bg-white border rounded-lg p-4 sm:p-6 space-y-4">
+          <h2 className="text-xl font-bold">Job Description</h2>
           <div className="prose max-w-none">
-            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {job.description}
-            </p>
+            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{job.description}</p>
           </div>
 
-          {/* Additional Details */}
-          {job.skills && job.skills.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-3">Required Skills</h3>
+          {/* Required Skills */}
+          {job.skills?.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Required Skills</h3>
               <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    {skill}
-                  </span>
+                {job.skills.map((skill, idx) => (
+                  <span key={idx} className="bg-gray-100 text-gray-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">{skill}</span>
                 ))}
               </div>
             </div>
           )}
 
           {/* Apply Section */}
-          <div className="mt-8 pt-6 border-t">
-            <h3 className="text-lg font-semibold mb-3">Ready to apply?</h3>
-            <p className="text-gray-600 mb-4">
-              Click the button below to apply for this position.
-            </p>
-            <button
-              onClick={handleApply}
-              className="bg-black text-white px-6 py-3 rounded font-medium hover:bg-gray-800 transition"
-            >
+          <div className="pt-4 border-t space-y-2">
+            <h3 className="text-lg font-semibold">Ready to apply?</h3>
+            <p className="text-gray-600">Click the button below to apply for this position.</p>
+            <button onClick={handleApply} className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded font-medium w-full hover:bg-gray-800 transition">
               Apply for this job
             </button>
           </div>

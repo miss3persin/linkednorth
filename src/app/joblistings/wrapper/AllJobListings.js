@@ -52,8 +52,6 @@ export default function JobsPage() {
   const { isSignedIn, user } = useUser()
 
   const handleJobClick = (job) => {
-    // Navigate to job details page
-    // The job.id should already be the UUID from your external API
     router.push(`/joblistings/${job.id}`)
   }
 
@@ -72,20 +70,14 @@ export default function JobsPage() {
         const fetchedJobs = data.jobs || []
         setJobs(fetchedJobs)
 
-        // Cache jobs in background (don't wait for it)
         if (fetchedJobs.length > 0) {
           fetch('/api/jobs/cache', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ jobs: fetchedJobs }),
-          })
-            .then(res => {
-              if (res.status === 401) console.warn("Not logged in, skipping cache.");
-            })
-            .catch(err => console.error('Cache error:', err));
+          }).catch(() => {})
         }
-      } catch (err) {
-        console.error("Error fetching jobs:", err)
+      } catch {
         setError("Something went wrong while fetching jobs.")
         setJobs([])
       } finally {
@@ -96,52 +88,41 @@ export default function JobsPage() {
     fetchJobs()
   }, [jobTitleQuery, countryQuery])
 
-  const handleViewDetails = (job) => {
-    setSelectedJob(job)
-  }
-
   const handleSaveJob = async (job) => {
     if (!isSignedIn) {
       alert("Please sign in to save jobs")
       return
     }
 
-    try {
-      const res = await fetch('/api/jobs/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: job.id,
-          userId: user.id,
-        }),
-      })
-
-      if (!res.ok) throw new Error('Failed to save job')
-
-      alert("Job saved successfully!")
-    } catch (err) {
-      console.error("Failed to save job:", err)
-      alert("Failed to save job. Please try again.")
-    }
+    await fetch('/api/jobs/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobId: job.id, userId: user.id }),
+    })
   }
 
   return (
-    <div className="min-h-screen flex bg-white mt-16">
+    <div className="min-h-screen flex bg-white mt-16 overflow-x-hidden">
       <Sidebar />
 
       <main className="flex-1 flex flex-col">
         {/* === Hero Section === */}
-        <section className="relative bg-gray-50 w-full py-10 sm:py-8">
-          <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none opacity-70 sm:opacity-50">
-            <Image src={overlay} alt="overlay" className="w-auto h-full object-fill" priority />
+        <section className="relative bg-gray-50 w-full py-8 sm:py-6">
+          <div className="absolute right-0 bottom-0 h-full pointer-events-none opacity-40 sm:opacity-50">
+            <Image
+              src={overlay}
+              alt="overlay"
+              className="w-auto h-full object-cover"
+              priority
+            />
           </div>
 
-          <div className="relative max-w-6xl mx-auto px-6 sm:px-12 py-12 sm:py-8 grid grid-cols-1 gap-10 sm:gap-6 items-center">
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-6 grid grid-cols-1 gap-6">
             <div className="text-center md:text-left">
-              <h2 className="text-[2.8rem] md:text-[2.4rem] sm:text-[2rem] font-bold mb-2 leading-tight">
+              <h2 className="text-[2.1rem] sm:text-[2rem] md:text-[2.4rem] font-bold mb-2 leading-tight">
                 Find your Dream Job
               </h2>
-              <p className={`${inter.variable} text-[#737373] mb-6 font-light text-base sm:text-sm`}>
+              <p className={`${inter.variable} text-[#737373] mb-5 font-light text-sm sm:text-sm`}>
                 Explore our job search platform, built to simplify your job hunt.
               </p>
               <div className="flex justify-center md:justify-start">
@@ -152,23 +133,23 @@ export default function JobsPage() {
         </section>
 
         {/* === Job Listings === */}
-        <div className="flex-1 max-w-6xl mx-auto px-6 sm:px-12 xl:px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 xl:px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
-              <h3 className="font-bold text-3xl md:text-2xl sm:text-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+              <h3 className="font-bold text-xl sm:text-2xl">
                 {loading
                   ? 'Getting jobs...'
                   : error
-                    ? 'Error loading jobs'
-                    : `${jobs.length} jobs found`}
+                  ? 'Error loading jobs'
+                  : `${jobs.length} jobs found`}
               </h3>
 
-              <button className="flex items-center border px-3 py-1 rounded text-sm sm:text-xs">
-                Most Recent <ChevronDown size={16} className="ml-1" />
+              <button className="flex items-center border px-3 py-1 rounded text-xs sm:text-sm self-start sm:self-auto">
+                Most Recent <ChevronDown size={14} className="ml-1" />
               </button>
             </div>
 
-            <div className="flex flex-col gap-6 sm:gap-4">
+            <div className="flex flex-col gap-4 sm:gap-6">
               {loading ? (
                 <p className="text-gray-500">Looking for jobs...</p>
               ) : error ? (
@@ -188,7 +169,7 @@ export default function JobsPage() {
                     imageSrc={job.imageSrc || logo}
                     applyLink={job.applyLink}
                     detailsLink={job.detailsLink}
-                    onViewDetails={() => handleViewDetails(job)}
+                    onViewDetails={() => setSelectedJob(job)}
                   />
                 ))
               ) : (
@@ -198,7 +179,7 @@ export default function JobsPage() {
           </div>
 
           {/* Sidebar details panel */}
-          <aside className={`border rounded p-6 sm:p-4 sticky top-24 self-start flex flex-col ${selectedJob ? 'h-[85vh]' : 'h-fit'} hidden lg:block`}>
+          <aside className={`border rounded p-4 sticky top-24 self-start flex flex-col ${selectedJob ? 'h-[85vh]' : 'h-fit'} hidden lg:block`}>
             {!selectedJob ? (
               <>
                 <h4 className="font-semibold mb-2 flex items-center gap-2 text-base sm:text-sm">

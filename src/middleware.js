@@ -1,15 +1,22 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-// Define which routes need a login
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/joblistings(.*)', '/library(.*)', '/resumebuilder(.*)', '/premium(.*)',])
+// Define which routes need login
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/joblistings(.*)',
+  '/library(.*)',
+  '/resumebuilder(.*)',
+  '/premium(.*)',
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
   // If the user isn't logged in and tries to access a protected route
-  // Clerk will handle the redirect to your Sign In page automatically
   if (!userId && isProtectedRoute(req)) {
-    return (await auth()).redirectToSignIn();
+    // Redirect to home page instead of Clerk login
+    return NextResponse.redirect(new URL('/', req.url));
   }
 });
 

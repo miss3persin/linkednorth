@@ -4,7 +4,7 @@ import { Open_Sans } from 'next/font/google'
 import Image from 'next/image'
 import React from 'react'
 
-const openSans = Open_Sans({ subsets: ['latin'] })
+const openSans = Open_Sans({ subsets: ['latin'], variable: '--font-open-sans' })
 
 export const Button = ({
   text,
@@ -27,7 +27,7 @@ export const Button = ({
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`w-full sm:w-auto ${openSans.className} ${baseStyles} ${variants[variant]}`}
+        className={`w-full sm:w-auto font-sans ${baseStyles} ${variants[variant]}`}
       >
         {text}
         {img && <Image src={img} alt="button-icon" />}
@@ -39,7 +39,7 @@ export const Button = ({
   return (
     <button
       onClick={onClick}
-      className={`${openSans.className} ${baseStyles} ${variants[variant]}`}
+      className={`font-sans ${baseStyles} ${variants[variant]}`}
     >
       {text}
       {img && <Image src={img} alt="button-icon" />}

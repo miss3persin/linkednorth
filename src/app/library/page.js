@@ -109,43 +109,45 @@ export default async function LibraryPage() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-white mt-16">
+    <div className="min-h-screen flex bg-white mt-16 overflow-x-hidden">
       <Sidebar />
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 px-4 sm:px-6 md:px-8 py-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3">
           <div>
-            <h1 className="text-xl font-semibold">Job Applications Tracker</h1>
-            <p className="text-sm text-gray-500">Track and manage your job applications</p>
+            <h1 className="text-lg sm:text-xl font-semibold">Job Applications Tracker</h1>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Track and manage your job applications
+            </p>
           </div>
 
-          <div className="flex gap-3">
-            <button className="text-sm border rounded-md px-3 py-2 bg-white hover:bg-gray-50">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button className="text-xs sm:text-sm border rounded-md px-2 sm:px-3 py-1 sm:py-2 bg-white hover:bg-gray-50">
               Filter
             </button>
-            <button className="text-sm bg-black text-white rounded-md px-3 py-2 flex items-center gap-1">
-              <HiPlus size={16} /> Add Job
+            <button className="text-xs sm:text-sm bg-black text-white rounded-md px-2 sm:px-3 py-1 sm:py-2 flex items-center gap-1">
+              <HiPlus size={14} /> Add Job
             </button>
           </div>
         </div>
 
         {/* Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
           {jobColumns.map((col, i) => (
-            <div key={i} className={`${col.color} p-4 rounded-xl border`}>
+            <div key={i} className={`${col.color} p-3 sm:p-4 rounded-xl border`}>
               {/* Column Header */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <p className="text-sm font-semibold">{col.title}</p>
                 <p className="text-xs text-gray-500">{col.desc}</p>
 
-                <div className="flex justify-between items-center mt-2">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
                   <button
-                    className={`flex items-center justify-center gap-1 text-xs border rounded-md w-full ${col.buttonColor} py-1 hover:opacity-80`}
+                    className={`flex items-center justify-center gap-1 text-xs border rounded-md w-full sm:w-auto ${col.buttonColor} py-1 hover:opacity-80`}
                   >
                     <HiPlus size={12} /> Add Job
                   </button>
-                  <span className="text-xs ml-2 bg-gray-200 rounded-full px-2 py-[2px]">
+                  <span className="text-xs bg-gray-200 rounded-full px-2 py-[2px]">
                     {col.count}
                   </span>
                 </div>
@@ -153,38 +155,38 @@ export default async function LibraryPage() {
 
               {/* Job Cards */}
               {col.jobs.map((job, j) => (
-                <div key={j} className="bg-white p-3 rounded-lg mb-3 shadow-sm border">
+                <div key={j} className="bg-white p-2 sm:p-3 rounded-lg mb-3 shadow-sm border break-words">
                   <p className="font-medium text-sm">{job.title}</p>
                   <p className="text-xs text-gray-500">{job.company}</p>
 
                   <p className="text-xs text-gray-500 mt-1">Applied: {job.date}</p>
 
                   {job.tag && (
-                    <span className={`text-[10px] px-2 py-[2px] rounded-md ${job.tagColor} mt-2 inline-block`}>
+                    <span className={`text-[9px] sm:text-[10px] px-2 py-[1.5px] rounded-md ${job.tagColor} mt-1 inline-block`}>
                       {job.tag}
                     </span>
                   )}
 
                   {job.extra && (
-                    <span className={`block text-[10px] px-2 py-[2px] mt-2 rounded-md ${job.extraColor}`}>
+                    <span className={`block text-[9px] sm:text-[10px] px-2 py-[1.5px] mt-1 rounded-md ${job.extraColor}`}>
                       {job.extra}
                     </span>
                   )}
 
                   {job.offer && (
-                    <span className={`block text-[10px] px-2 py-[2px] mt-2 rounded-md ${job.offerColor}`}>
+                    <span className={`block text-[9px] sm:text-[10px] px-2 py-[1.5px] mt-1 rounded-md ${job.offerColor}`}>
                       {job.offer}
                     </span>
                   )}
 
                   {job.offerExpires && (
-                    <span className={`block text-[10px] px-2 py-[2px] rounded-md ${job.offerColor}`}>
+                    <span className={`block text-[9px] sm:text-[10px] px-2 py-[1.5px] rounded-md ${job.offerColor}`}>
                       {job.offerExpires}
                     </span>
                   )}
 
                   {job.rejected && (
-                    <span className={`text-[10px] px-2 py-[2px] mt-2 rounded-md ${job.rejectedColor}`}>
+                    <span className={`text-[9px] sm:text-[10px] px-2 py-[1.5px] mt-1 rounded-md ${job.rejectedColor}`}>
                       {job.rejected}
                     </span>
                   )}
