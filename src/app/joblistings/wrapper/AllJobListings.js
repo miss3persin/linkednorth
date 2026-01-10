@@ -88,18 +88,31 @@ export default function JobsPage() {
     fetchJobs()
   }, [jobTitleQuery, countryQuery])
 
-  const handleSaveJob = async (job) => {
-    if (!isSignedIn) {
-      alert("Please sign in to save jobs")
-      return
-    }
 
-    await fetch('/api/jobs/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId: job.id, userId: user.id }),
-    })
+const handleSaveJob = async (job) => {
+  const res = await fetch('/api/jobs/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: user.id,           // ✅ REQUIRED
+      jobId: job.id,
+      jobTitle: job.jobTitle,
+      company: job.company,
+      location: job.location,
+      jobType: job.jobType,
+      applyLink: job.applyLink,
+      imageSrc: job.imageSrc,
+    }),
+  })
+
+  if (!res.ok) {
+    console.error('Failed to save job')
   }
+}
+
+
+
+
 
   return (
     <div className="min-h-screen flex bg-white mt-16 overflow-x-hidden">
