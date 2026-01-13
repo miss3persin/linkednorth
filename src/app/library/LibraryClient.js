@@ -11,91 +11,38 @@ export default function LibraryClient() {
             desc: "Jobs you're interested in",
             color: "bg-[#F8FAFC]",
             buttonColor: "bg-white",
-            jobs: [
-                {
-                    title: "Senior Software Engineer",
-                    company: "TechCorp Solutions",
-                    date: "Dec 13, 2023",
-                    tag: "Remote",
-                    tagColor: "bg-blue-100 text-blue-600",
-                },
-                {
-                    title: "Marketing Manager",
-                    company: "Creative Agency Pro",
-                    date: "Dec 12, 2023",
-                    tag: "On-site",
-                    tagColor: "bg-green-100 text-green-600",
-                },
-            ],
+            jobs: [],
         },
         {
             title: "Applied Jobs",
             desc: "Applications submitted",
             color: "bg-[#E8F1FF]",
             buttonColor: "bg-white",
-            jobs: [
-                {
-                    title: "UX Designer",
-                    company: "DesignHub Inc.",
-                    date: "Dec 10, 2023",
-                    tag: "Hybrid",
-                    tagColor: "bg-purple-100 text-purple-600",
-                },
-            ],
+            jobs: [],
         },
         {
             title: "Pending Jobs",
             desc: "Awaiting response",
             color: "bg-[#FFF8CC]",
             buttonColor: "bg-white",
-            jobs: [
-                {
-                    title: "Product Manager",
-                    company: "Companywork PLC",
-                    date: "Dec 8, 2023",
-                    tag: "Remote",
-                    tagColor: "bg-blue-100 text-blue-600",
-                    extra: "Interview: Dec 18, 2:00 PM",
-                    extraColor: "bg-green-100 text-green-600",
-                },
-            ],
+            jobs: [],
         },
         {
             title: "Completed",
             desc: "Successfully completed",
             color: "bg-[#D9FBE8]",
             buttonColor: "bg-white",
-            jobs: [
-                {
-                    title: "Data Scientist",
-                    company: "Analytics Pro",
-                    date: "Dec 7, 2023",
-                    tag: "On-site",
-                    tagColor: "bg-green-100 text-green-600",
-                    offer: "Offer: $85,000/year",
-                    offerExpires: "Expires: Dec 20, 2023",
-                    offerColor: "bg-purple-100 text-purple-600",
-                },
-            ],
+            jobs: [],
         },
         {
             title: "Rejected",
             desc: "Learn and Improve",
             color: "bg-[#FFE4E4]",
             buttonColor: "bg-white",
-            jobs: [
-                {
-                    title: "Frontend Developer",
-                    company: "TechSolutions Ltd",
-                    date: "Nov 28, 2023",
-                    tag: "Remote",
-                    tagColor: "bg-blue-100 text-blue-600",
-                    rejected: "Rejected: Dec 5, 2023",
-                    rejectedColor: "bg-red-100 text-red-600",
-                },
-            ],
+            jobs: [],
         },
     ])
+
 
     /* ---------------- FETCH SAVED JOBS FROM SUPABASE ---------------- */
 
@@ -108,32 +55,48 @@ export default function LibraryClient() {
                 const savedJobs = await res.json()
 
                 const formatted = savedJobs.map(item => ({
+                    jobId: item.job_id,
                     title: item.job_title,
                     company: item.job_data?.company ?? '',
+                    status: item.status,
                     date: new Date(item.created_at).toLocaleDateString(),
-                    tag: "Saved",
-                    tagColor: "bg-blue-100 text-blue-600",
+                    // tag: "Saved",
+                    // tagColor: "bg-blue-100 text-blue-600",
                 }))
 
 
+                // setJobColumns(prev => {
+                //     const updated = structuredClone(prev)
+                //     const savedCol = updated.find(c => c.title === "Saved Jobs")
+                //     if (!savedCol) return prev
+
+                //     const existing = new Set(
+                //         savedCol.jobs.map(j => `${j.title}-${j.company}`)
+                //     )
+
+                //     formatted.forEach(job => {
+                //         const key = `${job.title}-${job.company}`
+                //         if (!existing.has(key)) {
+                //             savedCol.jobs.unshift(job)
+                //         }
+                //     })
+
+                //     return updated
+                // })
                 setJobColumns(prev => {
                     const updated = structuredClone(prev)
-                    const savedCol = updated.find(c => c.title === "Saved Jobs")
-                    if (!savedCol) return prev
-
-                    const existing = new Set(
-                        savedCol.jobs.map(j => `${j.title}-${j.company}`)
-                    )
+                    updated.forEach(col => (col.jobs = []))
 
                     formatted.forEach(job => {
-                        const key = `${job.title}-${job.company}`
-                        if (!existing.has(key)) {
-                            savedCol.jobs.unshift(job)
-                        }
+                        const col = updated.find(c =>
+                            c.title.toLowerCase().startsWith(job.status)
+                        )
+                        if (col) col.jobs.push(job)
                     })
 
                     return updated
                 })
+
             } catch (err) {
                 console.error("Failed to fetch saved jobs")
             }
@@ -151,7 +114,7 @@ export default function LibraryClient() {
         )
     }
 
-    const handleDrop = (e, targetColIndex) => {
+    const handleDrop = async (e, targetColIndex) => {
         e.preventDefault()
         const { colIndex, jobIndex } = JSON.parse(
             e.dataTransfer.getData("text/plain")
@@ -159,13 +122,29 @@ export default function LibraryClient() {
 
         if (colIndex === targetColIndex) return
 
+        const targetStatus = jobColumns[targetColIndex].title
+            .toLowerCase()
+            .split(' ')[0] // saved, applied, pending, etc.
+
         setJobColumns(prev => {
             const updated = structuredClone(prev)
             const [movedJob] = updated[colIndex].jobs.splice(jobIndex, 1)
             updated[targetColIndex].jobs.push(movedJob)
+
+            // 🔥 persist
+            fetch('/api/jobs/status', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jobId: movedJob.jobId,
+                    status: targetStatus,
+                }),
+            })
+
             return updated
         })
     }
+
 
     /* ---------------- UI ---------------- */
 
