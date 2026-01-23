@@ -46,8 +46,10 @@ export default function JobsPage() {
 
   const searchParams = useSearchParams()
   const router = useRouter()
-  const jobTitleQuery = searchParams.get('jobTitle') || ''
-  const countryQuery = searchParams.get('country') || ''
+
+  // ✅ Updated to match the search bar / merged API params
+  const jobTitleQuery = searchParams.get('search') || ''
+  const countryQuery = searchParams.get('geo') || ''
 
   const { isSignedIn, user } = useUser()
 
@@ -60,22 +62,41 @@ export default function JobsPage() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(
-          `/api/jobs?jobTitle=${encodeURIComponent(jobTitleQuery)}&country=${encodeURIComponent(countryQuery)}`
-        )
+        // Build query for merged API
+        const query = new URLSearchParams()
+        if (jobTitleQuery) query.append('search', jobTitleQuery)
+        if (countryQuery) query.append('geo', countryQuery)
+        query.append('limit', '100') // fetch max 100 jobs
 
+        const res = await fetch(`/api/jobs?${query.toString()}`)
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
         const data = await res.json()
         const fetchedJobs = data.jobs || []
-        setJobs(fetchedJobs)
 
+        // Client-side filtering based on search params
+        const filtered = fetchedJobs.filter((job) => {
+          const title = job.jobTitle?.toLowerCase().trim() || ''
+          const location = job.location?.toLowerCase().trim() || ''
+          const titleQuery = jobTitleQuery.toLowerCase().trim()
+          const locationQuery = countryQuery.toLowerCase().trim()
+
+          const matchesTitle = titleQuery ? title.includes(titleQuery) : true
+          const matchesLocation = locationQuery ? location.includes(locationQuery) : true
+
+          return matchesTitle && matchesLocation
+        })
+
+        setJobs(filtered)
+
+
+        // Optional background cache
         if (fetchedJobs.length > 0) {
           fetch('/api/jobs/cache', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ jobs: fetchedJobs }),
-          }).catch(() => {})
+          }).catch(() => { })
         }
       } catch {
         setError("Something went wrong while fetching jobs.")
@@ -88,31 +109,28 @@ export default function JobsPage() {
     fetchJobs()
   }, [jobTitleQuery, countryQuery])
 
+  const handleSaveJob = async (job) => {
+    if (!isSignedIn) return alert('Please sign in to save jobs.')
 
-const handleSaveJob = async (job) => {
-  const res = await fetch('/api/jobs/save', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: user.id,           // ✅ REQUIRED
-      jobId: job.id,
-      jobTitle: job.jobTitle,
-      company: job.company,
-      location: job.location,
-      jobType: job.jobType,
-      applyLink: job.applyLink,
-      imageSrc: job.imageSrc,
-    }),
-  })
+    const res = await fetch('/api/jobs/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        jobId: job.id,
+        jobTitle: job.jobTitle,
+        company: job.company,
+        location: job.location,
+        jobType: job.jobType,
+        applyLink: job.applyLink,
+        imageSrc: job.imageSrc,
+      }),
+    })
 
-  if (!res.ok) {
-    console.error('Failed to save job')
+    if (!res.ok) {
+      console.error('Failed to save job')
+    }
   }
-}
-
-
-
-
 
   return (
     <div className="min-h-screen flex bg-white mt-16 overflow-x-hidden">
@@ -153,8 +171,8 @@ const handleSaveJob = async (job) => {
                 {loading
                   ? 'Getting jobs...'
                   : error
-                  ? 'Error loading jobs'
-                  : `${jobs.length} jobs found`}
+                    ? 'Error loading jobs'
+                    : `${jobs.length} jobs found`}
               </h3>
 
               <button className="flex items-center border px-3 py-1 rounded text-xs sm:text-sm self-start sm:self-auto">

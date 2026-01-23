@@ -34,7 +34,7 @@ export default function AuthNavbar({ userData }) {
   return (
     <nav className="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
       <div className="flex items-center justify-between px-4 sm:px-6 md:px-12 py-3">
-        
+
         {/* Logo */}
         <div className="relative h-10 w-[140px] flex-shrink-0">
           <Link href="/">
@@ -97,30 +97,60 @@ export default function AuthNavbar({ userData }) {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="lg:hidden fixed top-0 left-0 w-full h-screen bg-white z-40 flex flex-col items-center justify-center gap-8 px-6">
-          <Link href="/" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">Home</Link>
-          <Link href="/joblistings" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">Job Listings</Link>
-          <Link href="/resources" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">Career Resources</Link>
-          <Link href="/contact" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">Contact Us</Link>
+        <div className="lg:hidden fixed top-0 left-0 w-full h-screen bg-white z-40 flex flex-col">
 
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">
-            Notifications {notificationCount > 0 && `(${notificationCount})`}
-          </Link>
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">
-            Messages {messageCount > 0 && `(${messageCount})`}
-          </Link>
+          {/* Mobile Header (Logo + Close) */}
+          <div className="flex items-center justify-between px-8 py-4 border-b">
+            <div className="relative h-10 w-[140px] flex items-center justify-center">
+              <Link href="/" onClick={() => setMenuOpen(false)}>
+                <Image
+                  src={logo}
+                  alt="LinkedNorth"
+                  layout="intrinsic"
+                  objectFit="contain"
+                  quality={100}
+                />
+              </Link>
+            </div>
 
-          <Link href="/post-job" onClick={() => setMenuOpen(false)} className="text-lg hover:text-black">
-            Post A Job
-          </Link>
+            <button
+              className="text-2xl focus:outline-none"
+              onClick={() => setMenuOpen(false)}
+            >
+              <HiX />
+            </button>
+          </div>
 
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
-            <img
-              src={userData?.imageUrl}
-              alt="profile"
-              className="h-10 w-10 rounded-full object-cover border-2 border-transparent hover:border-gray-300"
-            />
-          </Link>
+          {/* Mobile Links */}
+          <div className="flex flex-col items-center justify-center gap-6 flex-1 px-6">
+            <Link href="/" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Home</Link>
+            <Link href="/joblistings" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Job Listings</Link>
+            <Link href="/resources" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Career Resources</Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Contact Us</Link>
+
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">
+              Notifications {notificationCount > 0 && (
+                <span className="text-red-500">
+                  ({notificationCount})
+                </span>
+              )}
+            </Link>
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-basr hover:text-black">
+              Messages {messageCount > 0 && `(${messageCount})`}
+            </Link>
+
+            <Link href="/post-job" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">
+              Post A Job
+            </Link>
+
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
+              <img
+                src={userData?.imageUrl}
+                alt="profile"
+                className="h-10 w-10 rounded-full object-cover border-2 border-transparent hover:border-gray-300"
+              />
+            </Link>
+          </div>
         </div>
       )}
     </nav>

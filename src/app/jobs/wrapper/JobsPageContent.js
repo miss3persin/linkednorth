@@ -52,8 +52,6 @@ export default function JobsPage() {
   const { isSignedIn, user } = useUser()
 
   const handleJobClick = (job) => {
-    // Navigate to job details page
-    // The job.id should already be the UUID from your external API
     router.push(`/joblistings/${job.id}`)
   }
 
@@ -62,9 +60,13 @@ export default function JobsPage() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(
-          `/api/jobs?jobTitle=${encodeURIComponent(jobTitleQuery)}&country=${encodeURIComponent(countryQuery)}`
-        )
+        // Map old query params to new merged API params
+        const query = new URLSearchParams()
+        if (jobTitleQuery) query.append('search', jobTitleQuery)
+        if (countryQuery) query.append('geo', countryQuery)
+        query.append('limit', '100') // fetch max 100 jobs by default
+
+        const res = await fetch(`/api/jobs?${query.toString()}`)
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
@@ -72,7 +74,7 @@ export default function JobsPage() {
         const fetchedJobs = data.jobs || []
         setJobs(fetchedJobs)
 
-        // Cache jobs in background (don't wait for it)
+        // Cache jobs in background (optional)
         if (fetchedJobs.length > 0) {
           fetch('/api/jobs/cache', {
             method: 'POST',
@@ -106,7 +108,6 @@ export default function JobsPage() {
       alert("Please sign in to save jobs")
       return
     }
-
 
     try {
       const res = await fetch('/api/jobs/save', {

@@ -15,7 +15,6 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  // Redirect after login
   useEffect(() => {
     if (!userLoaded || !isSignedIn || !open) return
 
@@ -25,9 +24,6 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
       setOpen(false)
       router.push(redirectTo)
     } else {
-      // 2. If no specific redirect is saved, just close the modal.
-      // Do NOT force a push to /dashboard here. 
-      // Let the page the user is currently on stay as it is.
       setOpen(false)
     }
   }, [isSignedIn, userLoaded, open, router, setOpen])
@@ -47,7 +43,6 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        // Modal effect above will handle redirect
       }
     } catch (err) {
       setError(err.errors ? err.errors[0].message : 'Something went wrong.')
@@ -70,16 +65,16 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
   }
 
   return (
-    <Modal open={open} onClose={() => setOpen(false)} size="max-w-md">
-      <div className="text-left">
+    <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
+      <div className="text-left px-1 sm:px-0">
         {/* Header */}
-        <h2 className="text-xl font-bold mb-1">Sign in</h2>
-        <p className="text-sm text-gray-500 mb-4">
+        <h2 className="text-lg sm:text-xl font-bold mb-1">Sign in</h2>
+        <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
           Stay updated on your professional world
         </p>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
               Email
@@ -88,7 +83,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -101,13 +96,13 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded text-xs sm:text-sm">
               {error}
             </div>
           )}
@@ -115,7 +110,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
           {/* Clerk CAPTCHA placeholder */}
           <div id="clerk-captcha" className="flex items-center" />
 
-          <div className="flex flex-col gap-4 justify-between text-sm">
+          <div className="flex flex-col gap-3 sm:gap-4 justify-between text-xs sm:text-sm">
             <a
               href="/forgot-password"
               className="text-blue-600 hover:underline font-medium"
@@ -131,16 +126,16 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
         {/* Divider */}
-        <div className="flex items-center my-4">
+        <div className="flex items-center my-3 sm:my-4">
           <div className="flex-grow border-t border-gray-300"></div>
-          <span className="px-2 text-sm text-gray-500">or</span>
+          <span className="px-2 text-xs sm:text-sm text-gray-500">or</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
 
@@ -148,7 +143,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
         <div className="space-y-2">
           <button
             onClick={() => handleOAuthSignIn('oauth_google')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition"
           >
             <img src="/google.svg" alt="Google" className="w-4 h-4" />
             Continue with Google
@@ -156,7 +151,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
           <button
             onClick={() => handleOAuthSignIn('oauth_facebook')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition"
           >
             <img src="/facebook.svg" alt="Facebook" className="w-4 h-4" />
             Continue with Facebook
@@ -164,7 +159,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
           <button
             onClick={() => handleOAuthSignIn('oauth_apple')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition"
           >
             <img src="/apple.svg" alt="Apple" className="w-4 h-4" />
             Continue with Apple
@@ -172,8 +167,8 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
         </div>
 
         {/* Footer */}
-        <p className="text-sm text-center mt-4 mb-6 text-gray-500">
-          New to LinkedNorth?{' '}
+        <p className="text-xs sm:text-sm text-center mt-4 mb-5 sm:mb-6 text-gray-500">
+          New to LinkedNorth?
           <span
             onClick={switchToSignUp}
             className="text-blue-600 cursor-pointer hover:underline font-medium pl-2"

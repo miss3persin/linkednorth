@@ -1,13 +1,10 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { Open_Sans } from 'next/font/google'
 import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import jobIcon from '/public/work.png'
 import locationIcon from '/public/location.png'
-
-// const openSans = Open_Sans({ subsets: ['latin'] })
 
 export const SearchBar = () => {
   const [jobTitle, setJobTitle] = useState('')
@@ -24,7 +21,6 @@ export const SearchBar = () => {
   const router = useRouter()
   const pathname = usePathname()
 
-
   // --- Debounce helper ---
   function debounce(fn, delay) {
     let timer
@@ -34,84 +30,66 @@ export const SearchBar = () => {
     }
   }
 
-  // --- Fetch job title suggestions ---
-// --- Fetch job title suggestions ---
-const fetchJobSuggestions = async (query) => {
-  if (!query.trim()) return setFilteredJobs([])
-  setLoadingJobs(true)
-  try {
-    const res = await fetch(`/api/jobs?jobTitle=${encodeURIComponent(query)}`)
-    if (!res.ok) throw new Error('Failed to fetch job suggestions')
-    const { jobs } = await res.json()
-    if (!jobs) return setFilteredJobs([])
+  // --- Fetch job title suggestions (new merged API) ---
+  const fetchJobSuggestions = async (query) => {
+    if (!query.trim()) return setFilteredJobs([])
+    setLoadingJobs(true)
+    try {
+      // Use merged API params
+      const params = new URLSearchParams()
+      params.append('search', query)
+      params.append('limit', '50') // fetch 50 results for dropdown
 
-    const titles = [
-      ...new Set(jobs.map((job) => job.jobTitle).filter(Boolean).slice(0, 8)),
-    ]
-    setFilteredJobs(titles)
-  } catch (err) {
-    console.error('Error fetching job suggestions:', err)
-    setFilteredJobs([])
-  } finally {
-    setLoadingJobs(false)
+      const res = await fetch(`/api/jobs?${params.toString()}`)
+      if (!res.ok) throw new Error('Failed to fetch job suggestions')
+
+      const data = await res.json()
+      const jobs = data.jobs || []
+
+      // Extract unique job titles for dropdown
+      const titles = [
+        ...new Set(jobs.map((job) => job.jobTitle).filter(Boolean).slice(0, 8)),
+      ]
+      setFilteredJobs(titles)
+    } catch (err) {
+      console.error('Error fetching job suggestions:', err)
+      setFilteredJobs([])
+    } finally {
+      setLoadingJobs(false)
+    }
   }
-}
 
   const debouncedFetchJobs = debounce(fetchJobSuggestions, 400)
 
-  // --- Fetch country suggestions ---
-// --- Fetch location suggestions (static dataset) ---
-const COUNTRIES = [
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "Netherlands",
-  "India",
-  "Nigeria",
-  "South Africa",
-  "Spain",
-  "Italy",
-  "Brazil",
-  "Singapore",
-  "Japan",
-  "Poland",
-  "Sweden",
-  "Norway",
-  "Ireland",
-  "Switzerland",
-  "Mexico",
-  "New Zealand",
-  "Philippines",
-  "Kenya",
-  "Ghana",
-];
+  // --- Country suggestions (static dataset) ---
+  const COUNTRIES = [
+    "United States","United Kingdom","Canada","Australia","Germany","France",
+    "Netherlands","India","Nigeria","South Africa","Spain","Italy","Brazil",
+    "Singapore","Japan","Poland","Sweden","Norway","Ireland","Switzerland",
+    "Mexico","New Zealand","Philippines","Kenya","Ghana",
+  ]
 
-const fetchLocationSuggestions = async (query) => {
-  if (!query.trim()) {
-    setFilteredCountries([]);
-    return;
+  const fetchLocationSuggestions = async (query) => {
+    if (!query.trim()) {
+      setFilteredCountries([])
+      return
+    }
+
+    setLoadingCountries(true)
+    try {
+      const matches = COUNTRIES.filter((c) =>
+        c.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 8)
+      setFilteredCountries(matches)
+    } catch (err) {
+      console.error("Error filtering locations:", err)
+      setFilteredCountries([])
+    } finally {
+      setLoadingCountries(false)
+    }
   }
 
-  setLoadingCountries(true);
-
-  try {
-    const matches = COUNTRIES.filter((c) =>
-      c.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 8);
-
-    setFilteredCountries(matches);
-  } catch (err) {
-    console.error("Error filtering locations:", err);
-    setFilteredCountries([]);
-  } finally {
-    setLoadingCountries(false);
-  }
-};
-
-const debouncedFetchCountries = debounce(fetchLocationSuggestions, 300);
+  const debouncedFetchCountries = debounce(fetchLocationSuggestions, 300)
 
   // --- Input handlers ---
   const handleJobTitleChange = (e) => {
@@ -127,24 +105,24 @@ const debouncedFetchCountries = debounce(fetchLocationSuggestions, 300);
   }
 
   // --- Handle search ---
-const handleSearch = () => {
-  if (!jobTitle.trim() && !country.trim()) {
-    alert('Please enter a job title or location.')
-    return
+  const handleSearch = () => {
+    if (!jobTitle.trim() && !country.trim()) {
+      alert('Please enter a job title or location.')
+      return
+    }
+
+    // Map to merged API query params
+    const query = `?search=${encodeURIComponent(jobTitle)}&geo=${encodeURIComponent(country)}`
+
+    // Home should redirect to jobs
+    if (pathname === '/') {
+      router.push(`/jobs${query}`)
+      return
+    }
+
+    // Jobs & JobListings should stay where they are
+    router.push(`${pathname}${query}`)
   }
-
-  const query = `?jobTitle=${encodeURIComponent(jobTitle)}&country=${encodeURIComponent(country)}`
-
-  // Home should redirect to jobs
-  if (pathname === '/') {
-    router.push(`/jobs${query}`)
-    return
-  }
-
-  // Jobs & JobListings should stay where they are
-  router.push(`${pathname}${query}`)
-}
-
 
   return (
     <div className="flex items-center justify-center py-4 sm:w-[35rem]">

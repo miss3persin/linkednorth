@@ -92,11 +92,11 @@ export default function HomePage() {
   const router = useRouter()
   const { isLoaded, isSignedIn } = useUser()
 
-useEffect(() => {
-  if (isLoaded && isSignedIn && window.location.pathname === '/') {
-    router.push('/dashboard');
-  }
-}, [isLoaded, isSignedIn, router]);
+  useEffect(() => {
+    if (isLoaded && isSignedIn && window.location.pathname === '/') {
+      router.push('/dashboard');
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   // Show loading while checking auth
   if (!isLoaded) {
@@ -266,7 +266,9 @@ useEffect(() => {
             </p>
           </div>
 
-          <div className="grid mb-10 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4 sm:px-8 md:px-16 xl:px-24">
+          <div className="mx-auto mb-10 grid w-full max-w-7xl grid-cols-1 gap-4 place-items-center
+                sm:grid-cols-2 lg:grid-cols-3
+                px-4 sm:px-8 md:px-16 xl:px-24">
             {jobData.map((job, index) => (
               <JobCard
                 key={index}
@@ -280,6 +282,7 @@ useEffect(() => {
               />
             ))}
           </div>
+
 
           <div className="flex items-center justify-center sm:w-full w-5/6 mx-auto">
             <Button text="Check More Job Listings" img={arrow_right} link="/jobs" variant="black" />
