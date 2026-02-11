@@ -17,6 +17,7 @@ export default function PostJobPage() {
         description: '',
         skills: [],
         requirements: '',
+        applicationLink: '', // Required field
     });
 
     const handleChange = (e) => {
@@ -209,6 +210,18 @@ export default function PostJobPage() {
                             </div>
                         </div>
 
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Job Application Link / Email <span className="text-red-500">*</span></label>
+                            <input
+                                name="applicationLink"
+                                value={formData.applicationLink || ''}
+                                onChange={handleChange}
+                                placeholder="e.g. example.com/apply or hr@company.com"
+                                className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Enter a URL or email address. Candidates will be directed here when they click "Apply Now".</p>
+                        </div>
+
                         <div className="flex justify-between pt-6 border-t border-gray-100">
                             <button
                                 onClick={handleBack}
@@ -218,7 +231,7 @@ export default function PostJobPage() {
                             </button>
                             <button
                                 onClick={handleNext}
-                                disabled={!formData.description}
+                                disabled={!formData.description || !formData.applicationLink}
                                 className="flex items-center gap-2 bg-black text-white px-8 py-2.5 rounded-md text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
                             >
                                 Continue
@@ -258,6 +271,10 @@ export default function PostJobPage() {
                                 <div>
                                     <label className="text-gray-400 font-bold text-[10px] uppercase tracking-widest block mb-1">Description</label>
                                     <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">{formData.description}</p>
+                                </div>
+                                <div>
+                                    <label className="text-gray-400 font-bold text-[10px] uppercase tracking-widest block mb-1">Application Link</label>
+                                    <p className="text-blue-600 underline font-medium break-all">{formData.applicationLink}</p>
                                 </div>
                             </div>
 

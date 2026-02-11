@@ -4,6 +4,37 @@ const YC_API_URL = "https://free-y-combinator-jobs-api.p.rapidapi.com/active-jb-
 const REMOTIVE_API_URL = "https://remotive.com/api/remote-jobs";
 const JOBICY_API_URL = "https://jobicy.com/api/v2/remote-jobs";
 
+// Helper function to format application links
+function formatApplicationLink(link) {
+    if (!link) return null;
+
+    const trimmedLink = link.trim();
+    console.log('[formatApplicationLink] Input:', link);
+    console.log('[formatApplicationLink] Trimmed:', trimmedLink);
+
+    // Check if it's an email (simple regex check)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmail = emailRegex.test(trimmedLink);
+    console.log('[formatApplicationLink] Is email?', isEmail);
+
+    if (isEmail) {
+        const result = `mailto:${trimmedLink}`;
+        console.log('[formatApplicationLink] Formatted as mailto:', result);
+        return result;
+    }
+
+    // Check if it already has a protocol
+    if (trimmedLink.startsWith('http://') || trimmedLink.startsWith('https://') || trimmedLink.startsWith('mailto:')) {
+        console.log('[formatApplicationLink] Already has protocol, using as-is');
+        return trimmedLink;
+    }
+
+    // Assume it's a URL without protocol, add https://
+    const result = `https://${trimmedLink}`;
+    console.log('[formatApplicationLink] Added https://', result);
+    return result;
+}
+
 async function safeFetch(fn, source) {
     try {
         const data = await fn();
@@ -147,7 +178,7 @@ async function fetchInternalJobs() {
             postedTime: job.created_at,
             description: job.description,
             imageSrc: job.company_logo,
-            applyLink: `/jobs/${job.id}`, // Internal jobs link to our own details page
+            applyLink: formatApplicationLink(job.application_link) || `/jobs/${job.id}`,
             detailsLink: `/jobs/${job.id}`,
             salary: job.salary_min || job.salary_max ? {
                 min: job.salary_min,
@@ -213,7 +244,7 @@ export async function getJobById(id) {
                 postedTime: internalJob.created_at,
                 jobType: internalJob.job_type,
                 contractType: internalJob.contract_type,
-                applyLink: `/jobs/${internalJob.id}`,
+                applyLink: formatApplicationLink(internalJob.application_link) || `/jobs/${internalJob.id}`,
                 imageSrc: internalJob.company_logo,
                 skills: internalJob.skills || [],
                 source: 'internal'

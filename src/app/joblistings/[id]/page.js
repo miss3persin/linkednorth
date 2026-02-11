@@ -8,24 +8,11 @@ import Sidebar from '@/app/components/layout/Sidebar'
 import { Button } from '@/app/components/ui/Button'
 import logo from '/public/linkednorth-logo.png'
 import arrow_right from '/public/chevron right.png'
+import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
 
 const formatPostedTime = (dateString) => {
   const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now - date
-
-  const seconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-  const months = Math.floor(days / 30)
-  const years = Math.floor(days / 365)
-
-  if (seconds < 60) return 'Just now'
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`
-  if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`
-  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`
-  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`
+  // ... keeping time format ...
   return `${years} year${years !== 1 ? 's' : ''} ago`
 }
 
@@ -38,6 +25,16 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Unified modal state
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    emailAddress: '',
+    externalLink: '',
+  })
 
   useEffect(() => {
     async function fetchJobDetails() {
@@ -85,10 +82,29 @@ export default function JobDetailsPage() {
         body: JSON.stringify({ jobId: params.id, userId: user.id }),
       })
       if (!res.ok) throw new Error('Failed to save job')
-      alert("Job saved successfully!")
+
+      // Copy the shareable link
+      const jobUrl = `${window.location.origin}/jobs/${params.id}`
+      await navigator.clipboard.writeText(jobUrl)
+
+      setModalState({
+        isOpen: true,
+        type: 'success',
+        title: 'Job Saved!',
+        message: 'This job has been saved to your profile and the link has been copied to your clipboard.',
+        emailAddress: '',
+        externalLink: '',
+      })
     } catch (err) {
       console.error("Failed to save job:", err)
-      alert("Failed to save job. Please try again.")
+      setModalState({
+        isOpen: true,
+        type: 'error',
+        title: 'Failed to Save',
+        message: 'Could not save this job. Please try again.',
+        emailAddress: '',
+        externalLink: '',
+      })
     } finally {
       setIsSaving(false)
     }
@@ -100,23 +116,126 @@ export default function JobDetailsPage() {
       router.push('/?redirect=/joblistings/' + params.id)
       return
     }
+
+    if (!job) return
+
     try {
+      // Track application in database
       const res = await fetch('/api/applications/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          jobId: params.id,
-          jobTitle: job?.jobTitle,
-          company: job?.company,
-          applyLink: job?.applyLink,
+          jobId: job.id,
+          jobTitle: job.jobTitle,
+          company: job.company,
+          applyLink: job.applyLink,
         }),
       })
+
       const data = await res.json()
-      if (data.success && job?.applyLink) window.open(job.applyLink, '_blank')
-      else alert('Failed to track application. Please try again.')
-    } catch {
-      alert('Failed to apply. Please try again.')
+
+      if (data.success) {
+        if (data.alreadyApplied) {
+          setModalState({
+            isOpen: true,
+            type: 'already_applied',
+            title: 'Already Applied',
+            message: 'You have already submitted an application for this position. Check your email for updates from the employer.',
+            emailAddress: '',
+            externalLink: '',
+          })
+          return
+        }
+
+        const applyLink = job.applyLink
+
+        // Check if it's a mailto link
+        if (applyLink && applyLink.startsWith('mailto:')) {
+          const emailAddress = applyLink.replace('mailto:', '')
+          setModalState({
+            isOpen: true,
+            type: 'email',
+            title: 'Send Your Application',
+            message: 'Your application has been recorded. Send your resume to:',
+            emailAddress,
+            externalLink: '',
+          })
+        } else if (applyLink) {
+          // For regular URLs
+          setModalState({
+            isOpen: true,
+            type: 'success',
+            title: 'Application Recorded!',
+            message: 'Your application has been submitted successfully. Click below to continue to the application page.',
+            emailAddress: '',
+            externalLink: applyLink,
+          })
+        } else {
+          setModalState({
+            isOpen: true,
+            type: 'success',
+            title: 'Application Recorded!',
+            message: 'Your application has been submitted successfully!',
+            emailAddress: '',
+            externalLink: '',
+          })
+        }
+      } else {
+        setModalState({
+          isOpen: true,
+          type: 'error',
+          title: 'Application Failed',
+          message: data.error || 'Failed to submit your application. Please try again.',
+          emailAddress: '',
+          externalLink: '',
+        })
+      }
+    } catch (err) {
+      console.error('Error applying:', err)
+      setModalState({
+        isOpen: true,
+        type: 'error',
+        title: 'Something Went Wrong',
+        message: 'Failed to submit your application. Please check your connection and try again.',
+        emailAddress: '',
+        externalLink: '',
+      })
     }
+  }
+
+  // Modal action handlers
+  const handleModalPrimaryAction = () => {
+    if (modalState.type === 'email') {
+      // Open email client
+      window.location.href = `mailto:${modalState.emailAddress}`
+      setModalState({ ...modalState, isOpen: false })
+    }
+  }
+
+  const handleModalSecondaryAction = async () => {
+    if (modalState.type === 'email') {
+      // Copy email to clipboard
+      try {
+        await navigator.clipboard.writeText(modalState.emailAddress)
+        setModalState({
+          isOpen: true,
+          type: 'success',
+          title: 'Email Copied!',
+          message: `${modalState.emailAddress}\n\nThe email address has been copied to your clipboard. You can now paste it in your email client.`,
+          emailAddress: '',
+          externalLink: '',
+        })
+      } catch (err) {
+        console.error('Failed to copy:', err)
+        // Fallback: show in prompt
+        prompt('Copy this email address:', modalState.emailAddress)
+        setModalState({ ...modalState, isOpen: false })
+      }
+    }
+  }
+
+  const closeModal = () => {
+    setModalState({ ...modalState, isOpen: false })
   }
 
   if (loading) {
@@ -225,6 +344,18 @@ export default function JobDetailsPage() {
           </div>
         </div>
       </main>
+
+      <JobApplicationModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        emailAddress={modalState.emailAddress}
+        externalLink={modalState.externalLink}
+        onPrimaryAction={handleModalPrimaryAction}
+        onSecondaryAction={handleModalSecondaryAction}
+      />
     </div>
   )
 }

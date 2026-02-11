@@ -18,7 +18,7 @@ export async function POST(req) {
         }
 
         const body = await req.json();
-        const { title, jobType, contractType, salaryMin, salaryMax, description, skills } = body;
+        const { title, jobType, contractType, salaryMin, salaryMax, description, skills, applicationLink } = body;
 
         // Insert into internal_jobs table (Supabase)
         const { data, error } = await supabaseAdmin
@@ -35,7 +35,8 @@ export async function POST(req) {
                 company_name: recruiterProfile.companyName,
                 company_logo: recruiterProfile.logoUrl,
                 location: recruiterProfile.location,
-                status: 'active'
+                status: 'active',
+                application_link: applicationLink || null // Save the link
             })
             .select()
             .single();

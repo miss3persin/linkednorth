@@ -75,10 +75,10 @@ export default async function JobApplicantsPage({ params }) {
     }
 
     return (
-        <div className="flex min-h-screen bg-[#F8F9FB]">
+        <div className="flex min-h-screen mt-16 bg-[#F8F9FB]">
             <Sidebar />
 
-            <main className="flex-1 p-8 mt-16 max-w-7xl mx-auto w-full">
+            <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
                 <div className="mb-8">
                     <Link href="/recruiter/hub" className="text-gray-500 hover:text-black flex items-center gap-2 text-sm mb-4">
                         <ChevronLeft size={16} /> Back to Hub

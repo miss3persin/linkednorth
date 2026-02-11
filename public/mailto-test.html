@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mailto Test</title>
+</head>
+<body>
+    <h1>Test Mailto Functionality</h1>
+    
+    <button onclick="testMailto()">Test Mailto (window.location.href)</button>
+    <button onclick="testMailtoOpen()">Test Mailto (window.open)</button>
+    <button onclick="testURL()">Test Regular URL</button>
+    
+    <script>
+        function testMailto() {
+            const email = 'mailto:examples@mail.com';
+            console.log('Testing mailto with window.location.href:', email);
+            alert('About to trigger mailto...');
+            setTimeout(() => {
+                window.location.href = email;
+            }, 100);
+        }
+        
+        function testMailtoOpen() {
+            const email = 'mailto:examples@mail.com';
+            console.log('Testing mailto with window.open:', email);
+            alert('About to trigger mailto with window.open...');
+            setTimeout(() => {
+                window.open(email, '_blank');
+            }, 100);
+        }
+        
+        function testURL() {
+            const url = 'https://google.com';
+            console.log('Testing regular URL:', url);
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>

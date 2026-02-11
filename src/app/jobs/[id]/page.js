@@ -8,6 +8,8 @@ import Sidebar from '@/app/components/layout/Sidebar'
 import { Button } from '@/app/components/ui/Button'
 import logo from '/public/linkednorth-logo.png'
 import arrow_right from '/public/chevron right.png'
+import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
+import AuthModals from '@/app/components/modals/AuthModals'
 
 const formatPostedTime = (dateString) => {
   const date = new Date(dateString)
@@ -33,17 +35,28 @@ export default function JobDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const { isSignedIn, user } = useUser()
-  
+
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [openAuthModal, setOpenAuthModal] = useState(false)
+
+  // Unified modal state
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    emailAddress: '',
+    externalLink: '',
+  })
 
   useEffect(() => {
     async function fetchJobDetails() {
       try {
         const res = await fetch(`/api/jobs/${params.id}`)
-        
+
         if (!res.ok) {
           throw new Error('Job not found')
         }
@@ -83,25 +96,159 @@ export default function JobDetailsPage() {
 
       if (!res.ok) throw new Error('Failed to save job')
 
-      alert("Job saved successfully!")
+      // Copy the shareable link
+      const jobUrl = `${window.location.origin}/jobs/${params.id}`
+      await navigator.clipboard.writeText(jobUrl)
+
+      setModalState({
+        isOpen: true,
+        type: 'success',
+        title: 'Job Saved!',
+        message: 'This job has been saved to your profile and the link has been copied to your clipboard.',
+        emailAddress: '',
+        externalLink: '',
+      })
     } catch (err) {
       console.error("Failed to save job:", err)
-      alert("Failed to save job. Please try again.")
+      setModalState({
+        isOpen: true,
+        type: 'error',
+        title: 'Failed to Save',
+        message: 'Could not save this job. Please try again.',
+        emailAddress: '',
+        externalLink: '',
+      })
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!isSignedIn) {
       alert("Please sign in to apply")
       router.push('/?redirect=/joblistings/' + params.id)
       return
     }
 
-    if (job?.applyLink) {
-      window.open(job.applyLink, '_blank')
+    if (!job) return
+
+    try {
+      // Track application in database
+      const res = await fetch('/api/applications/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          jobTitle: job.jobTitle,
+          company: job.company,
+          applyLink: job.applyLink,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        if (data.alreadyApplied) {
+          setModalState({
+            isOpen: true,
+            type: 'already_applied',
+            title: 'Already Applied',
+            message: 'You have already submitted an application for this position. Check your email for updates from the employer.',
+            emailAddress: '',
+            externalLink: '',
+          })
+          return
+        }
+
+        const applyLink = job.applyLink
+
+        // Check if it's a mailto link
+        if (applyLink && applyLink.startsWith('mailto:')) {
+          const emailAddress = applyLink.replace('mailto:', '')
+          setModalState({
+            isOpen: true,
+            type: 'email',
+            title: 'Send Your Application',
+            message: 'Your application has been recorded. Send your resume to:',
+            emailAddress,
+            externalLink: '',
+          })
+        } else if (applyLink) {
+          // For regular URLs
+          setModalState({
+            isOpen: true,
+            type: 'success',
+            title: 'Application Recorded!',
+            message: 'Your application has been submitted successfully. Click below to continue to the application page.',
+            emailAddress: '',
+            externalLink: applyLink,
+          })
+        } else {
+          setModalState({
+            isOpen: true,
+            type: 'success',
+            title: 'Application Recorded!',
+            message: 'Your application has been submitted successfully!',
+            emailAddress: '',
+            externalLink: '',
+          })
+        }
+      } else {
+        setModalState({
+          isOpen: true,
+          type: 'error',
+          title: 'Application Failed',
+          message: data.error || 'Failed to submit your application. Please try again.',
+          emailAddress: '',
+          externalLink: '',
+        })
+      }
+    } catch (err) {
+      console.error('Error applying:', err)
+      setModalState({
+        isOpen: true,
+        type: 'error',
+        title: 'Something Went Wrong',
+        message: 'Failed to submit your application. Please check your connection and try again.',
+        emailAddress: '',
+        externalLink: '',
+      })
     }
+  }
+
+  // Modal action handlers
+  const handleModalPrimaryAction = () => {
+    if (modalState.type === 'email') {
+      // Open email client
+      window.location.href = `mailto:${modalState.emailAddress}`
+      setModalState({ ...modalState, isOpen: false })
+    }
+  }
+
+  const handleModalSecondaryAction = async () => {
+    if (modalState.type === 'email') {
+      // Copy email to clipboard
+      try {
+        await navigator.clipboard.writeText(modalState.emailAddress)
+        setModalState({
+          isOpen: true,
+          type: 'success',
+          title: 'Email Copied!',
+          message: `${modalState.emailAddress}\n\nThe email address has been copied to your clipboard. You can now paste it in your email client.`,
+          emailAddress: '',
+          externalLink: '',
+        })
+      } catch (err) {
+        console.error('Failed to copy:', err)
+        // Fallback: show in prompt
+        prompt('Copy this email address:', modalState.emailAddress)
+        setModalState({ ...modalState, isOpen: false })
+      }
+    }
+  }
+
+  const closeModal = () => {
+    setModalState({ ...modalState, isOpen: false })
   }
 
   if (loading) {
@@ -154,14 +301,14 @@ export default function JobDetailsPage() {
         <div className="bg-white border rounded-lg p-6 mb-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
-              <Image 
-                src={job.imageSrc || logo} 
-                alt="Company Logo" 
-                fill 
-                className="object-contain p-1" 
+              <Image
+                src={job.imageSrc || logo}
+                alt="Company Logo"
+                fill
+                className="object-contain p-1"
               />
             </div>
-            
+
             <div className="flex-1">
               <h1 className="text-3xl font-bold mb-2">{job.jobTitle}</h1>
               <p className="text-lg text-gray-700 mb-1">{job.company}</p>
@@ -194,7 +341,7 @@ export default function JobDetailsPage() {
               Apply Now
               <Image src={arrow_right} alt="arrow" width={20} height={20} />
             </button>
-            
+
             <button
               onClick={handleSaveJob}
               disabled={isSaving}
@@ -246,6 +393,18 @@ export default function JobDetailsPage() {
           </div>
         </div>
       </main>
+
+      <JobApplicationModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        emailAddress={modalState.emailAddress}
+        externalLink={modalState.externalLink}
+        onPrimaryAction={handleModalPrimaryAction}
+        onSecondaryAction={handleModalSecondaryAction}
+      />
     </div>
   )
 }
