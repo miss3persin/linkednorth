@@ -33,7 +33,7 @@ export default function JobDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const { isSignedIn, user } = useUser()
-  
+
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -180,13 +180,19 @@ export default function JobDetailsPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <button onClick={handleApply} className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded font-medium hover:bg-gray-800 transition flex items-center justify-center gap-1 sm:gap-2 w-full sm:w-auto">
-              Apply Now
-              <Image src={arrow_right} alt="arrow" width={20} height={20} />
-            </button>
-            <button onClick={handleSaveJob} disabled={isSaving} className="border border-gray-300 px-4 sm:px-6 py-2 sm:py-3 rounded font-medium hover:bg-gray-50 transition disabled:opacity-50 w-full sm:w-auto">
-              {isSaving ? 'Saving...' : 'Save Job'}
-            </button>
+            <Button
+              text="Apply Now"
+              img={arrow_right}
+              onClick={handleApply}
+              variant="black"
+              className="font-medium"
+            />
+            <Button
+              text={isSaving ? 'Saving...' : 'Save Job'}
+              onClick={handleSaveJob}
+              variant="white"
+              className="font-medium"
+            />
           </div>
         </div>
 

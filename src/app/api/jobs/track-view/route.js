@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { upsertUser } from '@/services/userService'
+import { trackJobView } from '@/services/activityService'
 
 export async function POST(req) {
   try {
     const { userId: authUserId } = await auth()
-    
+
     if (!authUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -17,31 +18,21 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Ensure user exists in Supabase (create if not)
+    // Ensure user exists in Supabase
     const user = await currentUser()
     if (user) {
-      await supabaseAdmin
-        .from('users')
-        .upsert({
-          id: user.id,
-          email: user.emailAddresses[0]?.emailAddress,
-          first_name: user.firstName,
-          last_name: user.lastName,
-        }, { onConflict: 'id' })
+      await upsertUser({
+        id: user.id,
+        email: user.emailAddresses[0]?.emailAddress,
+        first_name: user.firstName,
+        last_name: user.lastName,
+      })
     }
 
     // Insert job view
-    const { error } = await supabaseAdmin
-      .from('job_views')
-      .insert({
-        user_id: userId,
-        job_id: jobId,
-        job_title: jobTitle,
-        company: company,
-      })
+    const result = await trackJobView(userId, jobId, jobTitle, company)
 
-    if (error) {
-      console.error('Error tracking view:', error)
+    if (!result.success) {
       return NextResponse.json({ error: 'Failed to track view' }, { status: 500 })
     }
 

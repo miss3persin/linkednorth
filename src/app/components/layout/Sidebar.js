@@ -2,28 +2,43 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 
 // Icons
-import { HiOutlineSquares2X2 } from "react-icons/hi2";
 import {
-  FiBriefcase,
-  FiFolder,
-  FiFileText,
-  FiStar,
-  FiLogOut,
-} from "react-icons/fi";
+  LayoutDashboard,
+  Briefcase,
+  Folder,
+  FileText,
+  Star,
+  LogOut,
+  Building2
+} from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function Sidebar() {
   const path = usePathname();
+  const { user } = useUser();
+  const isRecruiter = !!user?.publicMetadata?.isRecruiter;
 
   const items = [
-    { href: "/dashboard", label: "Dashboard", icon: <HiOutlineSquares2X2 size={18} /> },
-    { href: "/joblistings", label: "Jobs Listings", icon: <FiBriefcase size={18} /> },
-    { href: "/library", label: "Library", icon: <FiFolder size={18} /> },
-    { href: "/resumebuilder", label: "Resume Builder", icon: <FiFileText size={18} /> },
-    { href: "/premium", label: "Premium Features", icon: <FiStar size={18} /> },
+    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+    { href: "/joblistings", label: "Jobs Listings", icon: <Briefcase size={18} /> },
   ];
+
+  if (isRecruiter) {
+    items.push({
+      href: "/recruiter/hub",
+      label: "Recruiter Hub",
+      icon: <Building2 size={18} />
+    });
+  }
+
+  items.push(
+    { href: "/library", label: "Library", icon: <Folder size={18} /> },
+    { href: "/resumebuilder", label: "Resume Builder", icon: <FileText size={18} /> },
+    { href: "/premium", label: "Premium Features", icon: <Star size={18} /> },
+  );
 
   return (
     <aside
@@ -68,7 +83,7 @@ export default function Sidebar() {
             title="Logout"
             className="flex items-center gap-3 text-sm text-gray-600 hover:text-black w-full"
           >
-            <FiLogOut size={18} />
+            <LogOut size={18} />
             <span className="hidden xl:inline">Logout</span>
           </button>
         </SignOutButton>

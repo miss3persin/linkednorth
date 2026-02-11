@@ -1,36 +1,16 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { getJobById } from '@/services/jobService'
 
 export async function GET(req, { params }) {
   try {
     const { id } = await params
+    const job = await getJobById(id)
 
-    // First, try to fetch from Supabase cache
-    const { data: cachedJob, error } = await supabaseAdmin
-      .from('jobs_cache')
-      .select('*')
-      .eq('external_id', id)
-      .single()
-
-    if (cachedJob && !error) {
-      return NextResponse.json({ 
-        job: {
-          id: cachedJob.external_id,
-          jobTitle: cachedJob.title,
-          company: cachedJob.company,
-          location: cachedJob.location,
-          description: cachedJob.description,
-          postedTime: cachedJob.created_at,
-          jobType: cachedJob.job_type,
-          contractType: cachedJob.contract_type,
-          applyLink: cachedJob.apply_link,
-          imageSrc: cachedJob.image_url,
-          skills: cachedJob.skills || [],
-        }
-      })
+    if (job) {
+      return NextResponse.json({ job })
     }
 
-    // If not cached, return error (jobs should be cached when viewed)
+    // If not cached, return error
     return NextResponse.json(
       { error: 'Job not found. Please search for this job again.' },
       { status: 404 }

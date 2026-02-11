@@ -4,7 +4,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { FiEye, FiCalendar, FiBriefcase } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
-import { getUserActivity } from "../lib/activity";
+import { getUserActivity } from "@/services/activityService";
+import { Button } from "../components/ui/Button";
 
 export default async function Dashboard() {
   const user = await currentUser();
@@ -111,9 +112,11 @@ export default async function Dashboard() {
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4">
             <h3 className="font-semibold text-lg">Notifications</h3>
-            <button className="text-sm text-blue-600 hover:underline">
-              Mark all as read
-            </button>
+            <Button
+              text="Mark all as read"
+              variant="ghost"
+              className="text-sm font-normal"
+            />
           </div>
 
           {notifications.length === 0 ? (

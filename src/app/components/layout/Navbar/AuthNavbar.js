@@ -7,10 +7,19 @@ import { FiBell, FiMessageSquare } from "react-icons/fi";
 import { HiMenu, HiX } from "react-icons/hi";
 import logo from '/public/linkednorth-logo.png';
 
+import AuthModals from '@/app/components/modals/AuthModals'
+import RecruiterModal from '@/app/components/modals/RecruiterModal'
+
+import { useUser } from "@clerk/nextjs";
+
 export default function AuthNavbar({ userData }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [recruiterModalOpen, setRecruiterModalOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
+
+  const { user } = useUser();
+  const isRecruiter = !!user?.publicMetadata?.isRecruiter;
 
   useEffect(() => {
     async function fetchCounts() {
@@ -30,6 +39,14 @@ export default function AuthNavbar({ userData }) {
     const interval = setInterval(fetchCounts, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const handlePostJobClick = () => {
+    if (isRecruiter) {
+      window.location.href = '/recruiter/post-job';
+    } else {
+      setRecruiterModalOpen(true);
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
@@ -81,9 +98,12 @@ export default function AuthNavbar({ userData }) {
               className="h-8 w-8 rounded-full object-cover border-2 border-transparent hover:border-gray-300"
             />
           </Link>
-          <Link href="/post-job" className="px-3 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+          <button
+            onClick={handlePostJobClick}
+            className="px-3 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+          >
             Post A Job
-          </Link>
+          </button>
         </div>
 
         {/* Mobile Hamburger */}
@@ -139,9 +159,15 @@ export default function AuthNavbar({ userData }) {
               Messages {messageCount > 0 && `(${messageCount})`}
             </Link>
 
-            <Link href="/post-job" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                handlePostJobClick();
+              }}
+              className="text-base hover:text-black font-medium"
+            >
               Post A Job
-            </Link>
+            </button>
 
             <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
               <img
@@ -153,6 +179,7 @@ export default function AuthNavbar({ userData }) {
           </div>
         </div>
       )}
+      <RecruiterModal open={recruiterModalOpen} setOpen={setRecruiterModalOpen} />
     </nav>
   );
 }

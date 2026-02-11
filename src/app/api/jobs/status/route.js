@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
 
 export async function PATCH(req) {
   try {

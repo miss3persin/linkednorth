@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
 
 export async function POST(req) {
   try {
@@ -26,9 +26,9 @@ export async function POST(req) {
     // Insert or update jobs in cache
     const { error } = await supabaseAdmin
       .from('jobs_cache')
-      .upsert(jobsToCache, { 
+      .upsert(jobsToCache, {
         onConflict: 'external_id',
-        ignoreDuplicates: false 
+        ignoreDuplicates: false
       })
 
     if (error) {

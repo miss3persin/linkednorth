@@ -16,7 +16,7 @@ const openSans = Open_Sans({ subsets: ['latin'] })
 export default function PublicNavbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  
+
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -60,8 +60,8 @@ export default function PublicNavbar() {
               <Button
                 text="Post A Job"
                 img=""
-                link="/post-job"
                 variant="white"
+                onClick={handleOpenAuthModal}
               />
               <Button
                 text="Login/SignUp"
@@ -104,9 +104,8 @@ export default function PublicNavbar() {
               <Button
                 text="Post A Job"
                 img=""
-                link="/post-job"
                 variant="white"
-                onClick={() => setMenuOpen(false)}
+                onClick={handleOpenAuthModal}
               />
               <Button
                 text="Login/SignUp"

@@ -1,6 +1,6 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { createUser, updateUser, deleteUser } from '@/services/userService'
 
 export async function POST(req) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
@@ -47,59 +47,34 @@ export async function POST(req) {
   // Handle the webhook
   const eventType = evt.type
 
-  if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-
-    // Insert user into Supabase
-    const { error } = await supabaseAdmin
-      .from('users')
-      .insert({
-        id: id,
+  try {
+    if (eventType === 'user.created') {
+      const { id, email_addresses, first_name, last_name } = evt.data
+      await createUser({
+        id,
         email: email_addresses[0].email_address,
-        first_name: first_name,
-        last_name: last_name,
+        first_name,
+        last_name,
       })
-
-    if (error) {
-      console.error('Error creating user in Supabase:', error)
-      return new Response('Error creating user', { status: 500 })
     }
-  }
 
-  if (eventType === 'user.updated') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-
-    // Update user in Supabase
-    const { error } = await supabaseAdmin
-      .from('users')
-      .update({
+    if (eventType === 'user.updated') {
+      const { id, email_addresses, first_name, last_name } = evt.data
+      await updateUser(id, {
         email: email_addresses[0].email_address,
-        first_name: first_name,
-        last_name: last_name,
-        updated_at: new Date().toISOString(),
+        first_name,
+        last_name,
       })
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error updating user in Supabase:', error)
-      return new Response('Error updating user', { status: 500 })
     }
-  }
 
-  if (eventType === 'user.deleted') {
-    const { id } = evt.data
-
-    // Delete user from Supabase
-    const { error } = await supabaseAdmin
-      .from('users')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting user in Supabase:', error)
-      return new Response('Error deleting user', { status: 500 })
+    if (eventType === 'user.deleted') {
+      const { id } = evt.data
+      await deleteUser(id)
     }
-  }
 
-  return new Response('Webhook processed successfully', { status: 200 })
+    return new Response('Webhook processed successfully', { status: 200 })
+  } catch (error) {
+    console.error(`Error handling ${eventType}:`, error)
+    return new Response('Error processing webhook', { status: 500 })
+  }
 }

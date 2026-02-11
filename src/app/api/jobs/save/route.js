@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { supabaseAdmin } from '../../../lib/supabase'
+import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
 
 export async function POST(req) {
   try {
@@ -57,7 +57,7 @@ export async function POST(req) {
           imageSrc,
         },
       },
-          {
+        {
           onConflict: 'job_id,user_id',
         })
 
