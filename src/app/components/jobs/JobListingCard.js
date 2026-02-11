@@ -116,12 +116,20 @@ export const JobListingCard = ({
       const data = await res.json()
 
       if (data.success) {
-        // Open the external apply link
+        if (data.alreadyApplied) {
+          alert('You have already applied for this job!');
+          return;
+        }
+
+        // Success feedback
+        alert('Application submitted successfully!');
+
+        // Open the external apply link if it exists
         if (applyLink) {
           window.open(applyLink, '_blank')
         }
       } else {
-        alert('Failed to track application. Please try again.')
+        alert(data.error || 'Failed to track application. Please try again.')
       }
     } catch (err) {
       console.error('Error applying:', err)
@@ -225,10 +233,11 @@ export const JobListingCard = ({
           img={arrow_right}
           variant="black"
           onClick={(e) => {
-            e.preventDefault()
-            requireAuth(() => {
-              if (applyLink) window.open(applyLink, "_blank")
-            })
+            e.preventDefault();
+            const applyAction = async () => {
+              await handleApply();
+            };
+            requireAuth(applyAction);
           }}
         />
 
