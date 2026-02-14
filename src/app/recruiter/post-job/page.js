@@ -216,7 +216,7 @@ export default function PostJobPage() {
                                 name="applicationLink"
                                 value={formData.applicationLink || ''}
                                 onChange={handleChange}
-                                placeholder="e.g. example.com/apply or hr@company.com"
+                                placeholder="Application link or email (e.g. example.com/apply or hr@company.com)"
                                 className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all"
                             />
                             <p className="text-xs text-gray-400 mt-1">Enter a URL or email address. Candidates will be directed here when they click "Apply Now".</p>
