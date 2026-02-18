@@ -1,226 +1,301 @@
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+
+const ACCENT = '#5c6bc0'; // subtle professional color
+const SECTION_BG = '#f4f5fa'; // light panel for right column sections
+const TEXT_MAIN = '#111';
+const TEXT_MUTED = '#555';
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontFamily: 'Helvetica',
+    fontSize: 11,
+    color: TEXT_MAIN,
+    lineHeight: 1.5,
+  },
+
+  /* ---------- HEADER ---------- */
+  header: {
+    marginBottom: 28, // slightly more space between name & contacts
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingBottom: 14,
+  },
+  name: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+    color: ACCENT,
+  },
+  contactRow: {
+    marginTop: 14,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  contactItem: {
+    fontSize: 10,
+    color: TEXT_MUTED,
+    marginRight: 14,
+    marginBottom: 4,
+  },
+
+  /* ---------- LAYOUT ---------- */
+  body: {
+    flexDirection: 'row',
+  },
+  leftColumn: {
+    width: '65%',
+    paddingRight: 18,
+  },
+  rightColumn: {
+    width: '35%',
+    paddingLeft: 18,
+    borderLeftWidth: 1,
+    borderLeftColor: '#eee',
+  },
+
+  /* ---------- SECTIONS ---------- */
+  section: {
+    marginBottom: 18,
+  },
+  sectionTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    color: ACCENT,
+    marginBottom: 6,
+  },
+  sectionPanel: {
+    backgroundColor: SECTION_BG,
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+
+  /* ---------- ITEMS ---------- */
+  item: {
+    marginBottom: 10,
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  itemTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: TEXT_MAIN,
+  },
+  itemSubTitle: {
+    fontSize: 10,
+    color: TEXT_MUTED,
+  },
+  date: {
+    fontSize: 9,
+    color: '#777',
+  },
+  description: {
+    marginTop: 4,
+    fontSize: 10,
+    color: TEXT_MAIN,
+  },
+
+  /* ---------- LIST / META ---------- */
+  metaText: {
+    fontSize: 10,
+    marginBottom: 4,
+  },
+  label: {
+    fontWeight: 'bold',
+  },
+});
+
 export default function ProfessionalTemplate({ resumeData }) {
   const {
     personal,
     summary,
     experience,
     education,
-    skills,
+    skills = {},
     projects,
     certifications,
     languages,
     awards,
     interests,
-  } = resumeData
+  } = resumeData;
 
-  const normalizedSkills = {
-    technical: Array.isArray(skills?.technical)
-      ? skills.technical
-      : [],
-    soft: Array.isArray(skills?.soft)
-      ? skills.soft
-      : [],
-  }
+  const normalizeArray = (arr, key) => {
+    if (!arr) return [];
+    if (Array.isArray(arr))
+      return arr.map(item =>
+        typeof item === 'string' ? item : key ? item[key] : ''
+      );
+    if (typeof arr === 'string')
+      return arr.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+  };
 
-  const normalizedInterests = Array.isArray(interests)
-    ? interests
-    : typeof interests === 'string'
-      ? interests.split(',').map(i => i.trim()).filter(Boolean)
-      : []
-
-
+  const technicalSkills = normalizeArray(skills.technical);
+  const softSkills = normalizeArray(skills.soft);
+  const normalizedInterests = normalizeArray(interests);
 
   return (
-    <div className="bg-white text-gray-900 text-[13px] leading-relaxed p-10 max-w-[800px] mx-auto font-sans">
+    <Document>
+      <Page size="A4" style={styles.page}>
 
-      {/* ================= HEADER ================= */}
-      <header className="border-b border-gray-300 pb-4 mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {personal.fullName}
-        </h1>
+        {/* ===== HEADER ===== */}
+        <View style={styles.header}>
+          <Text style={styles.name}>{personal.fullName}</Text>
+          <View style={styles.contactRow}>
+            {personal.email && <Text style={styles.contactItem}>{personal.email}</Text>}
+            {personal.phone && <Text style={styles.contactItem}>{personal.phone}</Text>}
+            {personal.location && <Text style={styles.contactItem}>{personal.location}</Text>}
+            {personal.linkedin && <Text style={styles.contactItem}>{personal.linkedin}</Text>}
+            {personal.github && <Text style={styles.contactItem}>{personal.github}</Text>}
+            {personal.website && <Text style={styles.contactItem}>{personal.website}</Text>}
+          </View>
+        </View>
 
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-gray-600 text-sm">
-          {personal.email && <span>{personal.email}</span>}
-          {personal.phone && <span>{personal.phone}</span>}
-          {personal.location && <span>{personal.location}</span>}
-          {personal.linkedin && <span>{personal.linkedin}</span>}
-          {personal.github && <span>{personal.github}</span>}
-          {personal.website && <span>{personal.website}</span>}
-        </div>
-      </header>
+        {/* ===== BODY ===== */}
+        <View style={styles.body}>
 
-      {/* ================= SUMMARY ================= */}
-      {summary && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-2">
-            Professional Summary
-          </h2>
-          <p className="text-gray-800">{summary}</p>
-        </section>
-      )}
-
-      {/* ================= EXPERIENCE ================= */}
-      {experience?.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Experience
-          </h2>
-
-          {experience.map((job, i) => (
-            <div key={i} className="mb-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-sm">
-                    {job.role}
-                  </h3>
-                  <p className="text-gray-600">
-                    {job.company}
-                    {job.location && ` • ${job.location}`}
-                  </p>
-                </div>
-
-                <p className="text-xs text-gray-500 whitespace-nowrap">
-                  {job.startDate} – {job.endDate || 'Present'}
-                </p>
-              </div>
-
-              {job.description && (
-                <p className="mt-1 text-gray-800">
-                  {job.description}
-                </p>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* ================= EDUCATION ================= */}
-      {education?.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Education
-          </h2>
-
-          {education.map((edu, i) => (
-            <div key={i} className="mb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-sm">
-                    {edu.degree}
-                    {edu.field && `, ${edu.field}`}
-                  </h3>
-                  <p className="text-gray-600">{edu.school}</p>
-                </div>
-
-                <p className="text-xs text-gray-500 whitespace-nowrap">
-                  {edu.startDate} – {edu.endDate}
-                </p>
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* ================= SKILLS ================= */}
-      {(normalizedSkills.technical.length > 0 ||
-        normalizedSkills.soft.length > 0) && (
-          <section className="mb-6">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-              Skills
-            </h2>
-
-            {normalizedSkills.technical.length > 0 && (
-              <p className="mb-1">
-                <span className="font-semibold">Technical:</span>{' '}
-                {normalizedSkills.technical.join(', ')}
-              </p>
+          {/* ===== LEFT COLUMN ===== */}
+          <View style={styles.leftColumn}>
+            {summary && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Professional Summary</Text>
+                <Text>{summary}</Text>
+              </View>
             )}
 
-            {normalizedSkills.soft.length > 0 && (
-              <p>
-                <span className="font-semibold">Soft:</span>{' '}
-                {normalizedSkills.soft.join(', ')}
-              </p>
+            {experience?.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Experience</Text>
+                {experience.map((job, i) => (
+                  <View key={i} style={styles.item}>
+                    <View style={styles.itemHeader}>
+                      <View>
+                        <Text style={styles.itemTitle}>{job.role}</Text>
+                        <Text style={styles.itemSubTitle}>
+                          {job.company}
+                          {job.location ? ` • ${job.location}` : ''}
+                        </Text>
+                      </View>
+                      <Text style={styles.date}>
+                        {job.startDate} – {job.endDate || 'Present'}
+                      </Text>
+                    </View>
+                    {job.description && (
+                      <Text style={styles.description}>{job.description}</Text>
+                    )}
+                  </View>
+                ))}
+              </View>
             )}
-          </section>
-        )}
 
+            {projects?.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Projects</Text>
+                {projects.map((project, i) => (
+                  <View key={i} style={styles.item}>
+                    <Text style={styles.itemTitle}>
+                      {project.name}
+                      {project.link ? ` • ${project.link}` : ''}
+                    </Text>
+                    <Text style={styles.description}>{project.description}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
 
-      {/* ================= PROJECTS ================= */}
-      {projects?.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Projects
-          </h2>
+            {education?.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Education</Text>
+                {education.map((edu, i) => (
+                  <View key={i} style={styles.item}>
+                    <View style={styles.itemHeader}>
+                      <View>
+                        <Text style={styles.itemTitle}>
+                          {edu.degree}
+                          {edu.field ? `, ${edu.field}` : ''}
+                        </Text>
+                        <Text style={styles.itemSubTitle}>{edu.school}</Text>
+                      </View>
+                      <Text style={styles.date}>
+                        {edu.startDate} – {edu.endDate}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
 
-          {projects.map((project, i) => (
-            <div key={i} className="mb-3">
-              <h3 className="font-semibold text-sm">
-                {project.name}
-                {project.link && (
-                  <span className="text-gray-500 font-normal">
-                    {' '}• {project.link}
-                  </span>
+          {/* ===== RIGHT COLUMN ===== */}
+          <View style={styles.rightColumn}>
+            {(technicalSkills.length > 0 || softSkills.length > 0) && (
+              <View style={[styles.section, styles.sectionPanel]}>
+                <Text style={styles.sectionTitle}>Skills</Text>
+                {technicalSkills.length > 0 && (
+                  <Text style={styles.metaText}>
+                    <Text style={styles.label}>Technical: </Text>
+                    {technicalSkills.join(', ')}
+                  </Text>
                 )}
-              </h3>
-              <p className="text-gray-800">{project.description}</p>
-            </div>
-          ))}
-        </section>
-      )}
+                {softSkills.length > 0 && (
+                  <Text style={styles.metaText}>
+                    <Text style={styles.label}>Soft: </Text>
+                    {softSkills.join(', ')}
+                  </Text>
+                )}
+              </View>
+            )}
 
-      {/* ================= CERTIFICATIONS ================= */}
-      {certifications?.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Certifications
-          </h2>
+            {certifications?.length > 0 && (
+              <View style={[styles.section, styles.sectionPanel]}>
+                <Text style={styles.sectionTitle}>Certifications</Text>
+                {certifications.map((cert, i) => (
+                  <Text key={i} style={styles.metaText}>
+                    {cert.name} — {cert.issuer} ({cert.year})
+                  </Text>
+                ))}
+              </View>
+            )}
 
-          {certifications.map((cert, i) => (
-            <p key={i}>
-              {cert.name} — {cert.issuer} ({cert.year})
-            </p>
-          ))}
-        </section>
-      )}
+            {languages?.length > 0 && (
+              <View style={[styles.section, styles.sectionPanel]}>
+                <Text style={styles.sectionTitle}>Languages</Text>
+                {languages.map((lang, i) => (
+                  <Text key={i} style={styles.metaText}>
+                    {lang.name} ({lang.proficiency})
+                  </Text>
+                ))}
+              </View>
+            )}
 
-      {/* ================= LANGUAGES ================= */}
-      {languages?.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Languages
-          </h2>
+            {awards?.length > 0 && (
+              <View style={[styles.section, styles.sectionPanel]}>
+                <Text style={styles.sectionTitle}>Awards</Text>
+                {awards.map((award, i) => (
+                  <Text key={i} style={styles.metaText}>
+                    {award.title} — {award.issuer} ({award.year})
+                  </Text>
+                ))}
+              </View>
+            )}
 
-          <p>
-            {languages.map(l => `${l.name} (${l.proficiency})`).join(', ')}
-          </p>
-        </section>
-      )}
+            {normalizedInterests.length > 0 && (
+              <View style={[styles.section, styles.sectionPanel]}>
+                <Text style={styles.sectionTitle}>Interests</Text>
+                <Text style={styles.metaText}>
+                  {normalizedInterests.join(', ')}
+                </Text>
+              </View>
+            )}
+          </View>
 
-      {/* ================= AWARDS ================= */}
-      {awards?.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Awards
-          </h2>
-
-          {awards.map((award, i) => (
-            <p key={i}>
-              {award.title} — {award.issuer} ({award.year})
-            </p>
-          ))}
-        </section>
-      )}
-
-      {/* ================= INTERESTS ================= */}
-      {normalizedInterests.length > 0 && (
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-700 mb-3">
-            Interests
-          </h2>
-          <p>{normalizedInterests.join(', ')}</p>
-        </section>
-      )}
-
-    </div>
-  )
+        </View>
+      </Page>
+    </Document>
+  );
 }

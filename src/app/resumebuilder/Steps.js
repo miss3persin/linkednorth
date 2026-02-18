@@ -1,4 +1,4 @@
-export default function Steps({ step }) {
+export default function Steps({ step, onStepChange }) {
   const labels = [
     'Template',
     'Details',
@@ -7,13 +7,20 @@ export default function Steps({ step }) {
     'Download',
   ]
 
+  const handleStepClick = (num) => {
+    if (num <= step) {
+      onStepChange(num);
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-6">
       <div className="flex items-center gap-2">
-        {[1,2,3,4,5].map((num) => (
+        {[1, 2, 3, 4, 5].map((num) => (
           <div
             key={num}
-            className={`h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded-full border ${
+            onClick={() => handleStepClick(num)}
+            className={`h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded-full border cursor-pointer ${
               num === step
                 ? 'bg-gray-900 text-white'
                 : 'border-gray-300 text-gray-500'

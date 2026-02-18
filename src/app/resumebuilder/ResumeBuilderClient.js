@@ -10,6 +10,7 @@ import ResumePreview from '../components/resume/ResumePreview'
 import Steps from './Steps.js'
 import ActionButtons from '../resumebuilder/ActionButtons'
 import DownloadPDFButton from './DownloadPDFButton'
+import { PDFViewer } from '@react-pdf/renderer'
 
 
 
@@ -18,7 +19,9 @@ export default function ResumeBuilderClient() {
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [resumeData, setResumeData] = useState(emptyResume)
   const TOTAL_STEPS = 5
-
+  const handleStepChange = (num) => {
+    setStep(num);
+  };
 
   return (
     <div className="mt-6 w-full">
@@ -26,7 +29,7 @@ export default function ResumeBuilderClient() {
       <ImportSection />
 
       {/* Steps */}
-      <Steps step={step} />
+      <Steps step={step} onStepChange={handleStepChange} />
 
       {/* Step Content */}
       {step === 1 && (
@@ -38,8 +41,8 @@ export default function ResumeBuilderClient() {
           <TemplatesGrid
             templates={templates}
             onSelect={(tpl) => {
-              setSelectedTemplate(tpl)
-              setStep(2)
+              setSelectedTemplate(tpl);
+              setStep(2); // Move to the next step after selecting a template
             }}
           />
         </>
@@ -53,10 +56,16 @@ export default function ResumeBuilderClient() {
       )}
 
       {step === 3 && selectedTemplate && (
-        <ResumePreview
-          template={selectedTemplate}
-          resumeData={resumeData}
-        />
+        <div className="mt-6">
+          <h2 className="font-semibold mb-2">Preview Your Resume</h2>
+          <p className="text-gray-500 mb-4">
+            This is how your resume will look.
+          </p>
+
+          <PDFViewer style={{ width: '100%', height: '500px' }}>
+            <selectedTemplate.pdfComponent resumeData={resumeData} />
+          </PDFViewer>
+        </div>
       )}
 
       {step === 4 && (
