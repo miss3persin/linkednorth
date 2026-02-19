@@ -14,8 +14,8 @@ import overlay from '/public/Overlay.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
 import { useUser } from "@clerk/nextjs"
-import JobApplicationModal from '../modals/JobApplicationModal'
-import AuthModals from '../modals/AuthModals'
+import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
+import AuthModals from '@/app/components/modals/AuthModals'
 
 export const dynamic = "force-dynamic";
 
@@ -176,11 +176,10 @@ export default function JobsPage() {
   const totalPages = Math.min(Math.ceil(totalJobs / JOBS_PER_PAGE), MAX_PAGES)
 
   return (
-    <div className="min-h-screen flex bg-white mt-[72px]">
+    <div className="jobs-page min-h-screen flex bg-white mt-[72px]">
       <Sidebar />
 
       <main className="flex-1 flex flex-col">
-        {/* === Hero Section === */}
         <section className="relative bg-gray-50 w-full py-10 sm:py-8">
           <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none opacity-70 sm:opacity-50">
             <Image src={overlay} alt="overlay" className="w-auto h-full object-fill" priority />
@@ -200,8 +199,6 @@ export default function JobsPage() {
             </div>
           </div>
         </section>
-
-        {/* === Job Listings === */}
         <div className="flex-1 max-w-6xl mx-auto px-6 sm:px-12 xl:px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
@@ -266,8 +263,6 @@ export default function JobsPage() {
               )}
             </div>
           </div>
-
-          {/* Sidebar details panel */}
           {selectedJob && (
             <div
               className="lg:hidden fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm flex items-center justify-center p-4"

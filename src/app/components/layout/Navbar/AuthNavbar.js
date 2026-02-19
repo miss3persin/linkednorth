@@ -65,8 +65,7 @@ export default function AuthNavbar({ userData }) {
 
   return (
     <nav className={`${openSans.className} fixed top-0 left-0 w-full bg-white shadow-sm z-50`}>
-      <div className="flex items-center justify-between px-8 sm:px-16 xl:px-[10%] py-4">
-        {/* Logo - Left */}
+      <div className="flex items-center justify-between px-8 sm:px-16 xl:px-[6%] py-4">
         <div className="relative h-10 w-[150px] flex-shrink-0 flex items-center">
           <Link href="/">
             <Image
@@ -78,8 +77,6 @@ export default function AuthNavbar({ userData }) {
             />
           </Link>
         </div>
-
-        {/* NavLinks - Centered */}
         <div className="hidden lg:flex flex-1 justify-center">
           <div className="flex items-center gap-6 xl:gap-8 text-[13px]">
             <Link
@@ -108,8 +105,6 @@ export default function AuthNavbar({ userData }) {
             </Link>
           </div>
         </div>
-
-        {/* Desktop Right Section - Right */}
         <div className="hidden lg:flex items-center gap-8 ml-8">
           <div className="flex items-center gap-6">
             <Link
@@ -119,7 +114,7 @@ export default function AuthNavbar({ userData }) {
             >
               <FiBell size={20} />
               {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full font-semibold font-[7px]">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full font-semibold text-[8px]">
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
               )}
@@ -131,7 +126,7 @@ export default function AuthNavbar({ userData }) {
             >
               <FiMessageSquare size={18} />
               {messageCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full font-semibold font-[7px]">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full font-semibold text-8px]">
                   {messageCount > 9 ? '9+' : messageCount}
                 </span>
               )}
@@ -151,8 +146,6 @@ export default function AuthNavbar({ userData }) {
             Post A Job
           </button>
         </div>
-
-        {/* Mobile Hamburger */}
         <button
           className="lg:hidden text-2xl focus:outline-none"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -160,12 +153,8 @@ export default function AuthNavbar({ userData }) {
           {menuOpen ? <HiX /> : <HiMenu />}
         </button>
       </div>
-
-      {/* Mobile Menu */}
       {menuOpen && (
         <div className="lg:hidden fixed top-0 left-0 w-full h-screen bg-white z-40 flex flex-col">
-
-          {/* Mobile Header (Logo + Close) */}
           <div className="flex items-center justify-between px-8 sm:px-16 py-4 border-b">
             <div className="relative h-10 w-[150px] flex items-center justify-center">
               <Link href="/" onClick={() => setMenuOpen(false)}>
@@ -186,8 +175,6 @@ export default function AuthNavbar({ userData }) {
               <HiX />
             </button>
           </div>
-
-          {/* Mobile Links */}
           <div className="flex flex-col items-center justify-center gap-6 flex-1 px-6">
             <Link href="/" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Home</Link>
             <Link href="/joblistings" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Job Listings</Link>

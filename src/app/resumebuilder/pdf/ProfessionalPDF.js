@@ -64,7 +64,6 @@ export default function ProfessionalPDF({ resumeData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* HEADER */}
         <View style={styles.header}>
           <Text style={styles.name}>{personal.fullName}</Text>
           <View style={styles.contactRow}>
@@ -76,16 +75,12 @@ export default function ProfessionalPDF({ resumeData }) {
             {personal.website && <Text style={styles.contactItem}>{personal.website}</Text>}
           </View>
         </View>
-
-        {/* SUMMARY */}
         {summary && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Professional Summary</Text>
             <Text>{summary}</Text>
           </View>
         )}
-
-        {/* EXPERIENCE */}
         {experience?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Experience</Text>
@@ -106,8 +101,6 @@ export default function ProfessionalPDF({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* EDUCATION */}
         {education?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Education</Text>
@@ -124,8 +117,6 @@ export default function ProfessionalPDF({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* SKILLS */}
         {(technicalSkills.length > 0 || softSkills.length > 0) && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
@@ -133,8 +124,6 @@ export default function ProfessionalPDF({ resumeData }) {
             {softSkills.length > 0 && <Text style={styles.skillLine}><Text style={styles.skillLabel}>Soft: </Text>{softSkills.join(', ')}</Text>}
           </View>
         )}
-
-        {/* PROJECTS */}
         {projects?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Projects</Text>
@@ -146,32 +135,24 @@ export default function ProfessionalPDF({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* CERTIFICATIONS */}
         {normalizedCertifications.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Certifications</Text>
             {normalizedCertifications.map((c, i) => <Text key={i}>{c}</Text>)}
           </View>
         )}
-
-        {/* LANGUAGES */}
         {normalizedLanguages.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Languages</Text>
             <Text>{normalizedLanguages.join(', ')}</Text>
           </View>
         )}
-
-        {/* AWARDS */}
         {normalizedAwards.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Awards</Text>
             {normalizedAwards.map((a, i) => <Text key={i}>{a}</Text>)}
           </View>
         )}
-
-        {/* INTERESTS */}
         {normalizedInterests.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Interests</Text>

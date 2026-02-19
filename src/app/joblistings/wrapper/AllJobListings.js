@@ -172,7 +172,6 @@ export default function JobsPage() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col">
-        {/* === Hero Section === */}
         <section className="relative bg-gray-50 w-full py-8 sm:py-6">
           <div className="absolute right-0 bottom-0 h-full pointer-events-none opacity-40 sm:opacity-50">
             <Image
@@ -197,8 +196,6 @@ export default function JobsPage() {
             </div>
           </div>
         </section>
-
-        {/* === Job Listings === */}
         <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 xl:px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
@@ -263,8 +260,6 @@ export default function JobsPage() {
               )}
             </div>
           </div>
-
-          {/* Sidebar details panel */}
           {selectedJob && (
             <div
               className="lg:hidden fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm flex items-center justify-center p-4"

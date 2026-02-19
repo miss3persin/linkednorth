@@ -4,6 +4,13 @@ import Sidebar from '@/app/components/layout/Sidebar';
 import { X, ChevronDown, ChevronRight, Plus, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { Loader } from '@/app/components/ui/Loader';
+import {
+    validateTextField,
+    validateSalaryValue,
+    validateSalaryRange,
+    validateDescription,
+    validateUrlOrEmail,
+} from '@/app/lib/formValidators';
 
 export default function PostJobPage() {
     const [step, setStep] = useState(1);
@@ -20,10 +27,54 @@ export default function PostJobPage() {
         requirements: '',
         applicationLink: '', // Required field
     });
+    const [stepErrors, setStepErrors] = useState({});
+
+    const clearStepError = (...fields) => {
+        setStepErrors((prev) => {
+            const next = { ...prev };
+            fields.forEach((field) => {
+                if (field in next) {
+                    delete next[field];
+                }
+            });
+            return next;
+        });
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        const fieldsToClear = [name];
+        if (name === 'salaryMin' || name === 'salaryMax') {
+            fieldsToClear.push('salaryRange');
+        }
+        clearStepError(...fieldsToClear);
+    };
+
+    const validateStepOne = () => {
+        const errors = {};
+        const titleError = validateTextField(formData.title, { label: 'Job title', minLength: 3, maxLength: 120 });
+        const salaryMinError = validateSalaryValue('Min salary', formData.salaryMin);
+        const salaryMaxError = validateSalaryValue('Max salary', formData.salaryMax);
+        const salaryRangeError = validateSalaryRange(formData.salaryMin, formData.salaryMax);
+
+        if (titleError) errors.title = titleError;
+        if (salaryMinError) errors.salaryMin = salaryMinError;
+        if (salaryMaxError) errors.salaryMax = salaryMaxError;
+        if (salaryRangeError) errors.salaryRange = salaryRangeError;
+
+        return errors;
+    };
+
+    const validateStepTwo = () => {
+        const errors = {};
+        const descriptionError = validateDescription(formData.description);
+        const linkError = validateUrlOrEmail(formData.applicationLink);
+
+        if (descriptionError) errors.description = descriptionError;
+        if (linkError) errors.applicationLink = linkError;
+
+        return errors;
     };
 
     const addSkill = (e) => {
@@ -46,11 +97,39 @@ export default function PostJobPage() {
         }));
     };
 
-    const handleNext = () => setStep(prev => prev + 1);
-    const handleBack = () => setStep(prev => prev - 1);
+    const handleNext = () => {
+        const errors = step === 1 ? validateStepOne() : step === 2 ? validateStepTwo() : {};
+        if (Object.keys(errors).length) {
+            setStepErrors(errors);
+            return;
+        }
+
+        setStepErrors({});
+        setStep(prev => prev + 1);
+    };
+
+    const handleBack = () => {
+        setStepErrors({});
+        setStep(prev => prev - 1);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const stepOneErrors = validateStepOne();
+        const stepTwoErrors = validateStepTwo();
+        const combinedErrors = { ...stepOneErrors, ...stepTwoErrors };
+
+        if (Object.keys(combinedErrors).length) {
+            setStepErrors(combinedErrors);
+            if (Object.keys(stepOneErrors).length) {
+                setStep(1);
+            } else {
+                setStep(2);
+            }
+            return;
+        }
+
+        setStepErrors({});
         setLoading(true);
 
         try {
@@ -83,8 +162,11 @@ export default function PostJobPage() {
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="e.g. Product Manager"
-                                className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all"
+                                className={`w-full border rounded-md px-4 py-3 text-sm outline-none transition-all focus:outline-none ${stepErrors.title ? 'border-rose-500 focus:ring-rose-200 focus:border-rose-500' : 'border-gray-300 focus:ring-1 focus:ring-black'}`}
                             />
+                            {stepErrors.title && (
+                                <p className="text-xs mt-1 text-rose-500">{stepErrors.title}</p>
+                            )}
                         </div>
 
                         <div>
@@ -134,8 +216,11 @@ export default function PostJobPage() {
                                     value={formData.salaryMin}
                                     onChange={handleChange}
                                     placeholder="e.g. 50000"
-                                    className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all"
+                                    className={`w-full border rounded-md px-4 py-3 text-sm outline-none transition-all focus:outline-none ${stepErrors.salaryMin ? 'border-rose-500 focus:ring-rose-200 focus:border-rose-500' : 'border-gray-300 focus:ring-1 focus:ring-black'}`}
                                 />
+                                {stepErrors.salaryMin && (
+                                    <p className="text-[11px] mt-1 text-rose-500">{stepErrors.salaryMin}</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">Max Salary</label>
@@ -144,10 +229,16 @@ export default function PostJobPage() {
                                     value={formData.salaryMax}
                                     onChange={handleChange}
                                     placeholder="e.g. 80000"
-                                    className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all"
+                                    className={`w-full border rounded-md px-4 py-3 text-sm outline-none transition-all focus:outline-none ${stepErrors.salaryMax ? 'border-rose-500 focus:ring-rose-200 focus:border-rose-500' : 'border-gray-300 focus:ring-1 focus:ring-black'}`}
                                 />
+                                {stepErrors.salaryMax && (
+                                    <p className="text-[11px] mt-1 text-rose-500">{stepErrors.salaryMax}</p>
+                                )}
                             </div>
                         </div>
+                        {stepErrors.salaryRange && (
+                            <p className="text-[11px] mt-2 text-rose-500">{stepErrors.salaryRange}</p>
+                        )}
 
                         <div className="flex justify-end pt-6 border-t border-gray-100">
                             <button
@@ -172,8 +263,11 @@ export default function PostJobPage() {
                                 onChange={handleChange}
                                 rows={6}
                                 placeholder="Write a brief overview of the role..."
-                                className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all resize-none"
+                                className={`w-full border rounded-md px-4 py-3 text-sm outline-none transition-all resize-none focus:outline-none ${stepErrors.description ? 'border-rose-500 focus:ring-rose-200 focus:border-rose-500' : 'border-gray-300 focus:ring-1 focus:ring-black'}`}
                             />
+                            {stepErrors.description && (
+                                <p className="text-[11px] mt-1 text-rose-500">{stepErrors.description}</p>
+                            )}
                         </div>
 
                         <div>
@@ -211,17 +305,21 @@ export default function PostJobPage() {
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Job Application Link / Email <span className="text-red-500">*</span></label>
-                            <input
-                                name="applicationLink"
-                                value={formData.applicationLink || ''}
-                                onChange={handleChange}
-                                placeholder="Application link or email (e.g. example.com/apply or hr@company.com)"
-                                className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-black outline-none transition-all"
-                            />
-                            <p className="text-xs text-gray-400 mt-1">Enter a URL or email address. Candidates will be directed here when they click "Apply Now".</p>
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Job Application Link / Email <span className="text-red-500">*</span></label>
+                                <input
+                                    name="applicationLink"
+                                    value={formData.applicationLink || ''}
+                                    onChange={handleChange}
+                                    placeholder="Application link or email (e.g. example.com/apply or hr@company.com)"
+                                    className={`w-full border rounded-md px-4 py-3 text-sm outline-none transition-all focus:outline-none ${stepErrors.applicationLink ? 'border-rose-500 focus:ring-rose-200 focus:border-rose-500' : 'border-gray-300 focus:ring-1 focus:ring-black'}`}
+                                />
+                                {stepErrors.applicationLink ? (
+                                    <p className="text-xs mt-1 text-rose-500">{stepErrors.applicationLink}</p>
+                                ) : (
+                                    <p className="text-xs text-gray-400 mt-1">Enter a URL or email address. Candidates will be directed here when they click "Apply Now".</p>
+                                )}
+                            </div>
 
                         <div className="flex justify-between pt-6 border-t border-gray-100">
                             <button
@@ -352,9 +450,7 @@ export default function PostJobPage() {
 
     return (
         <div className="min-h-screen flex bg-[#F8F9FB] mt-[72px] font-sans">
-            <Sidebar />
             <main className="flex-1 max-w-6xl mx-auto px-6 py-10 md:py-16">
-                {/* Stepper */}
                 {step < 4 && (
                     <div className="flex flex-col md:flex-row justify-between mb-12 gap-6 md:gap-4 relative max-w-4xl mx-auto">
                         {[1, 2, 3].map(num => (
@@ -373,8 +469,6 @@ export default function PostJobPage() {
                         ))}
                     </div>
                 )}
-
-                {/* Step Content */}
                 <div className={`w-full max-w-4xl mx-auto bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden p-6 md:p-10 transition-all duration-500 ${step === 4 ? 'bg-white' : ''}`}>
                     {renderStep()}
                 </div>

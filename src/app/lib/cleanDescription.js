@@ -1,14 +1,6 @@
-/**
- * cleanDescription.js
- * Strips raw HTML from job descriptions and returns a structured plain-text
- * representation that is safe to display and easy to read.
- *
- * Works entirely on the client (or server) — no external deps.
- */
 
-/**
- * Convert HTML entities to their text equivalents.
- */
+
+
 function decodeEntities(str) {
     return str
         .replace(/&amp;/g, '&')
@@ -25,10 +17,7 @@ function decodeEntities(str) {
         .replace(/&[a-zA-Z]+;/g, ' ')
 }
 
-/**
- * Strip HTML tags and return clean text.
- * Preserves newlines for block-level elements.
- */
+
 export function stripHtml(html) {
     if (!html || typeof html !== 'string') return ''
 
@@ -61,10 +50,7 @@ export function stripHtml(html) {
     return text
 }
 
-/**
- * Returns the first `lineCount` non-empty lines of a cleaned description,
- * followed by '...' if the description is longer.
- */
+
 export function truncateClean(html, lineCount = 5) {
     const clean = stripHtml(html)
     if (!clean) return ''
@@ -75,14 +61,7 @@ export function truncateClean(html, lineCount = 5) {
     return lines.slice(0, lineCount).join('\n') + '...'
 }
 
-/**
- * Parse a cleaned description into structured sections for rich rendering.
- * Detects common headings (Requirements, Responsibilities, etc.) and
- * bullet-point lists.
- *
- * Returns an array of blocks:
- *   { type: 'heading' | 'paragraph' | 'list', content: string | string[] }
- */
+
 export function parseDescription(html) {
     if (!html || typeof html !== 'string') return []
 

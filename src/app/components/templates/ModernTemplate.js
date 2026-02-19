@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.6,
   },
 
-  /* ===== HEADER ===== */
+  
   header: {
     marginBottom: 32, // more breathing room
   },
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     backgroundColor: ACCENT, // colored divider
   },
 
-  /* ===== SECTIONS ===== */
+  
   section: {
     marginTop: 26,
     padding: 8,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  /* ===== ITEMS ===== */
+  
   item: {
     marginBottom: 14,
   },
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  /* ===== INLINE / META ===== */
+  
   inlineMeta: {
     fontSize: 10.5,
     marginBottom: 6,
@@ -111,8 +111,6 @@ export default function ModernTemplate({ resumeData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-
-        {/* ===== HEADER ===== */}
         <View style={styles.header}>
           <Text style={styles.name}>{personal.fullName}</Text>
 
@@ -127,16 +125,12 @@ export default function ModernTemplate({ resumeData }) {
 
           <View style={styles.divider} />
         </View>
-
-        {/* ===== ABOUT ===== */}
         {summary && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
             <Text>{summary}</Text>
           </View>
         )}
-
-        {/* ===== EXPERIENCE ===== */}
         {experience?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Experience</Text>
@@ -156,8 +150,6 @@ export default function ModernTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== PROJECTS ===== */}
         {projects?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Projects</Text>
@@ -172,8 +164,6 @@ export default function ModernTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== EDUCATION ===== */}
         {education?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Education</Text>
@@ -190,8 +180,6 @@ export default function ModernTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== SKILLS ===== */}
         {(technicalSkills.length > 0 || softSkills.length > 0) && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
@@ -209,8 +197,6 @@ export default function ModernTemplate({ resumeData }) {
             )}
           </View>
         )}
-
-        {/* ===== CERTIFICATIONS ===== */}
         {certifications?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Certifications</Text>
@@ -221,8 +207,6 @@ export default function ModernTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== LANGUAGES ===== */}
         {languages?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Languages</Text>
@@ -233,8 +217,6 @@ export default function ModernTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== AWARDS ===== */}
         {awards?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Awards</Text>
@@ -245,8 +227,6 @@ export default function ModernTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== INTERESTS ===== */}
         {normalizedInterests.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Interests</Text>

@@ -35,7 +35,6 @@ export default function PublicNavbar() {
     <>
       <nav className={`${openSans.className} relative w-screen`}>
         <div className="fixed z-50 flex w-screen items-center justify-between bg-white px-8 sm:px-16 xl:px-[8%] py-4 shadow-sm">
-          {/* Logo - Left */}
           <div className="relative h-10 w-[150px] flex-shrink-0 flex items-center">
             <Link href="/">
               <Image
@@ -47,8 +46,6 @@ export default function PublicNavbar() {
               />
             </Link>
           </div>
-
-          {/* NavLinks - Centered Illusion */}
           <div className="hidden lg:flex flex-1 justify-center">
             <ul className="flex gap-10 xl:gap-12 text-[13px]">
               <li>
@@ -85,26 +82,22 @@ export default function PublicNavbar() {
               </li>
             </ul>
           </div>
-
-          {/* Buttons - Right */}
           <div className="hidden lg:flex items-center gap-4 ml-8">
             <Button
               text="Post A Job"
               img=""
               variant="white"
               onClick={handleOpenAuthModal}
-              className="!px-5 !py-2"
+              className="!px-5 !py-3"
             />
             <Button
               text="Login/SignUp"
               img=""
               variant="black"
               onClick={handleOpenAuthModal}
-              className="!px-5 !py-2"
+              className="!px-5 !py-3"
             />
           </div>
-
-          {/* Mobile Hamburger */}
           <div className="lg:hidden flex items-center z-50">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -114,8 +107,6 @@ export default function PublicNavbar() {
             </button>
           </div>
         </div>
-
-        {/* Fullscreen Mobile Menu */}
         {menuOpen && (
           <div className="lg:hidden fixed top-0 left-0 w-screen h-screen bg-white z-40 flex flex-col items-center justify-center gap-10">
             <ul className="flex flex-col gap-8 text-[20px] text-[#868D9B] text-center">
@@ -149,8 +140,6 @@ export default function PublicNavbar() {
           </div>
         )}
       </nav>
-
-      {/* Auth Modal */}
       <AuthModals open={authModalOpen} setOpen={setAuthModalOpen} />
     </>
   )

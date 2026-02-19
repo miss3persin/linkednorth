@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.6,
   },
 
-  /* ===== HEADER PANEL ===== */
+  
   headerPanel: {
     backgroundColor: SOFT_BG,
     padding: 24,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
 
-  /* ===== SECTIONS ===== */
+  
   section: {
     marginBottom: 24,
   },
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
 
-  /* ===== CONTENT ===== */
+  
   item: {
     marginBottom: 14,
   },
@@ -107,8 +107,6 @@ export default function CreativeTemplate({ resumeData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-
-        {/* ===== HEADER ===== */}
         <View style={styles.headerPanel}>
           <Text style={styles.name}>{personal.fullName}</Text>
 
@@ -121,16 +119,12 @@ export default function CreativeTemplate({ resumeData }) {
             {personal.website && <Text style={styles.contactItem}>{personal.website}</Text>}
           </View>
         </View>
-
-        {/* ===== STORY ===== */}
         {summary && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>My Story</Text>
             <Text>{summary}</Text>
           </View>
         )}
-
-        {/* ===== EXPERIENCE ===== */}
         {experience?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Career Highlights</Text>
@@ -150,8 +144,6 @@ export default function CreativeTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== PROJECTS ===== */}
         {projects?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Projects</Text>
@@ -167,8 +159,6 @@ export default function CreativeTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== EDUCATION ===== */}
         {education?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Education</Text>
@@ -186,8 +176,6 @@ export default function CreativeTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== SKILLS ===== */}
         {(normalizedSkills.technical.length > 0 || normalizedSkills.soft.length > 0) && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
@@ -207,8 +195,6 @@ export default function CreativeTemplate({ resumeData }) {
             )}
           </View>
         )}
-
-        {/* ===== CERTIFICATIONS ===== */}
         {certifications?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Certifications</Text>
@@ -219,8 +205,6 @@ export default function CreativeTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== LANGUAGES ===== */}
         {languages?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Languages</Text>
@@ -231,8 +215,6 @@ export default function CreativeTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== AWARDS ===== */}
         {awards?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Awards</Text>
@@ -243,8 +225,6 @@ export default function CreativeTemplate({ resumeData }) {
             ))}
           </View>
         )}
-
-        {/* ===== INTERESTS ===== */}
         {normalizedInterests.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Interests</Text>

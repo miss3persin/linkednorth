@@ -97,8 +97,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
 
   return (
     <div className="mt-6 max-w-xl flex flex-col gap-6">
-
-      {/* PERSONAL INFO */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
           Personal Information
@@ -122,8 +120,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
           />
         ))}
       </section>
-
-      {/* SUMMARY */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
           Professional Summary
@@ -136,8 +132,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
           onChange={(e) => updateSummary(e.target.value)}
         />
       </section>
-
-      {/* EXPERIENCE */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
           Work Experience
@@ -206,8 +200,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
           + Add Experience
         </button>
       </section>
-
-      {/* EDUCATION */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
           Education
@@ -267,8 +259,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
           + Add Education
         </button>
       </section>
-
-      {/* SKILLS */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 mb-2">Skills</h2>
         <textarea
@@ -286,8 +276,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
           onChange={(e) => updateSkills("soft", e.target.value)}
         />
       </section>
-
-      {/* PROJECTS */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 mb-2">Projects</h2>
 
@@ -328,10 +316,7 @@ export default function ResumeForm({ resumeData, setResumeData }) {
           + Add Project
         </button>
       </section>
-
-      {/* ADDITIONAL */}
       <section>
-        {/* CERTIFICATIONS */}
         <section>
           <h3 className="text-sm font-semibold text-gray-700 mb-2">
             Certifications
@@ -387,8 +372,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
             + Add Certification
           </button>
         </section>
-
-        {/* LANGUAGES */}
         <section>
           <h3 className="text-sm font-semibold text-gray-700 mb-2">
             Languages
@@ -438,8 +421,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
             + Add Language
           </button>
         </section>
-
-        {/* AWARDS */}
         <section>
           <h3 className="text-sm font-semibold text-gray-700 mb-2">
             Awards
@@ -500,8 +481,6 @@ export default function ResumeForm({ resumeData, setResumeData }) {
             + Add Award
           </button>
         </section>
-
-        {/* INTERESTS */}
         <section>
         <h3 className="text-sm font-semibold text-gray-700 mb-2">
             Interests

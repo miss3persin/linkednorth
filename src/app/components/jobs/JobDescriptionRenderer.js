@@ -2,10 +2,7 @@
 
 import { parseDescription } from '@/app/lib/cleanDescription'
 
-/**
- * Renders a structured, clean job description from raw HTML or plain text.
- * Parses into headings, bullet lists, and paragraphs automatically.
- */
+
 export default function JobDescriptionRenderer({ description }) {
     if (!description) {
         return (

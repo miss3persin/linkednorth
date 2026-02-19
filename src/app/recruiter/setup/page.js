@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { Upload, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/app/components/layout/Sidebar'
-import { supabase } from '@/app/lib/supabase';
 import { useRef } from 'react';
 import { Loader } from '@/app/components/ui/Loader';
+import { validateTextField } from '@/app/lib/formValidators';
 
 export default function CompanyProfileSetup() {
     const router = useRouter();
@@ -18,14 +18,24 @@ export default function CompanyProfileSetup() {
         industry: '',
         logoUrl: '',
     });
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const fileInputRef = useRef(null);
     const [logoPreview, setLogoPreview] = useState(null);
     const [uploadingLogo, setUploadingLogo] = useState(false);
 
+    const clearFieldError = (field) => {
+        setFieldErrors((prev) => {
+            if (!prev[field]) return prev;
+            const { [field]: _omit, ...rest } = prev;
+            return rest;
+        });
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        clearFieldError(name);
     };
 
     const triggerLogoUpload = () => {
@@ -69,8 +79,28 @@ export default function CompanyProfileSetup() {
         }
     };
 
+    const runValidation = () => {
+        const validationErrors = {};
+        const companyNameError = validateTextField(formData.companyName, { label: 'Company name', minLength: 2, maxLength: 90 });
+        const locationError = validateTextField(formData.location, { label: 'Headquarters location', minLength: 3, maxLength: 80 });
+
+        if (companyNameError) validationErrors.companyName = companyNameError;
+        if (locationError) validationErrors.location = locationError;
+        if (!formData.industry) validationErrors.industry = 'Please select an industry.';
+
+        return validationErrors;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const validationErrors = runValidation();
+        if (Object.keys(validationErrors).length) {
+            setFieldErrors(validationErrors);
+            setError(null);
+            return;
+        }
+
+        setFieldErrors({});
         setLoading(true);
         setError(null);
 
@@ -99,7 +129,6 @@ export default function CompanyProfileSetup() {
         <div className="min-h-screen flex bg-[#F8F9FB] mt-[72px]">
             <Sidebar />
             <main className="flex-1 flex flex-col items-center pt-12 md:pt-20 px-4">
-                {/* Header Section (Outside the card) */}
                 <div className="text-center mb-8">
                     <h1 className="text-2xl md:text-[28px] font-bold text-[#0F172A] mb-3">
                         Set Up Your Company Profile
@@ -108,12 +137,8 @@ export default function CompanyProfileSetup() {
                         This information will be displayed on your job posts.
                     </p>
                 </div>
-
-                {/* Form Card */}
                 <div className="w-full max-w-[540px] bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-10 mb-20">
                     <form className="space-y-5" onSubmit={handleSubmit}>
-
-                        {/* Company Name */}
                         <div className="space-y-2">
                             <label className="block text-[13px] font-semibold text-gray-700">
                                 Company Name
@@ -126,9 +151,12 @@ export default function CompanyProfileSetup() {
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-black transition-all placeholder:text-gray-300 text-sm"
                                 onChange={handleChange}
                             />
+                            {fieldErrors.companyName && (
+                                <p className="text-[11px] mt-1 text-rose-500">
+                                    {fieldErrors.companyName}
+                                </p>
+                            )}
                         </div>
-
-                        {/* Company Logo Upload */}
                         <div className="space-y-2">
                             <label className="block text-[13px] font-semibold text-gray-700">
                                 Company Logo
@@ -145,31 +173,7 @@ export default function CompanyProfileSetup() {
                                     type="file"
                                     ref={fileInputRef}
                                     onChange={handleLogoUpload}
-                                    accept="image/*"
-                                    className="hidden"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={triggerLogoUpload}
-                                    disabled={uploadingLogo}
-                                    className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                                >
-                                    {uploadingLogo ? (
-                                        <>
-                                            <Loader size="xs" showMessage={false} inline className="text-gray-500" />
-                                            Uploading...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Upload size={14} />
-                                            Upload Square Logo
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Headquarters Location */}
+                                    accept="image}
                         <div className="space-y-2">
                             <label className="block text-[13px] font-semibold text-gray-700">
                                 Headquarters Location
@@ -182,9 +186,12 @@ export default function CompanyProfileSetup() {
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-black transition-all placeholder:text-gray-300 text-sm"
                                 onChange={handleChange}
                             />
+                            {fieldErrors.location && (
+                                <p className="text-[11px] mt-1 text-rose-500">
+                                    {fieldErrors.location}
+                                </p>
+                            )}
                         </div>
-
-                        {/* Industry Selection */}
                         <div className="space-y-2">
                             <label className="block text-[13px] font-semibold text-gray-700">
                                 Industry
@@ -208,11 +215,14 @@ export default function CompanyProfileSetup() {
                                     <ChevronDown size={16} className="text-gray-400" />
                                 </div>
                             </div>
+                            {fieldErrors.industry && (
+                                <p className="text-[11px] mt-1 text-rose-500">
+                                    {fieldErrors.industry}
+                                </p>
+                            )}
                         </div>
 
                         {error && <p className="text-red-500 text-xs italic">{error}</p>}
-
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}

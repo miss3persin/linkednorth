@@ -11,7 +11,6 @@ const inter = Inter({ subsets: ['latin'] })
 export default function ComingSoon() {
     return (
         <div className={`min-h-[95vh] flex flex-col items-center justify-center relative overflow-hidden bg-white ${inter.className}`}>
-            {/* Background Decorative Element */}
             <div className="absolute right-0 bottom-0 h-full pointer-events-none opacity-30 select-none">
                 <Image
                     src={overlay}
@@ -52,8 +51,6 @@ export default function ComingSoon() {
                     </Link>
                 </div>
             </div>
-
-            {/* Decorative Micro-elements */}
             <div className="absolute top-20 left-10 w-4 h-4 rounded-full bg-blue-100 opacity-50 animate-pulse"></div>
             <div className="absolute bottom-40 left-20 w-8 h-8 rounded-full bg-purple-50 opacity-40 animate-bounce" style={{ animationDuration: '3s' }}></div>
             <div className="absolute top-40 right-20 w-6 h-6 rounded-full bg-gray-100 opacity-60"></div>

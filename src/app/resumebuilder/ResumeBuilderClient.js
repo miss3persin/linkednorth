@@ -25,13 +25,8 @@ export default function ResumeBuilderClient() {
 
   return (
     <div className="mt-6 w-full">
-      {/* Import Section (always visible) */}
       <ImportSection />
-
-      {/* Steps */}
       <Steps step={step} onStepChange={handleStepChange} />
-
-      {/* Step Content */}
       {step === 1 && (
         <>
           <p className="mt-6 text-sm font-medium text-gray-700">
@@ -91,9 +86,6 @@ export default function ResumeBuilderClient() {
           </p>
         </div>
       )}
-
-
-      {/* Action Buttons */}
       <ActionButtons
         step={step}
         onBack={() => setStep((prev) => Math.max(1, prev - 1))}

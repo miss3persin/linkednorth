@@ -2,6 +2,12 @@
 import { useState } from 'react'
 import { useSignUp } from "@clerk/nextjs"
 import Modal from '../ui/Modal'
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  validateCode,
+} from '@/app/lib/formValidators'
 
 export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   const { isLoaded, signUp, setActive } = useSignUp()
@@ -14,12 +20,51 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   const [loading, setLoading] = useState(false)
   const [verifying, setVerifying] = useState(false)
   const [code, setCode] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
+
+  const clearFieldError = (field) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev
+      const { [field]: _omit, ...rest } = prev
+      return rest
+    })
+  }
+
+  const runSignUpValidation = () => {
+    const validationErrors = {}
+    const firstNameError = validateName(firstName, 'First name')
+    const lastNameError = validateName(lastName, 'Last name')
+    const emailError = validateEmail(email)
+    const passwordError = validatePassword(password)
+
+    if (firstNameError) validationErrors.firstName = firstNameError
+    if (lastNameError) validationErrors.lastName = lastNameError
+    if (emailError) validationErrors.email = emailError
+    if (passwordError) validationErrors.password = passwordError
+
+    return validationErrors
+  }
+
+  const runVerifyValidation = () => {
+    const validationErrors = {}
+    const codeError = validateCode(code)
+    if (codeError) validationErrors.code = codeError
+    return validationErrors
+  }
 
   if (!open) return null
   if (!isLoaded) return null
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const validationErrors = runSignUpValidation()
+    if (Object.keys(validationErrors).length) {
+      setFieldErrors(validationErrors)
+      setError(null)
+      return
+    }
+
+    setFieldErrors({})
     setLoading(true)
     setError(null)
 
@@ -42,6 +87,14 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
   const handleVerify = async (e) => {
     e.preventDefault()
+    const validationErrors = runVerifyValidation()
+    if (Object.keys(validationErrors).length) {
+      setFieldErrors(validationErrors)
+      setError(null)
+      return
+    }
+
+    setFieldErrors({})
     setLoading(true)
     setError(null)
 
@@ -78,7 +131,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     }
   }
 
-  /* ================= VERIFY MODE ================= */
+  
   if (verifying) {
     return (
       <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
@@ -96,11 +149,17 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
               <input
                 type="text"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  setCode(e.target.value)
+                  clearFieldError('code')
+                }}
                 className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter 6-digit code"
                 required
               />
+              {fieldErrors.code && (
+                <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.code}</p>
+              )}
             </div>
 
             {error && (
@@ -112,15 +171,18 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-black text-white py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed skip-squared"
             >
               {loading ? 'Verifying...' : 'Verify Email'}
             </button>
 
             <button
               type="button"
-              onClick={() => setVerifying(false)}
-              className="w-full text-blue-600 text-xs sm:text-sm hover:underline"
+              onClick={() => {
+                setVerifying(false)
+                setFieldErrors({})
+              }}
+              className="w-full text-blue-600 text-xs sm:text-sm hover:underline skip-squared"
             >
               Back to sign up
             </button>
@@ -130,17 +192,14 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     )
   }
 
-  /* ================= SIGN UP MODE ================= */
+  
   return (
     <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
       <div className="text-left px-1 sm:px-0">
-        {/* Header */}
         <h2 className="text-lg sm:text-xl font-bold mb-1">Join LinkedNorth</h2>
         <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
           Make the most of your professional life
         </p>
-
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
@@ -150,10 +209,16 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
               <input
                 type="text"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e) => {
+                  setFirstName(e.target.value)
+                  clearFieldError('firstName')
+                }}
                 className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+              {fieldErrors.firstName && (
+                <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.firstName}</p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -162,10 +227,16 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
               <input
                 type="text"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e) => {
+                  setLastName(e.target.value)
+                  clearFieldError('lastName')
+                }}
                 className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+              {fieldErrors.lastName && (
+                <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.lastName}</p>
+              )}
             </div>
           </div>
 
@@ -176,10 +247,16 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                clearFieldError('email')
+              }}
               className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+            {fieldErrors.email && (
+              <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>
@@ -189,11 +266,17 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                clearFieldError('password')
+              }}
               className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               minLength={8}
               required
             />
+            {fieldErrors.password && (
+              <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.password}</p>
+            )}
           </div>
 
           {error && (
@@ -221,24 +304,20 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed skip-squared"
           >
             {loading ? 'Creating account...' : 'Agree & Join'}
           </button>
         </form>
-
-        {/* Divider */}
         <div className="flex items-center my-3 sm:my-4">
           <div className="flex-grow border-t border-gray-300"></div>
           <span className="px-2 text-xs sm:text-sm text-gray-500">or</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
-
-        {/* Social logins */}
         <div className="space-y-2">
           <button
             onClick={() => handleOAuthSignUp('oauth_google')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
           >
             <img src="/google.svg" alt="Google" className="w-4 h-4" />
             Continue with Google
@@ -246,7 +325,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
           <button
             onClick={() => handleOAuthSignUp('oauth_facebook')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
           >
             <img src="/facebook.svg" alt="Facebook" className="w-4 h-4" />
             Continue with Facebook
@@ -254,14 +333,12 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
           <button
             onClick={() => handleOAuthSignUp('oauth_apple')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition"
+            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
           >
             <img src="/apple.svg" alt="Apple" className="w-4 h-4" />
             Continue with Apple
           </button>
         </div>
-
-        {/* Footer */}
         <p className="text-xs sm:text-sm text-center mt-4 mb-5 sm:mb-6 text-gray-500">
           Already on LinkedNorth?
           <span

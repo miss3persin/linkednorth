@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
 
-  /* ---------- HEADER ---------- */
+  
   header: {
     marginBottom: 28, // slightly more space between name & contacts
     borderBottomWidth: 1,
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  /* ---------- LAYOUT ---------- */
+  
   body: {
     flexDirection: 'row',
   },
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#eee',
   },
 
-  /* ---------- SECTIONS ---------- */
+  
   section: {
     marginBottom: 18,
   },
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  /* ---------- ITEMS ---------- */
+  
   item: {
     marginBottom: 10,
   },
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     color: TEXT_MAIN,
   },
 
-  /* ---------- LIST / META ---------- */
+  
   metaText: {
     fontSize: 10,
     marginBottom: 4,
@@ -142,8 +142,6 @@ export default function ProfessionalTemplate({ resumeData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-
-        {/* ===== HEADER ===== */}
         <View style={styles.header}>
           <Text style={styles.name}>{personal.fullName}</Text>
           <View style={styles.contactRow}>
@@ -155,11 +153,7 @@ export default function ProfessionalTemplate({ resumeData }) {
             {personal.website && <Text style={styles.contactItem}>{personal.website}</Text>}
           </View>
         </View>
-
-        {/* ===== BODY ===== */}
         <View style={styles.body}>
-
-          {/* ===== LEFT COLUMN ===== */}
           <View style={styles.leftColumn}>
             {summary && (
               <View style={styles.section}>
@@ -230,8 +224,6 @@ export default function ProfessionalTemplate({ resumeData }) {
               </View>
             )}
           </View>
-
-          {/* ===== RIGHT COLUMN ===== */}
           <View style={styles.rightColumn}>
             {(technicalSkills.length > 0 || softSkills.length > 0) && (
               <View style={[styles.section, styles.sectionPanel]}>

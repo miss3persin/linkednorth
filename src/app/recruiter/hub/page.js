@@ -143,7 +143,6 @@ export default function RecruiterHub() {
             <Sidebar />
 
             <main className="flex-1 p-4 md:p-8">
-                {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Recruiter Hub</h1>
@@ -167,8 +166,6 @@ export default function RecruiterHub() {
                     </button>
 
                 </div>
-
-                {/* Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {stats.map((stat, idx) => (
                         <div
@@ -188,7 +185,6 @@ export default function RecruiterHub() {
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Job Posts */}
                     <div className="flex-[2]">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="font-bold text-gray-900">My Job Posts</h2>
@@ -248,8 +244,6 @@ export default function RecruiterHub() {
                                                 >
                                                     <MoreHorizontal size={16} />
                                                 </button>
-
-                                                {/* Dropdown Menu */}
                                                 {activeMenuId === job.id && (
                                                     <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[140px] py-1">
                                                         <button
@@ -286,10 +280,7 @@ export default function RecruiterHub() {
                             )}
                         </div>
                     </div>
-
-                    {/* Alerts & Recent Apps */}
                     <div className="flex-1 space-y-8">
-                        {/* Activity & Alerts */}
                         <div>
                             <h2 className="font-bold text-gray-900 mb-4">Activity & Alerts</h2>
                             <div className="space-y-3">
@@ -301,7 +292,6 @@ export default function RecruiterHub() {
                                     </p>
                                     <p className="text-[9px] text-blue-500">Last updated: Just now</p>
                                 </div>
-                                {/* Dynamically show something relevant */}
                                 {jobs.length > 0 && (
                                     <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg">
                                         <p className="text-[11px] font-semibold text-orange-700">
@@ -314,8 +304,6 @@ export default function RecruiterHub() {
                                 )}
                             </div>
                         </div>
-
-                        {/* Recent Applications */}
                         <div>
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="font-bold text-gray-900">Recent Applications</h2>

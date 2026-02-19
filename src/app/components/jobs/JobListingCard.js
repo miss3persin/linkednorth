@@ -258,7 +258,6 @@ export const JobListingCard = ({
       />
 
       <div className="flex w-full max-w-[48rem] flex-col rounded-sm border border-[#E5E7EB] bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-        {/* === Top Section === */}
         <div className="flex items-start justify-between flex-wrap gap-3 sm:gap-0">
 
           <div className="flex gap-3 sm:gap-4 w-full sm:w-[72%] md:w-[75%] lg:w-[80%] shrink-0">
@@ -301,13 +300,9 @@ export const JobListingCard = ({
             />
           </div>
         </div>
-
-        {/* === Description === */}
         <p className="text-xs sm:text-sm md:text-base text-[#4B5563] leading-relaxed pl-0 sm:pl-[4.5rem] mb-3 sm:mb-2 max-w-[40rem] mt-2 sm:mt-0 line-clamp-2">
           {stripHtml(description)}
         </p>
-
-        {/* === Tags === */}
         <div className="flex flex-wrap gap-2 pl-0 sm:pl-[4.5rem] mb-4 sm:mb-5">
           <span className="rounded-full bg-green-100 px-2 sm:px-3 py-0.5 sm:py-1 text-[0.65rem] sm:text-xs font-medium text-green-800">
             {jobType}
@@ -322,8 +317,6 @@ export const JobListingCard = ({
               : ''}
           </span>
         </div>
-
-        {/* === Buttons === */}
         <div className="flex flex-col sm:flex-row gap-2 pl-0 sm:pl-[4.5rem]">
           <Button
             text="Apply Now"

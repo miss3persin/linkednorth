@@ -93,7 +93,7 @@ export default function LibraryClient() {
     }
 
 
-    /* ---------------- FETCH SAVED JOBS FROM SUPABASE ---------------- */
+    
 
     useEffect(() => {
         async function fetchSavedJobs() {
@@ -152,7 +152,7 @@ export default function LibraryClient() {
         fetchSavedJobs()
     }, [])
 
-    /* ---------------- DRAG & DROP ---------------- */
+    
 
     const handleDragStart = (e, colIndex, job) => {
         e.dataTransfer.setData(
@@ -201,14 +201,13 @@ export default function LibraryClient() {
     }
 
 
-    /* ---------------- UI ---------------- */
+    
 
     return (
         <div className="library-page min-h-screen flex bg-white mt-[72px]">
             <Sidebar />
 
             <main className="flex-1 px-4 sm:px-6 md:px-8 py-6">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3">
                     <div>
                         <h1 className="text-lg sm:text-xl font-semibold">
@@ -268,8 +267,6 @@ export default function LibraryClient() {
                     </div>
                 </div>
             )}
-
-            {/* Columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
                 {filteredColumns.map((col, i) => (
                         <div

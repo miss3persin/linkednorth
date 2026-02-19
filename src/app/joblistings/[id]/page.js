@@ -224,8 +224,6 @@ export default function JobDetailsPage() {
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-6">
-
-          {/* Navigation */}
           <div className="flex items-center justify-between">
             <button onClick={() => router.back()} className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-black transition-all skip-squared">
               <ArrowLeft size={14} /> Back to Listings
@@ -239,8 +237,6 @@ export default function JobDetailsPage() {
               </button>
             </div>
           </div>
-
-          {/* ===== Condensed Header Section ===== */}
           <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-10">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
               <div className="flex flex-col sm:flex-row items-start gap-6">
@@ -296,8 +292,6 @@ export default function JobDetailsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-
-            {/* ===== Description ===== */}
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-10">
                 <h2 className="text-xs font-black text-gray-400 mb-8 uppercase tracking-[0.2em] flex items-center gap-3">
@@ -323,8 +317,6 @@ export default function JobDetailsPage() {
                 )}
               </div>
             </div>
-
-            {/* ===== Sidebar Info ===== */}
             <div className="space-y-6 lg:sticky lg:top-[92px]">
               <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-8">
                 <h4 className="font-bold text-sm text-gray-900 mb-4">Job Summary</h4>

@@ -14,7 +14,7 @@
     font-family: var(--font-inter);
   }
 
-  /* custom-scroll.css */
+  
   .thin-scroll::-webkit-scrollbar {
     width: 4px;
   }
@@ -32,7 +32,7 @@
     background-color: #a3a3a3;
   }
 
-  /* Firefox support */
+  
   .thin-scroll {
     scrollbar-width: thin;
     scrollbar-color: #d4d4d4 transparent;
@@ -45,6 +45,7 @@
 
   .dashboard-page button:not(.skip-squared),
   .joblistings-page button:not(.skip-squared),
+  .jobs-page button:not(.skip-squared),
   .recruiter-hub-page button:not(.skip-squared),
   .library-page button:not(.skip-squared),
   .resume-builder-page button:not(.skip-squared),

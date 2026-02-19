@@ -49,7 +49,6 @@ export default function Sidebar() {
         sticky top-[72px] h-[calc(100vh-72px)]
       "
     >
-      {/* Menu - scrollable if too many items */}
       <nav className="space-y-1 overflow-y-auto thin-scroll">
         {items.map((item) => {
           const active = path.startsWith(item.href);
@@ -67,8 +66,6 @@ export default function Sidebar() {
               `}
             >
               {item.icon}
-
-              {/* Label — hidden below 1280px */}
               <span className="hidden xl:inline">
                 {item.label}
               </span>
@@ -76,8 +73,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-
-      {/* Logout - pinned to bottom */}
       <div className="border-t px-4 pt-4 mt-auto">
         <SignOutButton redirectUrl="/">
           <button

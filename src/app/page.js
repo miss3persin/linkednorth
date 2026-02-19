@@ -119,17 +119,12 @@ export default function HomePage() {
 
   return (
     <div className="relative">
-
-      {/* Hero Section */}
       <section>
         <div className="container relative px-16 pt-32 mb-48 flex flex-col items-center max-xl:px-8 max-lg:px-6 max-md:px-4 max-lg:pt-24 max-sm:pt-20 max-sm:mb-24">
-          {/* Background Illustrations */}
           <div className="absolute bottom-0 items-center justify-between w-full px-10 hidden xl:flex">
             <Image src={stration_2} alt="" layout="intrinsic" className="mt-10" />
             <Image src={stration_1} alt="" layout="intrinsic" className="mb-52" />
           </div>
-
-          {/* Headings */}
           <div className="w-full">
             <p
               className={`${inter.variable} mb-5 xs:mt-0 mt-5 px-16 text-center text-[4.1rem] xs:font-extrabold font-bold leading-tight text-[#333333] max-xl:text-[3.2rem] max-lg:text-[2.5rem] max-md:text-[2rem] max-sm:text-[1.7rem] max-sm:px-4`}
@@ -144,13 +139,9 @@ export default function HomePage() {
               in an easy way and good collaboration
             </p>
           </div>
-
-          {/* Search Bar */}
           <div className="xs:mb-36 mb-28 flex items-center justify-center max-md:mb-16">
             <SearchBar />
           </div>
-
-          {/* Trusted Companies */}
           <div className="w-full">
             <p className="mb-7 text-center text-sm text-[#868D9B] max-sm:mb-4">
               Trusted by 500+ Companies
@@ -170,12 +161,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Features Section */}
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0 max-md:mb-24">
-
-          {/* --- Left Section (Text + Buttons) --- */}
           <div className="w-full text-center lg:text-left">
             <p
               className={`${inter.variable} text-headingBlack text-3xl sm:text-4xl md:text-5xl mb-6 sm:mb-10 font-bold max-w-lg mx-auto lg:mx-0`}
@@ -186,57 +173,38 @@ export default function HomePage() {
             <div className="mb-6 sm:mb-10 w-[24rem] lg:block hidden relative mx-auto lg:mx-0">
               <Image src={features} alt="" />
             </div>
-
-            {/* 👇 This wrapper ensures image/buttons can reorder independently */}
             <div className="flex flex-col sm:flex-col lg:flex-col gap-6">
-              {/* Image (swaps above buttons only on xs) */}
               <div className="order-1 sm:order-1 lg:hidden block relative">
                 <Image src={startion_3} alt="" className="w-full" />
                 <div className="w-full h-16 sm:h-24 absolute bg-gradient-to-b from-transparent via-white/95 to-white bottom-[0.21rem]"></div>
               </div>
-
-              {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start order-2 sm:order-2">
                 <Button text="Check Career Resources" img={arrow_right} link="/coming-soon" variant="black" />
                 <Button text="Join Our Discord" img={discord_img} link="/coming-soon" variant="white" />
               </div>
             </div>
           </div>
-
-          {/* --- Right SectionMain image for larger screens) --- */}
           <div className="w-full relative max-md:mt-10 hidden lg:block">
             <Image src={startion_3} alt="" className="w-full" />
             <div className="w-full h-16 sm:h-24 bg-gradient-to-b from-transparent via-white/95 to-white absolute bottom-0"></div>
           </div>
         </div>
       </section>
-
-
-      {/* Resume Section */}
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-10 lg:gap-0">
-
-          {/* Image — stays left on large, but moves right below heading on xs */}
           <div className="lg:block hidden lg:w-4/6 relative max-sm:order-2 lg:order-1">
             <Image src={stration_4} alt="" />
           </div>
-
-          {/* Text Section */}
           <div className="w-full flex flex-col max-sm:order-1 lg:order-2">
-            {/* Heading */}
             <p
               className={`${inter.variable} text-[#333333] text-center lg:text-left text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-7 pt-3 font-bold`}
             >
               Get Your Resume Reviewed by Top{" "}
               <span className="text-[#A0A6B1]">Recruiters</span>
             </p>
-
-            {/* On small screens, we re-insert the image here so it comes right after the heading */}
             <div className="w-full relative my-4 lg:hidden items-center justify-center flex">
               <Image src={stration_4} alt="" />
             </div>
-
-            {/* Paragraph + Button stay at the bottom */}
             <p
               className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
@@ -254,10 +222,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-
-
-      {/* Jobs Section */}
       <section>
         <div className="container mb-24 sm:mb-36 md:mb-48">
           <div className="mb-6 sm:mb-10">
@@ -289,27 +253,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Feedback Section */}
       <section>
         <div className="container flex flex-col lg:flex-row-reverse px-4 sm:px-8 md:px-16 xl:px-24 mb-24 sm:mb-36 md:mb-48 items-center gap-14">
-
-          {/* Text Section */}
           <div className="w-full flex flex-col max-sm:order-1 lg:order-1">
-            {/* Heading */}
             <p
               className={`${inter.variable} text-[#333333] lg:text-left text-center text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-3 font-bold lg:max-w-lg`}
             >
               Real Feedback from Job Seekers{" "}
               <span className="text-[#A0A6B1]">Like You</span>
             </p>
-
-            {/* Image appears right below heading on small screens only */}
             <div className="w-5/6 relative my-4 sm:hidden justify-center mx-auto">
               <Image src={feedback_img} alt="" />
             </div>
-
-            {/* Paragraph + Button stay below */}
             <p
               className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
@@ -327,39 +282,25 @@ export default function HomePage() {
               />
             </div>
           </div>
-
-          {/* Image - large screens only */}
           <div className="w-full lg:w-5/6 relative flex max-md:hidden">
             <Image src={feedback_img} alt="" />
           </div>
         </div>
       </section>
-
-
-      {/* Connect Section */}
       <section>
         <div className="container flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 xl:px-24 mb-20 items-center gap-10 lg:gap-0">
-
-          {/* Image - large screens only */}
           <div className="w-full relative max-lg:hidden">
             <Image src={stration_5} alt="" />
           </div>
-
-          {/* Text Section */}
           <div className="w-full flex flex-col">
-            {/* Heading */}
             <p
               className={`${inter.variable} text-[#333333] lg:text-left text-center text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-5 pt-6 sm:pt-14 font-bold`}
             >
               Sign Up to Get Job Alerts
             </p>
-
-            {/* Image - shows below heading on small screens */}
             <div className="w-full relative my-4 lg:hidden items-center justify-center flex">
               <Image src={stration_5} alt="" />
             </div>
-
-            {/* Paragraph + Buttons stay below */}
             <p
               className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >

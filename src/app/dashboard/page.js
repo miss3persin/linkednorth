@@ -58,16 +58,11 @@ export default async function Dashboard() {
 
   return (
     <div className="dashboard-page min-h-screen flex bg-gray-50 mt-[72px]">
-      {/* Sidebar stays ASIDE */}
       <Sidebar />
-
-      {/* Dashboard Content */}
       <main className="flex-1 px-3 py-6 sm:px-5 md:px-8 xl:p-10">
         <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
           Welcome back, {user.firstName}!
         </h1>
-
-        {/* Top Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
             <div className="flex justify-between items-start gap-3">
@@ -108,8 +103,6 @@ export default async function Dashboard() {
             <p className="text-xs text-gray-400 mt-1">Active interviews</p>
           </div>
         </div>
-
-        {/* Notifications */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4">
             <h3 className="font-semibold text-lg">Notifications</h3>
@@ -146,14 +139,10 @@ export default async function Dashboard() {
                       {n.action}
                     </Link>
                   )}
-
-                  {/* Mobile time */}
                   <p className="text-xs text-gray-400 mt-2 sm:hidden">
                     {n.time}
                   </p>
                 </div>
-
-                {/* Desktop time */}
                 <p className="hidden sm:block text-xs text-gray-400 ml-auto">
                   {n.time}
                 </p>
@@ -161,8 +150,6 @@ export default async function Dashboard() {
             ))
           )}
         </div>
-
-        {/* Progress Bars */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
           <h3 className="font-semibold text-lg mb-4">
             Job Hunt Progress

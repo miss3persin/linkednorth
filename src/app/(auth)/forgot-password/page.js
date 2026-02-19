@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, useSignIn } from "@clerk/nextjs";
 import { Loader } from "@/app/components/ui/Loader";
+import {
+  validateEmail,
+  validatePassword,
+  validateCode,
+} from "@/app/lib/formValidators";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -13,10 +18,43 @@ export default function ForgotPasswordPage() {
   const [secondFactor, setSecondFactor] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { isLoaded, signIn, setActive } = useSignIn();
+
+  const clearFieldError = (field) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _omit, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const runSendValidation = () => {
+    const validationErrors = {};
+    const emailError = validateEmail(email);
+    if (emailError) validationErrors.email = emailError;
+    return validationErrors;
+  };
+
+  const runResetValidation = () => {
+    const validationErrors = {};
+    const codeError = validateCode(code);
+    const passwordError = validatePassword(password);
+    if (codeError) validationErrors.code = codeError;
+    if (passwordError) validationErrors.password = passwordError;
+    return validationErrors;
+  };
+
+  const formatClerkError = (err) => {
+    const rawMessage = err?.errors?.[0]?.longMessage || err?.message || "";
+    if (rawMessage.toLowerCase().includes("rate exceeded")) {
+      return "Too many requests. Please wait a moment and try again.";
+    }
+    return rawMessage || "Something went wrong. Please try again.";
+  };
 
   useEffect(() => {
     if (isSignedIn) {
@@ -34,6 +72,14 @@ export default function ForgotPasswordPage() {
 
   async function create(e) {
     e.preventDefault();
+    const validationErrors = runSendValidation();
+    if (Object.keys(validationErrors).length) {
+      setFieldErrors(validationErrors);
+      setError("");
+      return;
+    }
+
+    setFieldErrors({});
     setLoading(true);
     setError("");
 
@@ -43,9 +89,10 @@ export default function ForgotPasswordPage() {
         identifier: email,
       });
       setSuccessfulCreation(true);
+      setFieldErrors({});
     } catch (err) {
       console.error("Error:", err);
-      setError(err.errors?.[0]?.longMessage || "Something went wrong. Please try again.");
+      setError(formatClerkError(err));
     } finally {
       setLoading(false);
     }
@@ -53,6 +100,14 @@ export default function ForgotPasswordPage() {
 
   async function reset(e) {
     e.preventDefault();
+    const validationErrors = runResetValidation();
+    if (Object.keys(validationErrors).length) {
+      setFieldErrors(validationErrors);
+      setError("");
+      return;
+    }
+
+    setFieldErrors({});
     setLoading(true);
     setError("");
 
@@ -71,7 +126,7 @@ export default function ForgotPasswordPage() {
       }
     } catch (err) {
       console.error("Error:", err);
-      setError(err.errors?.[0]?.longMessage || "Reset failed. Please try again.");
+      setError(formatClerkError(err));
     } finally {
       setLoading(false);
     }
@@ -95,14 +150,20 @@ export default function ForgotPasswordPage() {
                   Email Address
                 </label>
                 <input
-                  type="email"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
+                type="email"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  clearFieldError('email')
+                }}
+                placeholder="you@example.com"
+                required
+              />
+              {fieldErrors.email && (
+                <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.email}</p>
+              )}
+            </div>
 
               <button
                 type="submit"
@@ -111,6 +172,10 @@ export default function ForgotPasswordPage() {
               >
                 {loading ? "Sending..." : "Send Reset Code"}
               </button>
+
+              <div className="mt-3 flex justify-center">
+                <div id="clerk-captcha" className="w-full max-w-xs" />
+              </div>
             </>
           ) : (
             <>
@@ -120,12 +185,18 @@ export default function ForgotPasswordPage() {
                 </label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="Enter 6-digit code"
-                  required
-                />
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value)
+                  clearFieldError('code')
+                }}
+                placeholder="Enter 6-digit code"
+                required
+              />
+              {fieldErrors.code && (
+                <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.code}</p>
+              )}
               </div>
 
               <div>
@@ -134,14 +205,20 @@ export default function ForgotPasswordPage() {
                 </label>
                 <input
                   type="password"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password (8+ characters)"
-                  minLength={8}
-                  required
-                />
-              </div>
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  clearFieldError('password')
+                }}
+                placeholder="Enter new password (8+ characters)"
+                minLength={8}
+                required
+              />
+              {fieldErrors.password && (
+                <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.password}</p>
+              )}
+            </div>
 
               <button
                 type="submit"
@@ -158,6 +235,7 @@ export default function ForgotPasswordPage() {
                   setCode("");
                   setPassword("");
                   setError("");
+                  setFieldErrors({});
                 }}
                 className="w-full text-sm text-blue-600 hover:underline"
               >
@@ -188,8 +266,6 @@ export default function ForgotPasswordPage() {
             </p>
           </div>
         )}
-
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Remembered your password?{" "}
           <span

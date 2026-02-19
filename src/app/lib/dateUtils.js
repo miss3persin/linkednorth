@@ -1,6 +1,4 @@
-/**
- * Formats a date string into a relative human-readable time (e.g., "2d ago", "3mo ago").
- */
+
 export const formatPostedTime = (dateString) => {
     if (!dateString) return 'Unknown'
     const date = new Date(dateString)
@@ -23,8 +21,6 @@ export const formatPostedTime = (dateString) => {
     return `${years}y ago`
 }
 
-/**
- * Title cases a contract type string (e.g., "FULL_TIME" -> "Full Time").
- */
+
 export const titleCaseContract = (str) =>
     str ? str.toLowerCase().split(/[\s_-]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : ''
