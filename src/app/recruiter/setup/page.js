@@ -173,7 +173,29 @@ export default function CompanyProfileSetup() {
                                     type="file"
                                     ref={fileInputRef}
                                     onChange={handleLogoUpload}
-                                    accept="image}
+                                    accept="image/*"
+                                    className="hidden"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={triggerLogoUpload}
+                                    disabled={uploadingLogo}
+                                    className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                >
+                                    {uploadingLogo ? (
+                                        <>
+                                            <Loader size="xs" showMessage={false} inline className="text-gray-500" />
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload size={14} />
+                                            Upload Square Logo
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
                         <div className="space-y-2">
                             <label className="block text-[13px] font-semibold text-gray-700">
                                 Headquarters Location
