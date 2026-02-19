@@ -1,4 +1,6 @@
 // components/Navbar/index.js
+export const dynamic = "force-dynamic";
+
 import { currentUser } from "@clerk/nextjs/server";
 import PublicNavbar from "./PublicNavbar";
 import AuthNavbar from "./AuthNavbar";

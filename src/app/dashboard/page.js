@@ -1,4 +1,6 @@
 // app/dashboard/page.js
+export const dynamic = "force-dynamic";
+
 import Sidebar from "../components/layout/Sidebar";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
