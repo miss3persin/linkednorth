@@ -15,7 +15,7 @@ export async function PATCH(req) {
       .from('saved_jobs')
       .update({ status })
       .eq('job_id', jobId)
-      .eq('user_id', userId)
+      .eq('profile_id', userId)
 
     if (error) {
       console.error('Status update error:', error)

@@ -37,7 +37,7 @@ const jobData = [
     jobType: 'On-site',
     description: "We're looking for a skilled frontend developer to join our team in London.",
     imageSrc: '/apple.png',
-    applyLink: 'https://google.com/careers'
+    applyLink: '/jobs'
   },
   {
     jobTitle: 'Backend Developer',
@@ -46,7 +46,7 @@ const jobData = [
     jobType: 'Remote',
     description: 'Join our team to build scalable backend systems.',
     imageSrc: '/Uber.png',
-    applyLink: 'https://amazon.jobs'
+    applyLink: '/jobs'
   },
   {
     jobTitle: 'Product Manager',
@@ -55,7 +55,7 @@ const jobData = [
     jobType: 'Hybrid',
     description: 'Lead the product development for next-gen tools.',
     imageSrc: '/microsoft.png',
-    applyLink: 'https://microsoft.com/careers'
+    applyLink: '/jobs'
   },
   {
     jobTitle: 'Product Manager',
@@ -64,7 +64,7 @@ const jobData = [
     jobType: 'Hybrid',
     description: 'Lead the product development for next-gen tools.',
     imageSrc: '/Netflix.png',
-    applyLink: 'https://microsoft.com/careers'
+    applyLink: '/jobs'
   },
   {
     jobTitle: 'Product Manager',
@@ -73,7 +73,7 @@ const jobData = [
     jobType: 'Hybrid',
     description: 'Lead the product development for next-gen tools.',
     imageSrc: '/Tesla.png',
-    applyLink: 'https://microsoft.com/careers'
+    applyLink: '/jobs'
   },
   {
     jobTitle: 'Product Manager',
@@ -82,7 +82,7 @@ const jobData = [
     jobType: 'Hybrid',
     description: 'Lead the product development for next-gen tools.',
     imageSrc: '/reddit.png',
-    applyLink: 'https://microsoft.com/careers'
+    applyLink: '/jobs'
   }
 ]
 
@@ -197,8 +197,8 @@ export default function HomePage() {
 
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start order-2 sm:order-2">
-                <Button text="Check Career Resources" img={arrow_right} link="/resources" variant="black" />
-                <Button text="Join Our Discord" img={discord_img} link="https://www.google.com/" variant="white" />
+                <Button text="Check Career Resources" img={arrow_right} link="/coming-soon" variant="black" />
+                <Button text="Join Our Discord" img={discord_img} link="/coming-soon" variant="white" />
               </div>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function HomePage() {
               <Button
                 text="Check Resume -$25"
                 img={arrow_right}
-                link=""
+                onClick={() => setAuthModalOpen(true)}
                 variant="black"
               />
             </div>
@@ -369,7 +369,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start mx-auto lg:mx-0">
               <Button
                 text="Find Your Future Job"
-                link="https://www.google.com/"
+                link="/jobs"
                 variant="black"
               />
             </div>

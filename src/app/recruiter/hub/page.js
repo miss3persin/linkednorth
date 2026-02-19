@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import React, { useState, useEffect } from "react";
 import Sidebar from "@/app/components/layout/Sidebar"; // adjust path if needed
 import { useUser } from "@clerk/nextjs";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader } from "@/app/components/ui/Loader";
 
 export default function RecruiterHub() {
     const { user, isLoaded } = useUser();
@@ -127,18 +128,18 @@ export default function RecruiterHub() {
     ];
 
     if (!isLoaded || loading) {
-        return (
-            <div className="flex min-h-screen bg-white">
-                <Sidebar />
-                <main className="flex-1 flex items-center justify-center">
-                    <p className="text-gray-500">Loading...</p>
-                </main>
-            </div>
-        );
-    }
+    return (
+        <div className="recruiter-hub-page flex min-h-screen bg-white">
+            <Sidebar />
+            <main className="flex-1 flex items-center justify-center">
+                <Loader message="Loading recruiter hub" size="lg" />
+            </main>
+        </div>
+    );
+}
 
     return (
-        <div className="flex min-h-screen mt-16 bg-white">
+        <div className="recruiter-hub-page flex min-h-screen mt-[72px] bg-white">
             <Sidebar />
 
             <main className="flex-1 p-4 md:p-8">
@@ -160,7 +161,7 @@ export default function RecruiterHub() {
                                 // Fallback or handle if strictly not recruiter despite page access
                             }
                         }}
-                        className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                        className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors skip-squared"
                     >
                         <span>+</span> Post a Job
                     </button>
@@ -209,8 +210,8 @@ export default function RecruiterHub() {
                                                 <h4 className="font-bold text-sm text-gray-900">{job.title}</h4>
                                                 <span
                                                     className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${job.status === "active"
-                                                            ? "bg-green-100 text-green-700"
-                                                            : "bg-gray-100 text-gray-600"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-gray-100 text-gray-600"
                                                         }`}
                                                 >
                                                     {job.status}
@@ -335,8 +336,8 @@ export default function RecruiterHub() {
                                                         <p className="text-xs font-bold">{app.name}</p>
                                                         <span
                                                             className={`text-[8px] px-1.5 py-0.5 rounded-sm font-bold uppercase ${app.status === "New"
-                                                                    ? "bg-blue-100 text-blue-600"
-                                                                    : "bg-green-100 text-green-600"
+                                                                ? "bg-blue-100 text-blue-600"
+                                                                : "bg-green-100 text-green-600"
                                                                 }`}
                                                         >
                                                             {app.status}

@@ -1,8 +1,9 @@
 "use client";
 import React, { useState } from 'react';
 import Sidebar from '@/app/components/layout/Sidebar';
-import { X, ChevronDown, ChevronRight, Plus, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, ChevronDown, ChevronRight, Plus, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
+import { Loader } from '@/app/components/ui/Loader';
 
 export default function PostJobPage() {
     const [step, setStep] = useState(1);
@@ -305,7 +306,18 @@ export default function PostJobPage() {
                                 disabled={loading}
                                 className="flex items-center gap-2 bg-black text-white px-8 py-2.5 rounded-md text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
                             >
-                                {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                                {loading ? (
+                                    <>
+                                        <Loader
+                                            size="sm"
+                                            showMessage={false}
+                                            inline
+                                            spinnerColor="rgba(255,255,255,0.35)"
+                                            accentColor="#ffffff"
+                                        />
+                                        Publishing...
+                                    </>
+                                ) : (
                                     <>
                                         Publish Job
                                         <CheckCircle2 size={16} />
@@ -339,8 +351,8 @@ export default function PostJobPage() {
     };
 
     return (
-        <div className="min-h-screen flex bg-[#F8F9FB] mt-16 font-sans">
-            {/* <Sidebar /> */}
+        <div className="min-h-screen flex bg-[#F8F9FB] mt-[72px] font-sans">
+            <Sidebar />
             <main className="flex-1 max-w-6xl mx-auto px-6 py-10 md:py-16">
                 {/* Stepper */}
                 {step < 4 && (

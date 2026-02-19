@@ -2,10 +2,11 @@
 
 import { Suspense } from 'react'
 import JobListingsPage from './wrapper/AllJobListings'
+import { Loader } from '@/app/components/ui/Loader'
 
 export default function Wrapper() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loader message="Loading jobs" size="lg" />}>
       <JobListingsPage />
     </Suspense>
   )

@@ -2,6 +2,7 @@
 
 import { Open_Sans } from 'next/font/google'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import logo from '/public/linkednorth-logo-white.png'
 
@@ -25,24 +26,24 @@ export default function Footer() {
 
         {/* Links */}
         <div className="flex flex-col gap-4 sm:gap-6 text-[#7A7A7A] text-sm">
-          <p>Home</p>
-          <p>Job Listings</p>
-          <p>Contact Us</p>
-          <p>Career Resources</p>
+          <Link href="/" className="hover:text-white transition-colors">Home</Link>
+          <Link href="/joblistings" className="hover:text-white transition-colors">Job Listings</Link>
+          <Link href="/coming-soon" className="hover:text-white transition-colors">Contact Us</Link>
+          <Link href="/coming-soon" className="hover:text-white transition-colors">Career Resources</Link>
         </div>
 
         {/* Socials */}
         <div className="flex flex-col gap-4 sm:gap-6 text-[#7A7A7A] text-sm">
-          <p>Twitter</p>
-          <p>LinkedIn</p>
-          <p>Instagram</p>
-          <p>Tiktok</p>
+          <p onClick={() => window.location.reload()} className="cursor-pointer hover:text-white transition-colors">Twitter</p>
+          <p onClick={() => window.location.reload()} className="cursor-pointer hover:text-white transition-colors">LinkedIn</p>
+          <p onClick={() => window.location.reload()} className="cursor-pointer hover:text-white transition-colors">Instagram</p>
+          <p onClick={() => window.location.reload()} className="cursor-pointer hover:text-white transition-colors">Tiktok</p>
         </div>
 
         {/* Newsletter */}
         <div className="flex flex-col gap-4 sm:gap-6 text-[#7A7A7A] text-sm">
-          <p>Join Newsletter</p>
-          <p>Join Community</p>
+          <p onClick={() => window.location.reload()} className="cursor-pointer hover:text-white transition-colors">Join Newsletter</p>
+          <p onClick={() => window.location.reload()} className="cursor-pointer hover:text-white transition-colors">Join Community</p>
         </div>
       </div>
 

@@ -43,13 +43,14 @@ export default function Sidebar() {
   return (
     <aside
       className="
-        bg-white border-r min-h-screen flex flex-col justify-between py-6
+        bg-white border-r flex flex-col justify-between pb-6
         w-16 xl:w-60
         transition-all duration-300
+        sticky top-[72px] h-[calc(100vh-72px)]
       "
     >
-      {/* Menu */}
-      <nav className="space-y-1">
+      {/* Menu - scrollable if too many items */}
+      <nav className="space-y-1 overflow-y-auto thin-scroll">
         {items.map((item) => {
           const active = path.startsWith(item.href);
 
@@ -76,8 +77,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="border-t px-4 pt-4">
+      {/* Logout - pinned to bottom */}
+      <div className="border-t px-4 pt-4 mt-auto">
         <SignOutButton redirectUrl="/">
           <button
             title="Logout"

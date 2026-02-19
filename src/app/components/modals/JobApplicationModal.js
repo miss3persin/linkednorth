@@ -5,7 +5,7 @@ import { X, Mail, Copy, ExternalLink, CheckCircle2, AlertCircle, Info } from 'lu
 export default function JobApplicationModal({
     isOpen,
     onClose,
-    type = 'success', // 'success', 'already_applied', 'error', 'email'
+    type = 'success', // 'success', 'already_applied', 'already_saved', 'error', 'email'
     title,
     message,
     emailAddress,
@@ -20,6 +20,7 @@ export default function JobApplicationModal({
             case 'email':
                 return <Mail size={32} className="text-blue-600" />
             case 'already_applied':
+            case 'already_saved':
                 return <Info size={32} className="text-amber-600" />
             case 'error':
                 return <AlertCircle size={32} className="text-red-600" />
@@ -31,7 +32,8 @@ export default function JobApplicationModal({
     const getIconBg = () => {
         switch (type) {
             case 'email': return 'bg-blue-100'
-            case 'already_applied': return 'bg-amber-100'
+            case 'already_applied':
+            case 'already_saved': return 'bg-amber-100'
             case 'error': return 'bg-red-100'
             default: return 'bg-emerald-100'
         }
@@ -41,6 +43,7 @@ export default function JobApplicationModal({
         switch (type) {
             case 'email': return 'Send Your Application'
             case 'already_applied': return 'Already Applied'
+            case 'already_saved': return 'Already Saved'
             case 'error': return 'Oops! Something went wrong'
             default: return 'Application Recorded!'
         }

@@ -34,9 +34,9 @@ export default function PublicNavbar() {
   return (
     <>
       <nav className={`${openSans.className} relative w-screen`}>
-        <div className="fixed z-50 flex w-screen items-center justify-between bg-white px-8 sm:px-16 xl:px-32 py-4 shadow-sm">
-          {/* Logo Centered */}
-          <div className="relative h-10 w-[150px] flex-shrink-0 mx-auto mt-4 lg:mx-0">
+        <div className="fixed z-50 flex w-screen items-center justify-between bg-white px-8 sm:px-16 xl:px-[8%] py-4 shadow-sm">
+          {/* Logo - Left */}
+          <div className="relative h-10 w-[150px] flex-shrink-0 flex items-center">
             <Link href="/">
               <Image
                 src={logo}
@@ -48,28 +48,60 @@ export default function PublicNavbar() {
             </Link>
           </div>
 
-          {/* Desktop Links */}
-          <div className="hidden lg:flex lg:items-center lg:gap-10 text-[13px]  text-[#868D9B]">
-            <ul className="flex gap-8 xl:gap-10">
-              <li><Link href="/">Home</Link></li>
-              <li><Link href="/jobs">Job Listings</Link></li>
-              <li><Link href="/resources">Career Resources</Link></li>
-              <li><Link href="/contact">Contact Us</Link></li>
+          {/* NavLinks - Centered Illusion */}
+          <div className="hidden lg:flex flex-1 justify-center">
+            <ul className="flex gap-10 xl:gap-12 text-[13px]">
+              <li>
+                <Link
+                  href="/"
+                  className={`${pathname === '/' ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/jobs"
+                  className={`${(pathname === '/jobs' || pathname.startsWith('/jobs/')) ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
+                >
+                  Job Listings
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/coming-soon"
+                  className={`${pathname === '/coming-soon' ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
+                >
+                  Career Resources
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/coming-soon"
+                  className={`${pathname === '/contact' ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
+                >
+                  Contact Us
+                </Link>
+              </li>
             </ul>
-            <div className="flex items-center gap-3 ml-6">
-              <Button
-                text="Post A Job"
-                img=""
-                variant="white"
-                onClick={handleOpenAuthModal}
-              />
-              <Button
-                text="Login/SignUp"
-                img=""
-                variant="black"
-                onClick={handleOpenAuthModal}
-              />
-            </div>
+          </div>
+
+          {/* Buttons - Right */}
+          <div className="hidden lg:flex items-center gap-4 ml-8">
+            <Button
+              text="Post A Job"
+              img=""
+              variant="white"
+              onClick={handleOpenAuthModal}
+              className="!px-5 !py-2"
+            />
+            <Button
+              text="Login/SignUp"
+              img=""
+              variant="black"
+              onClick={handleOpenAuthModal}
+              className="!px-5 !py-2"
+            />
           </div>
 
           {/* Mobile Hamburger */}
@@ -94,10 +126,10 @@ export default function PublicNavbar() {
                 <Link href="/jobs" onClick={() => setMenuOpen(false)}>Job Listings</Link>
               </li>
               <li className="hover:text-black cursor-pointer">
-                <Link href="/resources" onClick={() => setMenuOpen(false)}>Career Resources</Link>
+                <Link href="/coming-soon" onClick={() => setMenuOpen(false)}>Career Resources</Link>
               </li>
               <li className="hover:text-black cursor-pointer">
-                <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+                <Link href="/coming-soon" onClick={() => setMenuOpen(false)}>Contact Us</Link>
               </li>
             </ul>
             <div className="flex flex-col gap-4 mt-6">

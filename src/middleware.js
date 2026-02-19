@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 // Define which routes need login
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
-  '/joblistings(.*)',
+  '/joblistings', // Main page protected
   '/library(.*)',
   '/resumebuilder(.*)',
   '/premium(.*)',

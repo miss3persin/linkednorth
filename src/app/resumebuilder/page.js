@@ -3,7 +3,7 @@ import ResumeBuilderClient from './ResumeBuilderClient'
 
 export default function ResumeBuilderPage() {
   return (
-    <div className="flex min-h-screen bg-white mt-16 overflow-x-hidden">
+    <div className="resume-builder-page flex min-h-screen bg-white mt-[72px]">
       {/* Sidebar */}
       <Sidebar />
 
@@ -11,7 +11,7 @@ export default function ResumeBuilderPage() {
         <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Resume Builder</h1>
         <p className="text-xs sm:text-sm text-gray-500 mt-1">Build Your Resume</p>
 
-      
+
 
         <ResumeBuilderClient />
       </div>

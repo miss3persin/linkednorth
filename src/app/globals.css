@@ -42,4 +42,16 @@
   font-family: var(--font-open-sans);
 }
 
+
+  .dashboard-page button:not(.skip-squared),
+  .joblistings-page button:not(.skip-squared),
+  .recruiter-hub-page button:not(.skip-squared),
+  .library-page button:not(.skip-squared),
+  .resume-builder-page button:not(.skip-squared),
+  .premium-page button:not(.skip-squared) {
+    border-radius: 0 !important;
+    padding-top: calc(0.75rem + 1px) !important;
+    padding-bottom: calc(0.75rem + 1px) !important;
+  }
+
 }

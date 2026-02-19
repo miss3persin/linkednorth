@@ -5,31 +5,13 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useUser } from '@clerk/nextjs'
 import Sidebar from '@/app/components/layout/Sidebar'
-import { Button } from '@/app/components/ui/Button'
 import logo from '/public/linkednorth-logo.png'
-import arrow_right from '/public/chevron right.png'
 import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
 import AuthModals from '@/app/components/modals/AuthModals'
-
-const formatPostedTime = (dateString) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now - date
-
-  const seconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-  const months = Math.floor(days / 30)
-  const years = Math.floor(days / 365)
-
-  if (seconds < 60) return 'Just now'
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`
-  if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`
-  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`
-  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`
-  return `${years} year${years !== 1 ? 's' : ''} ago`
-}
+import JobDescriptionRenderer from '@/app/components/jobs/JobDescriptionRenderer'
+import { MapPin, Clock, Briefcase, Calendar, ExternalLink, Bookmark, ArrowLeft, Share2, Building2 } from 'lucide-react'
+import { formatPostedTime, titleCaseContract } from '@/app/lib/dateUtils'
+import { Loader } from '@/app/components/ui/Loader'
 
 export default function JobDetailsPage() {
   const params = useParams()
@@ -42,25 +24,15 @@ export default function JobDetailsPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [openAuthModal, setOpenAuthModal] = useState(false)
 
-  // Unified modal state
   const [modalState, setModalState] = useState({
-    isOpen: false,
-    type: 'success',
-    title: '',
-    message: '',
-    emailAddress: '',
-    externalLink: '',
+    isOpen: false, type: 'success', title: '', message: '', emailAddress: '', externalLink: '',
   })
 
   useEffect(() => {
     async function fetchJobDetails() {
       try {
         const res = await fetch(`/api/jobs/${params.id}`)
-
-        if (!res.ok) {
-          throw new Error('Job not found')
-        }
-
+        if (!res.ok) throw new Error('Job not found')
         const data = await res.json()
         setJob(data.job)
       } catch (err) {
@@ -70,19 +42,11 @@ export default function JobDetailsPage() {
         setLoading(false)
       }
     }
-
-    if (params.id) {
-      fetchJobDetails()
-    }
+    if (params.id) fetchJobDetails()
   }, [params.id])
 
   const handleSaveJob = async () => {
-    if (!isSignedIn) {
-      alert("Please sign in to save jobs")
-      router.push('/?redirect=/joblistings/' + params.id)
-      return
-    }
-
+    if (!isSignedIn) { setOpenAuthModal(true); return }
     setIsSaving(true)
     try {
       const res = await fetch('/api/jobs/save', {
@@ -93,173 +57,96 @@ export default function JobDetailsPage() {
           userId: user.id,
         }),
       })
-
-      if (!res.ok) throw new Error('Failed to save job')
-
-      // Copy the shareable link
-      const jobUrl = `${window.location.origin}/jobs/${params.id}`
-      await navigator.clipboard.writeText(jobUrl)
+      if (!res.ok) throw new Error('Failed')
 
       setModalState({
         isOpen: true,
         type: 'success',
         title: 'Job Saved!',
-        message: 'This job has been saved to your profile and the link has been copied to your clipboard.',
+        message: 'This job has been saved to your profile library for later.',
         emailAddress: '',
-        externalLink: '',
+        externalLink: ''
       })
-    } catch (err) {
-      console.error("Failed to save job:", err)
+    } catch {
       setModalState({
         isOpen: true,
         type: 'error',
         title: 'Failed to Save',
         message: 'Could not save this job. Please try again.',
         emailAddress: '',
-        externalLink: '',
+        externalLink: ''
       })
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleApply = async () => {
-    if (!isSignedIn) {
-      alert("Please sign in to apply")
-      router.push('/?redirect=/joblistings/' + params.id)
-      return
-    }
-
-    if (!job) return
-
+  const handleShare = async () => {
     try {
-      // Track application in database
-      const res = await fetch('/api/applications/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: job.id,
-          jobTitle: job.jobTitle,
-          company: job.company,
-          applyLink: job.applyLink,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (data.success) {
-        if (data.alreadyApplied) {
-          setModalState({
-            isOpen: true,
-            type: 'already_applied',
-            title: 'Already Applied',
-            message: 'You have already submitted an application for this position. Check your email for updates from the employer.',
-            emailAddress: '',
-            externalLink: '',
-          })
-          return
-        }
-
-        const applyLink = job.applyLink
-
-        // Check if it's a mailto link
-        if (applyLink && applyLink.startsWith('mailto:')) {
-          const emailAddress = applyLink.replace('mailto:', '')
-          setModalState({
-            isOpen: true,
-            type: 'email',
-            title: 'Send Your Application',
-            message: 'Your application has been recorded. Send your resume to:',
-            emailAddress,
-            externalLink: '',
-          })
-        } else if (applyLink) {
-          // For regular URLs
-          setModalState({
-            isOpen: true,
-            type: 'success',
-            title: 'Application Recorded!',
-            message: 'Your application has been submitted successfully. Click below to continue to the application page.',
-            emailAddress: '',
-            externalLink: applyLink,
-          })
-        } else {
-          setModalState({
-            isOpen: true,
-            type: 'success',
-            title: 'Application Recorded!',
-            message: 'Your application has been submitted successfully!',
-            emailAddress: '',
-            externalLink: '',
-          })
-        }
-      } else {
-        setModalState({
-          isOpen: true,
-          type: 'error',
-          title: 'Application Failed',
-          message: data.error || 'Failed to submit your application. Please try again.',
-          emailAddress: '',
-          externalLink: '',
-        })
-      }
-    } catch (err) {
-      console.error('Error applying:', err)
+      const jobUrl = `${window.location.origin}/joblistings/${params.id}`
+      await navigator.clipboard.writeText(jobUrl)
       setModalState({
         isOpen: true,
-        type: 'error',
-        title: 'Something Went Wrong',
-        message: 'Failed to submit your application. Please check your connection and try again.',
+        type: 'success',
+        title: 'Link Copied!',
+        message: 'A shareable link has been copied to your clipboard.',
         emailAddress: '',
-        externalLink: '',
+        externalLink: ''
       })
+    } catch {
+      alert('Failed to copy link.')
     }
   }
 
-  // Modal action handlers
+  const handleApply = async () => {
+    if (!isSignedIn) { setOpenAuthModal(true); return }
+    if (!job) return
+    try {
+      const res = await fetch('/api/applications/create', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId: job.id, jobTitle: job.jobTitle, company: job.company, applyLink: job.applyLink }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        if (data.alreadyApplied) {
+          setModalState({ isOpen: true, type: 'already_applied', title: 'Already Applied', message: 'You have already applied for this position.', emailAddress: '', externalLink: '' })
+          return
+        }
+        const link = job.applyLink
+        if (link?.startsWith('mailto:')) {
+          setModalState({ isOpen: true, type: 'email', title: 'Send Your Application', message: 'Your application has been recorded. Send your resume to:', emailAddress: link.replace('mailto:', ''), externalLink: '' })
+        } else if (link) {
+          setModalState({ isOpen: true, type: 'success', title: 'Application Recorded!', message: "Your application has been submitted. Click below to continue to the employer's page.", emailAddress: '', externalLink: link })
+        } else {
+          setModalState({ isOpen: true, type: 'success', title: 'Application Recorded!', message: 'Your application has been submitted successfully!', emailAddress: '', externalLink: '' })
+        }
+      } else {
+        setModalState({ isOpen: true, type: 'error', title: 'Application Failed', message: data.error || 'Failed to submit. Please try again.', emailAddress: '', externalLink: '' })
+      }
+    } catch {
+      setModalState({ isOpen: true, type: 'error', title: 'Something Went Wrong', message: 'Failed to submit. Check your connection and try again.', emailAddress: '', externalLink: '' })
+    }
+  }
+
   const handleModalPrimaryAction = () => {
-    if (modalState.type === 'email') {
-      // Open email client
-      window.location.href = `mailto:${modalState.emailAddress}`
-      setModalState({ ...modalState, isOpen: false })
-    }
+    if (modalState.type === 'email') { window.location.href = `mailto:${modalState.emailAddress}`; setModalState({ ...modalState, isOpen: false }) }
   }
-
   const handleModalSecondaryAction = async () => {
     if (modalState.type === 'email') {
-      // Copy email to clipboard
       try {
         await navigator.clipboard.writeText(modalState.emailAddress)
-        setModalState({
-          isOpen: true,
-          type: 'success',
-          title: 'Email Copied!',
-          message: `${modalState.emailAddress}\n\nThe email address has been copied to your clipboard. You can now paste it in your email client.`,
-          emailAddress: '',
-          externalLink: '',
-        })
-      } catch (err) {
-        console.error('Failed to copy:', err)
-        // Fallback: show in prompt
-        prompt('Copy this email address:', modalState.emailAddress)
-        setModalState({ ...modalState, isOpen: false })
-      }
+        setModalState({ isOpen: true, type: 'success', title: 'Email Copied!', message: `${modalState.emailAddress} has been copied to your clipboard.`, emailAddress: '', externalLink: '' })
+      } catch { setModalState({ ...modalState, isOpen: false }) }
     }
   }
-
-  const closeModal = () => {
-    setModalState({ ...modalState, isOpen: false })
-  }
+  const closeModal = () => setModalState({ ...modalState, isOpen: false })
 
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-white mt-16">
+      <div className="min-h-screen flex bg-gray-50 mt-[72px]">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent mb-4"></div>
-            <p className="text-gray-600">Loading job details...</p>
-          </div>
+          <Loader message="Loading job details" size="lg" />
         </main>
       </div>
     )
@@ -267,16 +154,17 @@ export default function JobDetailsPage() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen flex bg-white mt-16">
+      <div className="min-h-screen flex bg-gray-50 mt-[72px]">
         <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">{error || 'Job not found'}</p>
+        <main className="flex-1 flex items-center justify-center px-4">
+          <div className="bg-white p-8 rounded-none border border-gray-200 text-center max-w-md w-full">
+            <h2 className="text-xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Job Not Found</h2>
+            <p className="text-gray-500 mb-6 text-sm">{error || "The job you're looking for doesn't exist."}</p>
             <button
-              onClick={() => router.push('/joblistings')}
-              className="text-blue-600 hover:underline"
+              onClick={() => router.push('/jobs')}
+              className="w-full bg-black text-white py-3 rounded-none font-bold hover:bg-gray-800 transition-all text-sm uppercase tracking-wider"
             >
-              Back to job listings
+              Back to Job Board
             </button>
           </div>
         </main>
@@ -285,114 +173,142 @@ export default function JobDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white mt-16">
+    <div className="min-h-screen flex bg-gray-50 mt-[72px]">
       <Sidebar />
 
-      <main className="flex-1 max-w-5xl mx-auto px-6 sm:px-12 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="text-blue-600 hover:underline mb-6 text-sm"
-        >
-          ← Back to listings
-        </button>
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-6">
 
-        {/* Job Header */}
-        <div className="bg-white border rounded-lg p-6 mb-6">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
-              <Image
-                src={job.imageSrc || logo}
-                alt="Company Logo"
-                fill
-                className="object-contain p-1"
-              />
-            </div>
-
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{job.jobTitle}</h1>
-              <p className="text-lg text-gray-700 mb-1">{job.company}</p>
-              <p className="text-sm text-gray-500">
-                {job.location} • {formatPostedTime(job.postedTime)}
-              </p>
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button onClick={() => router.back()} className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-black transition-all">
+              <ArrowLeft size={14} /> Back to Listings
+            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-black transition-all"
+              >
+                Share <Share2 size={14} />
+              </button>
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {job.jobType && (
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-                {job.jobType}
-              </span>
-            )}
-            {job.contractType && (
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
-                {job.contractType}
-              </span>
-            )}
-          </div>
+          {/* ===== Condensed Header Section ===== */}
+          <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-10">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
+              <div className="flex flex-col sm:flex-row items-start gap-6">
+                <div className="relative w-20 h-20 rounded-none border border-gray-100 overflow-hidden bg-white flex-shrink-0">
+                  <Image
+                    src={job.imageSrc || logo}
+                    alt={job.company}
+                    fill
+                    className="object-contain p-2"
+                    referrerPolicy="no-referrer"
+                    unoptimized={true}
+                    onError={(e) => {
+                      e.target.src = logo.src || logo
+                    }}
+                  />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight mb-2">{job.jobTitle}</h1>
+                  <div className="flex items-center gap-2 text-gray-500 font-bold text-sm">
+                    {job.company}
+                  </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleApply}
-              className="bg-black text-white px-6 py-3 rounded font-medium hover:bg-gray-800 transition flex items-center gap-2"
-            >
-              Apply Now
-              <Image src={arrow_right} alt="arrow" width={20} height={20} />
-            </button>
+                  <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+                    <div className="flex items-center gap-1.5 text-[0.65rem] sm:text-xs font-bold text-gray-400">
+                      <MapPin size={14} /> {job.location || 'Remote'}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[0.65rem] sm:text-xs font-bold text-gray-400">
+                      <Clock size={14} /> {titleCaseContract(job.contractType) || 'Full Time'}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[0.65rem] sm:text-xs font-bold text-gray-400">
+                      <Calendar size={14} /> {formatPostedTime(job.postedTime)}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <button
-              onClick={handleSaveJob}
-              disabled={isSaving}
-              className="border border-gray-300 px-6 py-3 rounded font-medium hover:bg-gray-50 transition disabled:opacity-50"
-            >
-              {isSaving ? 'Saving...' : 'Save Job'}
-            </button>
-          </div>
-        </div>
-
-        {/* Job Description */}
-        <div className="bg-white border rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Job Description</h2>
-          <div className="prose max-w-none">
-            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {job.description}
-            </p>
-          </div>
-
-          {/* Additional Details */}
-          {job.skills && job.skills.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-3">Required Skills</h3>
-              <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    {skill}
-                  </span>
-                ))}
+              <div className="flex flex-col gap-3 min-w-[180px]">
+                <button
+                  onClick={handleApply}
+                  className="w-full bg-black text-white rounded-none px-6 py-4 font-bold text-sm hover:bg-gray-800 transition-all border border-black shadow-none"
+                >
+                  Apply Now
+                </button>
+                <button
+                  onClick={handleSaveJob}
+                  disabled={isSaving}
+                  className="w-full bg-white text-black rounded-none px-6 py-4 font-bold text-sm hover:bg-gray-50 transition-all border border-gray-200"
+                >
+                  {isSaving ? 'Saving...' : 'Bookmark'}
+                </button>
               </div>
             </div>
-          )}
-
-          {/* Apply Section */}
-          <div className="mt-8 pt-6 border-t">
-            <h3 className="text-lg font-semibold mb-3">Ready to apply?</h3>
-            <p className="text-gray-600 mb-4">
-              Click the button below to apply for this position.
-            </p>
-            <button
-              onClick={handleApply}
-              className="bg-black text-white px-6 py-3 rounded font-medium hover:bg-gray-800 transition"
-            >
-              Apply for this job
-            </button>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+            {/* ===== Description ===== */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-10">
+                <h2 className="text-xs font-black text-gray-400 mb-8 uppercase tracking-[0.2em] flex items-center gap-3">
+                  Job Description
+                  <div className="flex-1 h-[1px] bg-gray-100" />
+                </h2>
+
+                <div className="prose prose-sm prose-gray max-w-none">
+                  <JobDescriptionRenderer description={job.description} />
+                </div>
+
+                {job.skills?.length > 0 && (
+                  <div className="mt-12 pt-8 border-t border-gray-100">
+                    <h3 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.2em]">Required Skills</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {job.skills.map((skill, idx) => (
+                        <span key={idx} className="bg-white text-gray-900 border border-gray-200 px-3 py-1.5 rounded-none text-[10px] font-bold uppercase tracking-wider">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ===== Sidebar Info ===== */}
+            <div className="space-y-6 lg:sticky lg:top-[92px]">
+              <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-8">
+                <h4 className="font-bold text-sm text-gray-900 mb-4">Job Summary</h4>
+                <ul className="space-y-5">
+                  <li className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Company</span>
+                    <span className="text-sm font-bold text-gray-700">{job.company}</span>
+                  </li>
+                  <li className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Category</span>
+                    <span className="text-sm font-bold text-gray-700">{job.jobType || 'General'}</span>
+                  </li>
+                  <li className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Commitment</span>
+                    <span className="text-sm font-bold text-gray-700">{titleCaseContract(job.contractType) || 'Full Time'}</span>
+                  </li>
+                  <li className="flex flex-col gap-1 pt-4 border-t border-gray-50">
+                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Job Identifier</span>
+                    <span className="text-[10px] font-mono text-gray-500 break-all">{params.id}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </main>
+
+      <AuthModals open={openAuthModal} setOpen={setOpenAuthModal} />
 
       <JobApplicationModal
         isOpen={modalState.isOpen}

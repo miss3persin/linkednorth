@@ -4,7 +4,7 @@ export default function ActionButtons({ step, onBack, onNext }) {
       <button
         disabled={step === 1}
         onClick={onBack}
-        className="text-xs px-4 py-2 border rounded w-full sm:w-auto disabled:opacity-50"
+        className="text-xs px-4 py-2 border rounded w-full sm:w-auto disabled:opacity-50 skip-squared"
       >
         Back
       </button>
@@ -12,7 +12,7 @@ export default function ActionButtons({ step, onBack, onNext }) {
       {step < 5 && (
         <button
           onClick={onNext}
-          className="text-xs px-4 py-2 bg-gray-900 text-white rounded w-full sm:w-auto"
+          className="text-xs px-4 py-2 bg-gray-900 text-white rounded w-full sm:w-auto skip-squared"
         >
           Next →
         </button>

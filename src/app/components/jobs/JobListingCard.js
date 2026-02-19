@@ -14,42 +14,14 @@ import save_btn from '/public/job_save_btn.png'
 import logo from '/public/linkednorth-logo.png'
 import { Button } from '../ui/Button'
 import JobApplicationModal from '../modals/JobApplicationModal'
+import { stripHtml } from '../../lib/cleanDescription'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
 const inter = Inter({ subsets: ['latin'] })
 
-const formatPostedTime = (dateString) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now - date
+import { formatPostedTime } from '../../lib/dateUtils'
 
-  const seconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-  const months = Math.floor(days / 30)
-  const years = Math.floor(days / 365)
 
-  if (seconds < 60) return 'Just now'
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`
-  if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`
-  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`
-  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`
-  return `${years} year${years !== 1 ? 's' : ''} ago`
-}
-
-// Truncate description to a specific number of sentences
-const truncateDescription = (text, sentenceLimit = 3) => {
-  if (!text) return ''
-
-  // Split by sentence-ending punctuation
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text]
-
-  if (sentences.length <= sentenceLimit) return text
-
-  // Join first few sentences and add ellipsis
-  return sentences.slice(0, sentenceLimit).join(' ').trim() + '...'
-}
 
 
 export const JobListingCard = ({
@@ -205,36 +177,19 @@ export const JobListingCard = ({
     }
   }
 
-  const handleSaveJob = async () => {
-    if (!isSignedIn) {
-      setOpenAuthModal(true)
-      return
-    }
-
+  const handleShareJob = async () => {
     setIsSaving(true)
     try {
-      const response = await fetch("/api/jobs/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jobId: id,
-          userId: user.id,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to save job')
-      }
-
-      // Copy the shareable link
-      const jobUrl = `${window.location.origin}/jobs/${id}`
+      // Copy the shareable link (works for both /jobs and /joblistings)
+      const baseUrl = window.location.origin
+      const jobUrl = `${baseUrl}/joblistings/${id}`
       await navigator.clipboard.writeText(jobUrl)
 
       setModalState({
         isOpen: true,
         type: 'success',
-        title: 'Job Saved!',
-        message: 'This job has been saved to your profile and the link has been copied to your clipboard.',
+        title: 'Link Copied!',
+        message: 'A shareable link to this job has been copied to your clipboard.',
         emailAddress: '',
         externalLink: '',
       })
@@ -243,8 +198,8 @@ export const JobListingCard = ({
       setModalState({
         isOpen: true,
         type: 'error',
-        title: 'Failed to Save',
-        message: 'Could not save this job. Please try again.',
+        title: 'Failed to Copy',
+        message: 'Could not copy the link. Please try copying it manually.',
         emailAddress: '',
         externalLink: '',
       })
@@ -302,22 +257,27 @@ export const JobListingCard = ({
         onSecondaryAction={handleModalSecondaryAction}
       />
 
-      <div className="flex w-full max-w-[48rem] flex-col rounded-sm border border-[#E5E7EB] bg-white p-6 shadow-sm">
+      <div className="flex w-full max-w-[48rem] flex-col rounded-sm border border-[#E5E7EB] bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
         {/* === Top Section === */}
         <div className="flex items-start justify-between flex-wrap gap-3 sm:gap-0">
 
-          <div className="flex gap-3 sm:gap-4">
-            <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
+          <div className="flex gap-3 sm:gap-4 w-full sm:w-[72%] md:w-[75%] lg:w-[80%] shrink-0">
+            <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-white border border-gray-100">
               <Image
                 src={imageSrc ? imageSrc : logo}
                 alt="Company Logo"
                 fill
                 className="object-contain p-1"
+                referrerPolicy="no-referrer"
+                unoptimized={true}
+                onError={(e) => {
+                  e.target.src = logo.src || logo
+                }}
               />
             </div>
 
-            <div className="flex flex-col gap-0.5 sm:gap-1">
-              <p className="font-bold text-lg sm:text-xl md:text-2xl text-[#111827] leading-snug">
+            <div className="flex flex-col gap-0.5 sm:gap-1 max-w-[75%] sm:max-w-[80%] md:max-w-[85%]">
+              <p className="font-bold text-lg sm:text-xl md:text-2xl text-[#111827] leading-snug line-clamp-2">
                 {jobTitle}
               </p>
               <div className="flex flex-wrap items-center gap-1 text-[0.65rem] sm:text-xs md:text-sm text-[#4F98FF]">
@@ -333,18 +293,18 @@ export const JobListingCard = ({
           <div className="flex flex-col gap-1">
             <Image
               src={save_btn}
-              alt="save"
+              alt="share"
               width={16}
               height={16}
               className={`cursor-pointer ${isSaving ? 'opacity-50' : 'hover:opacity-80'}`}
-              onClick={handleSaveJob}
+              onClick={handleShareJob}
             />
           </div>
         </div>
 
         {/* === Description === */}
-        <p className="text-xs sm:text-sm md:text-base text-[#4B5563] leading-relaxed pl-0 sm:pl-[4.5rem] mb-3 sm:mb-2 max-w-[40rem] mt-2 sm:mt-0">
-          {truncateDescription(description, 2)}
+        <p className="text-xs sm:text-sm md:text-base text-[#4B5563] leading-relaxed pl-0 sm:pl-[4.5rem] mb-3 sm:mb-2 max-w-[40rem] mt-2 sm:mt-0 line-clamp-2">
+          {stripHtml(description)}
         </p>
 
         {/* === Tags === */}
@@ -353,7 +313,13 @@ export const JobListingCard = ({
             {jobType}
           </span>
           <span className="rounded-full bg-blue-100 px-2 sm:px-3 py-0.5 sm:py-1 text-[0.65rem] sm:text-xs font-medium text-blue-800">
-            {contractType}
+            {contractType
+              ? contractType
+                .toLowerCase()
+                .split(/[\s_-]+/)
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(' ')
+              : ''}
           </span>
         </div>
 

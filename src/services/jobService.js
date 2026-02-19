@@ -193,33 +193,67 @@ async function fetchInternalJobs() {
     }
 }
 
-export async function getJobs({ search = "", limit = 100, dedupe = true } = {}) {
+export async function getJobs({ search = "", geo = "", limit = 25, offset = 0, sort = "recent", dedupe = true } = {}) {
     const results = await Promise.allSettled([
         safeFetch(fetchYCJobs, "ycombinator"),
         safeFetch(() => fetchRemotiveJobs(search), "remotive"),
         safeFetch(fetchJobicyJobs, "jobicy"),
-        fetchInternalJobs() // Internal jobs are not "safeFetch" wrapped here so we can see errors during dev
+        fetchInternalJobs()
     ]);
 
-    const jobs = results
+    let jobs = results
         .filter((r) => r.status === "fulfilled")
         .flatMap((r) => {
-            if (Array.isArray(r.value)) return r.value; // Internal jobs case
+            if (Array.isArray(r.value)) return r.value;
             return (r.value.ok ? r.value.data : []);
         });
 
-    // Sort internal jobs to the top
-    const internalJobs = jobs.filter(j => j.source === "internal");
-    const otherJobs = jobs.filter(j => j.source !== "internal");
+    // Filter by keyword (job title, company, description)
+    if (search) {
+        const query = search.toLowerCase();
+        jobs = jobs.filter(job =>
+            job.jobTitle?.toLowerCase().includes(query) ||
+            job.company?.toLowerCase().includes(query) ||
+            job.description?.toLowerCase().includes(query)
+        );
+    }
 
-    const processedJobs = dedupe ? dedupeJobs([...internalJobs, ...otherJobs]) : [...internalJobs, ...otherJobs];
-    const finalJobs = processedJobs.slice(0, limit);
+    // Filter by location/geo
+    if (geo) {
+        const geoQuery = geo.toLowerCase();
+        jobs = jobs.filter(job =>
+            job.location?.toLowerCase().includes(geoQuery) ||
+            job.jobType?.toLowerCase().includes(geoQuery)
+        );
+    }
+
+    // Deduplication
+    if (dedupe) {
+        jobs = dedupeJobs(jobs);
+    }
+
+    // Sorting
+    if (sort === "recent") {
+        jobs.sort((a, b) => {
+            // Prioritize internal jobs
+            if (a.source === "internal" && b.source !== "internal") return -1;
+            if (b.source === "internal" && a.source !== "internal") return 1;
+
+            const dateA = new Date(a.postedTime || 0);
+            const dateB = new Date(b.postedTime || 0);
+            return dateB - dateA;
+        });
+    }
+
+    const totalCount = jobs.length;
+    const paginatedJobs = jobs.slice(offset, offset + limit);
 
     return {
-        jobs: finalJobs,
+        jobs: paginatedJobs,
+        totalCount,
         sources: results.map((r) =>
             r.status === "fulfilled"
-                ? { source: r.value.source, ok: r.value.ok }
+                ? { source: r.value.source || (Array.isArray(r.value) ? "internal" : "unknown"), ok: r.value.ok ?? true }
                 : { source: "unknown", ok: false }
         ),
     };

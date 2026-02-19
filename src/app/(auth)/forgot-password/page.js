@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, useSignIn } from "@clerk/nextjs";
+import { Loader } from "@/app/components/ui/Loader";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -26,7 +27,7 @@ export default function ForgotPasswordPage() {
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <Loader message="Preparing page" size="md" />
       </div>
     );
   }

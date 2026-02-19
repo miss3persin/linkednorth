@@ -7,79 +7,94 @@ import { ChevronDown } from 'lucide-react'
 import { JobListingCard } from '../../components/jobs/JobListingCard'
 import { saveJobsRedirect } from '../../lib/authRedirect'
 import { SearchBar } from '../../components/ui/SearchBar'
+import { HiMenu, HiX } from 'react-icons/hi'
+import { stripHtml } from '../../lib/cleanDescription'
 import { Inter } from 'next/font/google'
 import overlay from '/public/Overlay.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
-import logo from '/public/linkednorth-logo.png'
 import { useUser } from "@clerk/nextjs"
+import JobApplicationModal from '../modals/JobApplicationModal'
+import AuthModals from '../modals/AuthModals'
 
 export const dynamic = "force-dynamic";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
-const formatPostedTime = (dateString) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now - date
+import { formatPostedTime } from '@/app/lib/dateUtils'
+import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
 
-  const seconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-  const months = Math.floor(days / 30)
-  const years = Math.floor(days / 365)
-
-  if (seconds < 60) return 'Just now'
-  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`
-  if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`
-  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`
-  if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`
-  return `${years} year${years !== 1 ? 's' : ''} ago`
-}
+import { Pagination } from '../../components/ui/Pagination'
+import Sidebar from '@/app/components/layout/Sidebar'
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedJob, setSelectedJob] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalJobs, setTotalJobs] = useState(0)
+  const [sortBy, setSortBy] = useState('recent')
+  const JOBS_PER_PAGE = 25
+  const MAX_PAGES = 50
 
   const searchParams = useSearchParams()
   const router = useRouter()
-  const jobTitleQuery = searchParams.get('jobTitle') || ''
-  const countryQuery = searchParams.get('country') || ''
+  const jobTitleQuery = searchParams.get('search') || ''
+  const countryQuery = searchParams.get('geo') || ''
 
   const { isSignedIn, user } = useUser()
+
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    emailAddress: '',
+    externalLink: '',
+  })
+
+  const [isSaving, setIsSaving] = useState(false)
+
+  const [openAuthModal, setOpenAuthModal] = useState(false)
 
   const handleJobClick = (job) => {
     router.push(`/joblistings/${job.id}`)
   }
 
   useEffect(() => {
+    // Reset to page 1 when search queries or sort changes
+    setCurrentPage(1)
+  }, [jobTitleQuery, countryQuery, sortBy])
+
+  useEffect(() => {
     async function fetchJobs() {
       setLoading(true)
       setError(null)
       try {
-        // Map old query params to new merged API params
         const query = new URLSearchParams()
         if (jobTitleQuery) query.append('search', jobTitleQuery)
         if (countryQuery) query.append('geo', countryQuery)
-        query.append('limit', '100') // fetch max 100 jobs by default
+
+        const offset = (currentPage - 1) * JOBS_PER_PAGE
+        query.append('limit', JOBS_PER_PAGE.toString())
+        query.append('offset', offset.toString())
+        query.append('sort', sortBy)
 
         const res = await fetch(`/api/jobs?${query.toString()}`)
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
         const data = await res.json()
-        const fetchedJobs = data.jobs || []
-        setJobs(fetchedJobs)
+        setJobs(data.jobs || [])
+        setTotalJobs(data.totalCount || 0)
 
         // Cache jobs in background (optional)
-        if (fetchedJobs.length > 0) {
+        if (data.jobs && data.jobs.length > 0) {
           fetch('/api/jobs/cache', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ jobs: fetchedJobs }),
+            body: JSON.stringify({ jobs: data.jobs }),
           })
             .then(res => {
               if (res.status === 401) console.warn("Not logged in, skipping cache.");
@@ -96,7 +111,12 @@ export default function JobsPage() {
     }
 
     fetchJobs()
-  }, [jobTitleQuery, countryQuery])
+  }, [jobTitleQuery, countryQuery, currentPage, sortBy])
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleViewDetails = (job) => {
     setSelectedJob(job)
@@ -104,32 +124,60 @@ export default function JobsPage() {
 
   const handleSaveJob = async (job) => {
     if (!isSignedIn) {
-      saveJobsRedirect(searchParams)
-      alert("Please sign in to save jobs")
+      setOpenAuthModal(true)
       return
     }
+
+    if (!job) return
+
+    setIsSaving(true)
 
     try {
       const res = await fetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: job.id,
-          userId: user.id,
-        }),
+        body: JSON.stringify(buildSaveJobPayload(job, user.id)),
       })
 
-      if (!res.ok) throw new Error('Failed to save job')
+      const resData = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(resData.error || 'Failed to save job')
 
-      alert("Job saved successfully!")
+      const alreadySaved =
+        resData.alreadySaved ||
+        resData.message?.toLowerCase().includes('already saved')
+
+      setModalState({
+        isOpen: true,
+        type: alreadySaved ? 'already_saved' : 'success',
+        title: alreadySaved ? 'Already Saved' : 'Job Bookmarked!',
+        message: alreadySaved
+          ? resData.message || 'This job is already in your library.'
+          : 'This job has been saved to your profile library for later.',
+        emailAddress: '',
+        externalLink: '',
+      })
     } catch (err) {
-      console.error("Failed to save job:", err)
-      alert("Failed to save job. Please try again.")
+      console.error('Failed to save job:', err)
+      setModalState({
+        isOpen: true,
+        type: 'error',
+        title: 'Save Failed',
+        message: 'Could not save this job. Please try again.',
+        emailAddress: '',
+        externalLink: '',
+      })
+    } finally {
+      setIsSaving(false)
     }
   }
 
+  const closeModal = () => setModalState({ ...modalState, isOpen: false })
+
+  const totalPages = Math.min(Math.ceil(totalJobs / JOBS_PER_PAGE), MAX_PAGES)
+
   return (
-    <div className="min-h-screen flex bg-white mt-16">
+    <div className="min-h-screen flex bg-white mt-[72px]">
+      <Sidebar />
 
       <main className="flex-1 flex flex-col">
         {/* === Hero Section === */}
@@ -162,37 +210,57 @@ export default function JobsPage() {
                   ? 'Getting jobs...'
                   : error
                     ? 'Error loading jobs'
-                    : `${jobs.length} jobs found`}
+                    : `${totalJobs} jobs found`}
               </h3>
 
-              <button className="flex items-center border px-3 py-1 rounded text-sm sm:text-xs">
-                Most Recent <ChevronDown size={16} className="ml-1" />
-              </button>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="appearance-none bg-white border border-gray-200 px-4 py-2 pr-8 rounded text-sm sm:text-xs font-medium focus:outline-none focus:ring-2 focus:ring-black/5"
+                >
+                  <option value="recent">Most Recent</option>
+                  <option value="relevance">Relevance</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+              </div>
             </div>
 
             <div className="flex flex-col gap-6 sm:gap-4">
               {loading ? (
-                <p className="text-gray-500">Looking for jobs...</p>
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-40 bg-gray-50 animate-pulse rounded-sm border border-gray-100" />
+                  ))}
+                </div>
               ) : error ? (
                 <p className="text-red-500">{error}</p>
               ) : jobs.length > 0 ? (
-                jobs.map((job) => (
-                  <JobListingCard
-                    key={job.id}
-                    id={job.id}
-                    jobTitle={job.jobTitle}
-                    company={job.company}
-                    location={job.location}
-                    postedTime={job.postedTime}
-                    jobType={job.jobType}
-                    contractType={job.contractType}
-                    description={job.description}
-                    imageSrc={job.imageSrc || logo}
-                    applyLink={job.applyLink}
-                    detailsLink={job.detailsLink}
-                    onViewDetails={() => handleViewDetails(job)}
+                <>
+                  {jobs.map((job) => (
+                    <JobListingCard
+                      key={job.id}
+                      id={job.id}
+                      jobTitle={job.jobTitle}
+                      company={job.company}
+                      location={job.location}
+                      postedTime={job.postedTime}
+                      jobType={job.jobType}
+                      contractType={job.contractType}
+                      description={job.description}
+                      imageSrc={job.imageSrc || logo}
+                      applyLink={job.applyLink}
+                      detailsLink={job.detailsLink}
+                      onViewDetails={() => handleViewDetails(job)}
+                    />
+                  ))}
+
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
                   />
-                ))
+                </>
               ) : (
                 <p className="text-gray-600">No jobs match your search.</p>
               )}
@@ -200,34 +268,120 @@ export default function JobsPage() {
           </div>
 
           {/* Sidebar details panel */}
-          <aside className={`border rounded p-6 sm:p-4 sticky top-24 self-start flex flex-col ${selectedJob ? 'h-[85vh]' : 'h-fit'} hidden lg:block`}>
+          {selectedJob && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm flex items-center justify-center p-4"
+              onClick={() => setSelectedJob(null)}
+            >
+              <div
+                className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 relative max-h-[90vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h4 className="font-bold text-xl">Job Details</h4>
+                  <button onClick={() => setSelectedJob(null)} className="text-gray-400 hover:text-black p-2 bg-gray-50 rounded-full transition-colors">
+                    <HiX className="text-xl" />
+                  </button>
+                </div>
+                <div className="w-full h-[1px] bg-gray-100 mb-6"></div>
+
+                <div className="overflow-y-auto pr-1 flex-1 thin-scroll">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="relative w-16 h-16 rounded-xl border border-gray-100 overflow-hidden shrink-0 shadow-sm">
+                      <Image
+                        src={selectedJob.imageSrc || logo}
+                        alt="Company Logo"
+                        fill
+                        className="object-contain"
+                        unoptimized={true}
+                        onError={(e) => {
+                          e.target.src = logo.src || logo
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-lg leading-tight line-clamp-2">{selectedJob.jobTitle}</h5>
+                      <p className="text-gray-600 font-medium">{selectedJob.company}</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {selectedJob.location} • {formatPostedTime(selectedJob.postedTime)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mb-6">
+                    <button
+                      onClick={() => window.open(selectedJob.applyLink, '_blank')}
+                      className="bg-black text-white text-sm px-6 py-3 rounded-xl w-full hover:bg-gray-800 transition font-bold shadow-lg shadow-black/10"
+                    >
+                      Easy Apply
+                    </button>
+                    <button
+                      onClick={() => handleSaveJob(selectedJob)}
+                      disabled={isSaving}
+                      className={`border border-gray-200 text-sm px-6 py-3 rounded-xl w-full transition font-bold ${isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+                    >
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium line-clamp-5">
+                      {stripHtml(selectedJob.description)}
+                    </p>
+                  </div>
+
+                  <Button
+                    text="Show more details"
+                    img={arrow_right}
+                    variant="black"
+                    className="w-full justify-center !rounded-xl !py-4"
+                    onClick={() => handleJobClick(selectedJob)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <aside className={`
+            border bg-white rounded-xl p-6 sticky top-[90px] self-start flex-col h-[80vh] hidden lg:flex
+            ${!selectedJob ? 'justify-start h-fit' : ''}
+          `}>
             {!selectedJob ? (
               <>
-                <h4 className="font-semibold mb-2 flex items-center gap-2 text-base sm:text-sm">
-                  <span className="bg-purple-100 text-purple-600 p-2 rounded">✉️</span>
+                <h4 className="font-semibold mb-2 flex items-center gap-2 text-base">
+                  <span className="bg-purple-100 text-purple-600 p-2 rounded-lg">✉️</span>
                   Subscribe for updates
                 </h4>
                 <p className="text-sm text-gray-600 mb-4">Stay informed about new job opportunities.</p>
-                <input type="email" placeholder="Enter Email" className="border rounded px-4 py-2 w-full mb-3 text-sm" />
-                <button className="bg-black text-white px-4 py-2 w-full rounded text-sm">Subscribe</button>
+                <input type="email" placeholder="Enter Email" className="border border-gray-200 rounded-lg px-4 py-2 w-full mb-3 text-sm focus:ring-2 focus:ring-black/5 outline-none transition-all" />
+                <button className="bg-black text-white px-4 py-3 w-full rounded-lg text-sm font-bold hover:bg-gray-800 transition shadow-lg shadow-black/5">Subscribe</button>
               </>
             ) : (
               <div className="flex flex-col h-full">
                 <div className="flex justify-between items-start mb-3">
                   <h4 className="font-bold text-lg">Job Details</h4>
-                  <button onClick={() => setSelectedJob(null)} className="text-gray-400 hover:text-black text-sm">✕</button>
+                  <button onClick={() => setSelectedJob(null)} className="text-gray-400 hover:text-black">✕</button>
                 </div>
-                <div className="w-full h-[1px] bg-gray-200 mb-4"></div>
+                <div className="w-full h-[1px] bg-gray-100 mb-4"></div>
 
                 <div className="overflow-y-auto pr-1 flex-1 thin-scroll">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="relative w-12 h-12 rounded-md overflow-hidden">
-                      <Image src={selectedJob.imageSrc || logo} alt="Company Logo" fill className="object-contain" />
+                    <div className="relative w-12 h-12 rounded-lg border border-gray-50 overflow-hidden shrink-0">
+                      <Image
+                        src={selectedJob.imageSrc || logo}
+                        alt="Company Logo"
+                        fill
+                        className="object-contain"
+                        unoptimized={true}
+                        onError={(e) => {
+                          e.target.src = logo.src || logo
+                        }}
+                      />
                     </div>
                     <div>
-                      <p className="font-semibold text-base">{selectedJob.jobTitle}</p>
+                      <p className="font-bold text-base leading-tight line-clamp-2">{selectedJob.jobTitle}</p>
                       <p className="text-sm text-gray-600">{selectedJob.company}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 mt-1">
                         {selectedJob.location} • {formatPostedTime(selectedJob.postedTime)}
                       </p>
                     </div>
@@ -236,23 +390,25 @@ export default function JobsPage() {
                   <div className="flex gap-2 mb-4">
                     <button
                       onClick={() => window.open(selectedJob.applyLink, '_blank')}
-                      className="bg-black text-white text-sm px-4 py-2 rounded w-full hover:bg-gray-800 transition"
+                      className="bg-black text-white text-xs px-4 py-2.5 rounded-lg w-full hover:bg-gray-800 transition font-bold"
                     >
                       Easy Apply
                     </button>
                     <button
                       onClick={() => handleSaveJob(selectedJob)}
-                      className="border text-sm px-4 py-2 rounded w-full hover:bg-gray-50 transition"
+                      disabled={isSaving}
+                      className={`border border-gray-200 text-xs px-4 py-2.5 rounded-lg w-full transition font-bold ${isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'}`}
                     >
-                      Save
+                      {isSaving ? 'Saving...' : 'Save'}
                     </button>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-4">{selectedJob.description}</p>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-5">{stripHtml(selectedJob.description)}</p>
                   <Button
                     text="Show more details"
                     img={arrow_right}
                     variant="black"
+                    className="w-full justify-center !rounded-lg"
                     onClick={() => handleJobClick(selectedJob)}
                   />
                 </div>
@@ -260,6 +416,17 @@ export default function JobsPage() {
             )}
           </aside>
         </div>
+        <JobApplicationModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          type={modalState.type}
+          title={modalState.title}
+          message={modalState.message}
+          emailAddress={modalState.emailAddress}
+          externalLink={modalState.externalLink}
+        />
+
+        <AuthModals open={openAuthModal} setOpen={setOpenAuthModal} />
       </main>
     </div>
   )

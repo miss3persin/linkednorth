@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Upload, ChevronDown, Loader2 } from 'lucide-react';
+import { Upload, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/app/components/layout/Sidebar'
 import { supabase } from '@/app/lib/supabase';
 import { useRef } from 'react';
+import { Loader } from '@/app/components/ui/Loader';
 
 export default function CompanyProfileSetup() {
     const router = useRouter();
@@ -95,8 +96,8 @@ export default function CompanyProfileSetup() {
     };
 
     return (
-        <div className="min-h-screen flex bg-[#F8F9FB] mt-16">
-            {/* <Sidebar /> */}
+        <div className="min-h-screen flex bg-[#F8F9FB] mt-[72px]">
+            <Sidebar />
             <main className="flex-1 flex flex-col items-center pt-12 md:pt-20 px-4">
                 {/* Header Section (Outside the card) */}
                 <div className="text-center mb-8">
@@ -155,7 +156,7 @@ export default function CompanyProfileSetup() {
                                 >
                                     {uploadingLogo ? (
                                         <>
-                                            <Loader2 className="animate-spin" size={14} />
+                                            <Loader size="xs" showMessage={false} inline className="text-gray-500" />
                                             Uploading...
                                         </>
                                     ) : (
@@ -217,14 +218,20 @@ export default function CompanyProfileSetup() {
                             disabled={loading}
                             className="w-full bg-black text-white text-sm font-bold py-3.5 rounded-lg hover:bg-[#1e293b] transition-colors mt-4 flex items-center justify-center gap-2"
                         >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="animate-spin" size={18} />
-                                    Saving...
-                                </>
-                            ) : (
-                                'Save & Continue to Job Post'
-                            )}
+                        {loading ? (
+                            <>
+                                <Loader
+                                    size="sm"
+                                    showMessage={false}
+                                    inline
+                                    spinnerColor="rgba(255,255,255,0.35)"
+                                    accentColor="#ffffff"
+                                />
+                                Saving...
+                            </>
+                        ) : (
+                            'Save & Continue to Job Post'
+                        )}
                         </button>
                     </form>
                 </div>

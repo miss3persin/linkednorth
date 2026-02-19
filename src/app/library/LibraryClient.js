@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Sidebar from "../components/layout/Sidebar"
 import { HiPlus } from "react-icons/hi"
 
@@ -43,6 +44,54 @@ export default function LibraryClient() {
         },
     ])
 
+    const router = useRouter()
+    const [filterOpen, setFilterOpen] = useState(false)
+    const [filterQuery, setFilterQuery] = useState('')
+    const [removingJobId, setRemovingJobId] = useState(null)
+
+    const normalizedFilter = filterQuery.trim().toLowerCase()
+    const filterActive = normalizedFilter.length > 0
+    const matchesFilter = (job) => {
+        if (!normalizedFilter) return true
+        return (
+            job.title?.toLowerCase().includes(normalizedFilter) ||
+            job.company?.toLowerCase().includes(normalizedFilter)
+        )
+    }
+
+    const filteredColumns = filterActive
+        ? jobColumns.map((col) => ({
+              ...col,
+              jobs: col.jobs.filter(matchesFilter),
+          }))
+        : jobColumns
+
+    const totalFilteredJobs = filteredColumns.reduce((total, col) => total + col.jobs.length, 0)
+
+    const handleRemoveJob = async (job) => {
+        if (!job?.jobId) return
+
+        setRemovingJobId(job.jobId)
+        try {
+            const res = await fetch(`/api/jobs/save?jobId=${encodeURIComponent(job.jobId)}`, {
+                method: 'DELETE',
+            })
+            if (!res.ok) throw new Error('Failed to remove job')
+
+            setJobColumns(prev => {
+                const updated = structuredClone(prev)
+                updated.forEach(col => {
+                    col.jobs = col.jobs.filter(entry => entry.jobId !== job.jobId)
+                })
+                return updated
+            })
+        } catch (err) {
+            console.error('Failed to remove job from library', err)
+        } finally {
+            setRemovingJobId(null)
+        }
+    }
+
 
     /* ---------------- FETCH SAVED JOBS FROM SUPABASE ---------------- */
 
@@ -56,12 +105,10 @@ export default function LibraryClient() {
 
                 const formatted = savedJobs.map(item => ({
                     jobId: item.job_id,
-                    title: item.job_title,
-                    company: item.job_data?.company ?? '',
-                    status: item.status,
-                    date: new Date(item.created_at).toLocaleDateString(),
-                    // tag: "Saved",
-                    // tagColor: "bg-blue-100 text-blue-600",
+                    title: item.jobs?.title || 'Unknown Position',
+                    company: item.jobs?.company || 'Unknown Company',
+                    status: item.status || 'saved',
+                    date: new Date(item.saved_at || item.created_at).toLocaleDateString(),
                 }))
 
 
@@ -107,16 +154,16 @@ export default function LibraryClient() {
 
     /* ---------------- DRAG & DROP ---------------- */
 
-    const handleDragStart = (e, colIndex, jobIndex) => {
+    const handleDragStart = (e, colIndex, job) => {
         e.dataTransfer.setData(
             "text/plain",
-            JSON.stringify({ colIndex, jobIndex })
+            JSON.stringify({ colIndex, jobId: job.jobId })
         )
     }
 
     const handleDrop = async (e, targetColIndex) => {
         e.preventDefault()
-        const { colIndex, jobIndex } = JSON.parse(
+        const { colIndex, jobId } = JSON.parse(
             e.dataTransfer.getData("text/plain")
         )
 
@@ -128,7 +175,15 @@ export default function LibraryClient() {
 
         setJobColumns(prev => {
             const updated = structuredClone(prev)
-            const [movedJob] = updated[colIndex].jobs.splice(jobIndex, 1)
+            const sourceCol = updated[colIndex]
+            if (!sourceCol) return prev
+
+            const jobIndex = sourceCol.jobs.findIndex(job => job.jobId === jobId)
+            if (jobIndex === -1) return prev
+
+            const [movedJob] = sourceCol.jobs.splice(jobIndex, 1)
+            if (!movedJob) return prev
+            movedJob.status = targetStatus
             updated[targetColIndex].jobs.push(movedJob)
 
             // 🔥 persist
@@ -149,7 +204,7 @@ export default function LibraryClient() {
     /* ---------------- UI ---------------- */
 
     return (
-        <div className="min-h-screen flex bg-white mt-16 overflow-x-hidden">
+        <div className="library-page min-h-screen flex bg-white mt-[72px]">
             <Sidebar />
 
             <main className="flex-1 px-4 sm:px-6 md:px-8 py-6">
@@ -165,18 +220,58 @@ export default function LibraryClient() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-2">
-                        <button className="text-xs sm:text-sm border rounded-md px-2 sm:px-3 py-1 sm:py-2 bg-white hover:bg-gray-50">
-                            Filter
-                        </button>
-                        <button className="text-xs sm:text-sm bg-black text-white rounded-md px-2 sm:px-3 py-1 sm:py-2 flex items-center gap-1">
-                            <HiPlus size={14} /> Add Job
-                        </button>
+                    <button
+                        type="button"
+                        onClick={() => setFilterOpen((prev) => !prev)}
+                        className="text-xs sm:text-sm border rounded-md px-2 sm:px-3 py-1 sm:py-2 bg-white hover:bg-gray-50"
+                    >
+                        {filterOpen ? 'Hide Filters' : 'Filter'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => router.push('/joblistings')}
+                        className="text-xs sm:text-sm bg-black text-white rounded-md px-2 sm:px-3 py-1 sm:py-2 flex items-center gap-1 skip-squared"
+                    >
+                        <HiPlus size={14} /> Add Job
+                    </button>
+                    </div>
+            </div>
+
+            {filterOpen && (
+                <div className="max-w-6xl mx-auto mt-4 mb-6 bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <div className="flex-1 min-w-[220px]">
+                            <label className="text-xs font-semibold text-gray-500">Filter saved jobs</label>
+                            <input
+                                type="text"
+                                value={filterQuery}
+                                onChange={(e) => setFilterQuery(e.target.value)}
+                                placeholder="Search by title or company"
+                                className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-black focus:outline-none"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                            <p className="text-xs text-gray-500">
+                                {filterActive
+                                    ? `Showing ${totalFilteredJobs} matching job${totalFilteredJobs === 1 ? '' : 's'}`
+                                    : 'Filters apply to title + company'}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setFilterQuery('')}
+                                disabled={!filterActive}
+                                className="text-xs border border-gray-200 rounded-md px-2 py-1 bg-white hover:bg-gray-50 disabled:opacity-40"
+                            >
+                                Clear
+                            </button>
+                        </div>
                     </div>
                 </div>
+            )}
 
-                {/* Columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
-                    {jobColumns.map((col, i) => (
+            {/* Columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+                {filteredColumns.map((col, i) => (
                         <div
                             key={i}
                             onDragOver={e => e.preventDefault()}
@@ -188,7 +283,11 @@ export default function LibraryClient() {
                                 <p className="text-xs text-gray-500">{col.desc}</p>
 
                                 <div className="flex justify-between mt-2">
-                                    <button className="text-xs border rounded-md flex items-center justify-center gap-1 px-2 py-1 bg-white">
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push('/joblistings')}
+                                        className="text-xs border rounded-md flex items-center justify-center gap-1 px-2 py-1 bg-white skip-squared"
+                                    >
                                         <HiPlus size={12} /> Add Job
                                     </button>
                                     <span className="text-xs bg-gray-200 rounded-full px-2 flex items-center justify-center">
@@ -201,11 +300,29 @@ export default function LibraryClient() {
                                 <div
                                     key={`${job.title}-${j}`}
                                     draggable
-                                    onDragStart={e => handleDragStart(e, i, j)}
+                                    onDragStart={e => handleDragStart(e, i, job)}
                                     className="bg-white p-3 rounded-lg mb-3 shadow-sm border cursor-move"
                                 >
                                     <p className="font-medium text-sm">{job.title}</p>
                                     <p className="text-xs text-gray-500">{job.company}</p>
+                                    <div className="mt-3 flex items-center justify-between text-[10px] text-gray-500">
+                                        <span>{job.date ?? 'Unknown date'}</span>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                handleRemoveJob(job)
+                                            }}
+                                            disabled={removingJobId === job.jobId}
+                                            className={`font-semibold transition-colors ${
+                                                removingJobId === job.jobId
+                                                    ? 'text-gray-400 cursor-not-allowed'
+                                                    : 'text-red-500 hover:text-red-600'
+                                            }`}
+                                        >
+                                            {removingJobId === job.jobId ? 'Removing...' : 'Remove'}
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

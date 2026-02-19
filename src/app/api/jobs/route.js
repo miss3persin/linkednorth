@@ -7,13 +7,17 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
 
   const search = searchParams.get("search") || "";
-  const limit = Number(searchParams.get("limit") || 100);
+  const geo = searchParams.get("geo") || "";
+  const limit = Number(searchParams.get("limit") || 25);
+  const offset = Number(searchParams.get("offset") || 0);
+  const sort = searchParams.get("sort") || "recent";
 
   try {
-    const { jobs, sources } = await getJobs({ search, limit });
+    const { jobs, totalCount, sources } = await getJobs({ search, geo, limit, offset, sort });
 
     return NextResponse.json({
       count: jobs.length,
+      totalCount,
       sources,
       jobs,
     });

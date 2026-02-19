@@ -6,6 +6,7 @@ import { FiEye, FiCalendar, FiBriefcase } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { getUserActivity } from "@/services/activityService";
 import { Button } from "../components/ui/Button";
+import { Loader } from "../components/ui/Loader";
 
 export default async function Dashboard() {
   const user = await currentUser();
@@ -13,7 +14,7 @@ export default async function Dashboard() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading session...</p>
+        <Loader message="Loading session" size="md" />
       </div>
     );
   }
@@ -56,7 +57,7 @@ export default async function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-gray-50 mt-16 overflow-x-hidden">
+    <div className="dashboard-page min-h-screen flex bg-gray-50 mt-[72px]">
       {/* Sidebar stays ASIDE */}
       <Sidebar />
 

@@ -15,7 +15,7 @@ export default function ImportSection() {
         </div>
       </div>
 
-      <button className="bg-blue-600 text-white text-xs px-3 sm:px-4 py-2 rounded-md w-full sm:w-auto">
+      <button className="bg-blue-600 text-white text-xs px-3 sm:px-4 py-2 rounded-md w-full sm:w-auto skip-squared">
         Import from LinkedIn
       </button>
     </div>
