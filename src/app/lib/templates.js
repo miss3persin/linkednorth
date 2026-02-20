@@ -1,6 +1,4 @@
-import ProfessionalTemplate from '../components/templates/ProfessionalTemplate'
-import ModernTemplate from '../components/templates/ModernTemplate'
-import CreativeTemplate from '../components/templates/CreativeTemplate'
+'use client';
 
 // Utility function to normalize arrays
 export const normalizeArray = (arr, key) => {
@@ -10,29 +8,37 @@ export const normalizeArray = (arr, key) => {
   return [];
 };
 
+const createTemplateMeta = ({ id, name, description, thumbnail, pdfImporter }) => ({
+  id,
+  name,
+  description,
+  thumbnail,
+  async loadPdfComponent() {
+    const mod = await pdfImporter()
+    return mod.default || mod
+  },
+})
+
 export const templates = [
-  {
+  createTemplateMeta({
     id: 'professional',
     name: 'Professional',
     description: 'Clean and traditional design perfect for corporate roles',
-    component: ProfessionalTemplate,
-    pdfComponent: ProfessionalTemplate,
     thumbnail: '/template1.png',
-  },
-  {
+    pdfImporter: () => import('../resumebuilder/pdf/ProfessionalPDF'),
+  }),
+  createTemplateMeta({
     id: 'modern',
     name: 'Modern',
     description: 'Contemporary design with bold colors and clean lines',
-    component: ModernTemplate,
-    pdfComponent: ModernTemplate,
     thumbnail: '/template2.png',
-  },
-  {
+    pdfImporter: () => import('../components/templates/ModernTemplate'),
+  }),
+  createTemplateMeta({
     id: 'creative',
     name: 'Creative',
     description: 'Vibrant and artistic design for creative professionals',
-    component: CreativeTemplate,
-    pdfComponent: CreativeTemplate,
     thumbnail: '/template3.png',
-  },
+    pdfImporter: () => import('../components/templates/CreativeTemplate'),
+  }),
 ]

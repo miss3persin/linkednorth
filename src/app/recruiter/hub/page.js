@@ -295,7 +295,7 @@ export default function RecruiterHub() {
                                 {jobs.length > 0 && (
                                     <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg">
                                         <p className="text-[11px] font-semibold text-orange-700">
-                                            Job "{jobs[0].title}" is gaining traction
+                                            Job “{jobs[0].title}” is gaining traction
                                         </p>
                                         <p className="text-[9px] text-orange-500 underline cursor-pointer">
                                             View analytics

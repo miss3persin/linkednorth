@@ -218,22 +218,22 @@ export default function LibraryClient() {
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-row flex-wrap gap-2 items-center">
                     <button
                         type="button"
                         onClick={() => setFilterOpen((prev) => !prev)}
-                        className="text-xs sm:text-sm border rounded-md px-2 sm:px-3 py-1 sm:py-2 bg-white hover:bg-gray-50"
+                        className="text-xs sm:text-sm border rounded-md px-3 py-2 bg-white hover:bg-gray-50 min-h-[38px] flex items-center justify-center"
                     >
                         {filterOpen ? 'Hide Filters' : 'Filter'}
                     </button>
                     <button
                         type="button"
                         onClick={() => router.push('/joblistings')}
-                        className="text-xs sm:text-sm bg-black text-white rounded-md px-2 sm:px-3 py-1 sm:py-2 flex items-center gap-1 skip-squared"
+                        className="text-xs sm:text-sm bg-black text-white rounded-md px-3 sm:px-4 py-2 flex items-center gap-1 skip-squared min-h-[38px]"
                     >
                         <HiPlus size={14} /> Add Job
                     </button>
-                    </div>
+                </div>
             </div>
 
             {filterOpen && (

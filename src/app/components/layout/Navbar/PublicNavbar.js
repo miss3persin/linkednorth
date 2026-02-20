@@ -6,11 +6,12 @@ import { saveJobsRedirect } from '../../../lib/authRedirect'
 import { useState } from 'react'
 import logo from '/public/linkednorth-logo.png'
 import Image from 'next/image'
-import AuthModals from '../../modals/AuthModals'
+import dynamic from 'next/dynamic'
 import { Open_Sans } from 'next/font/google'
 import { Button } from '../../ui/Button'
 import { HiMenu, HiX } from 'react-icons/hi'
 
+const AuthModals = dynamic(() => import('../../modals/AuthModals'), { ssr: false });
 const openSans = Open_Sans({ subsets: ['latin'] })
 
 export default function PublicNavbar() {
@@ -108,22 +109,22 @@ export default function PublicNavbar() {
           </div>
         </div>
         {menuOpen && (
-          <div className="lg:hidden fixed top-0 left-0 w-screen h-screen bg-white z-40 flex flex-col items-center justify-center gap-10">
-            <ul className="flex flex-col gap-8 text-[20px] text-[#868D9B] text-center">
-              <li className="hover:text-black cursor-pointer">
+          <div className="lg:hidden fixed inset-0 z-40 flex flex-col items-center justify-center overflow-y-auto bg-white px-6 py-10 text-center">
+            <ul className="flex w-full flex-col gap-6 text-[18px] text-[#868D9B]">
+              <li className="hover:text-black">
                 <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
               </li>
-              <li className="hover:text-black cursor-pointer">
+              <li className="hover:text-black">
                 <Link href="/jobs" onClick={() => setMenuOpen(false)}>Job Listings</Link>
               </li>
-              <li className="hover:text-black cursor-pointer">
+              <li className="hover:text-black">
                 <Link href="/coming-soon" onClick={() => setMenuOpen(false)}>Career Resources</Link>
               </li>
-              <li className="hover:text-black cursor-pointer">
+              <li className="hover:text-black">
                 <Link href="/coming-soon" onClick={() => setMenuOpen(false)}>Contact Us</Link>
               </li>
             </ul>
-            <div className="flex flex-col gap-4 mt-6">
+            <div className="flex w-full max-w-xs flex-col gap-3 mt-6">
               <Button
                 text="Post A Job"
                 img=""

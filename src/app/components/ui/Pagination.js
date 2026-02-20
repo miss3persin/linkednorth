@@ -55,15 +55,15 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                         key={index}
                         onClick={() => typeof page === 'number' && onPageChange(page)}
                         disabled={page === '...'}
-                        className={`
-                            min-w-[36px] h-9 sm:min-w-[40px] sm:h-10 px-2 sm:px-3 rounded-lg text-sm font-bold transition-all shrink-0
-                            ${page === currentPage
-                                ? 'bg-black text-white shadow-lg shadow-black/10'
-                                : page === '...'
-                                    ? 'border-transparent cursor-default text-gray-400'
-                                    : 'bg-white border border-gray-200 text-gray-600 hover:border-black/20 hover:bg-gray-50 shadow-sm'
-                            }
-                        `}
+                    className={`
+                        flex items-center justify-center text-center leading-none min-w-[36px] h-9 sm:min-w-[40px] sm:h-10 px-2 sm:px-3 rounded-lg text-sm font-bold transition-all shrink-0
+                        ${page === currentPage
+                            ? 'bg-black text-white shadow-lg shadow-black/10'
+                            : page === '...'
+                                ? 'border-transparent cursor-default text-gray-400'
+                                : 'bg-white border border-gray-200 text-gray-600 hover:border-black/20 hover:bg-gray-50 shadow-sm'
+                        }
+                    `}
                     >
                         {page}
                     </button>

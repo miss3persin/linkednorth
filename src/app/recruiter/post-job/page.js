@@ -317,7 +317,7 @@ export default function PostJobPage() {
                                 {stepErrors.applicationLink ? (
                                     <p className="text-xs mt-1 text-rose-500">{stepErrors.applicationLink}</p>
                                 ) : (
-                                    <p className="text-xs text-gray-400 mt-1">Enter a URL or email address. Candidates will be directed here when they click "Apply Now".</p>
+                                    <p className="text-xs text-gray-400 mt-1">Enter a URL or email address. Candidates will be directed here when they click “Apply Now”.</p>
                                 )}
                             </div>
 

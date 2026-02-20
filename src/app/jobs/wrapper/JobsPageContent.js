@@ -1,5 +1,6 @@
 'use client'
 
+import dynamicImport from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -14,8 +15,8 @@ import overlay from '/public/Overlay.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
 import { useUser } from "@clerk/nextjs"
-import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
-import AuthModals from '@/app/components/modals/AuthModals'
+const JobApplicationModal = dynamicImport(() => import('@/app/components/modals/JobApplicationModal'), { ssr: false })
+const AuthModals = dynamicImport(() => import('@/app/components/modals/AuthModals'), { ssr: false })
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,6 @@ import { formatPostedTime } from '@/app/lib/dateUtils'
 import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
 
 import { Pagination } from '../../components/ui/Pagination'
-import Sidebar from '@/app/components/layout/Sidebar'
-
 export default function JobsPage() {
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -176,9 +175,7 @@ export default function JobsPage() {
   const totalPages = Math.min(Math.ceil(totalJobs / JOBS_PER_PAGE), MAX_PAGES)
 
   return (
-    <div className="jobs-page min-h-screen flex bg-white mt-[72px]">
-      <Sidebar />
-
+    <div className="jobs-page min-h-screen flex flex-col bg-white mt-[72px]">
       <main className="flex-1 flex flex-col">
         <section className="relative bg-gray-50 w-full py-10 sm:py-8">
           <div className="absolute right-0 bottom-0 h-full flex items-center pointer-events-none opacity-70 sm:opacity-50">

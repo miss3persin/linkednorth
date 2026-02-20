@@ -208,7 +208,7 @@ export default function HomePage() {
             <p
               className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
-              Receive expert feedback from recruiters who've worked with leading
+              Receive expert feedback from recruiters who’ve worked with leading
               brands to elevate your resume.
             </p>
             <div className="lg:w-full mx-auto">

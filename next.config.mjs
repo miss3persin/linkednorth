@@ -26,8 +26,14 @@ const nextConfig = {
                 port: '',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'img.clerk.com',
+                port: '',
+                pathname: '/**',
+            },
         ],
-        domains: ['npnfuaxuxdyroswxjsvn.supabase.co'],
+        domains: ['npnfuaxuxdyroswxjsvn.supabase.co', 'img.clerk.com'],
     },
 };
 

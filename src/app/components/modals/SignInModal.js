@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Modal from '../ui/Modal'
 import { validateEmail } from '@/app/lib/formValidators'
+import Image from 'next/image'
 
 export default function SignInModal({ open, setOpen, switchToSignUp }) {
   const { isLoaded: userLoaded, isSignedIn } = useUser()
@@ -177,7 +178,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
             onClick={() => handleOAuthSignIn('oauth_google')}
             className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
           >
-            <img src="/google.svg" alt="Google" className="w-4 h-4" />
+            <Image src="/google.svg" alt="Google" width={16} height={16} unoptimized />
             Continue with Google
           </button>
 
@@ -185,7 +186,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
             onClick={() => handleOAuthSignIn('oauth_facebook')}
             className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
           >
-            <img src="/facebook.svg" alt="Facebook" className="w-4 h-4" />
+            <Image src="/facebook.svg" alt="Facebook" width={16} height={16} unoptimized />
             Continue with Facebook
           </button>
 
@@ -193,7 +194,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
             onClick={() => handleOAuthSignIn('oauth_apple')}
             className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
           >
-            <img src="/apple.svg" alt="Apple" className="w-4 h-4" />
+            <Image src="/apple.svg" alt="Apple" width={16} height={16} unoptimized />
             Continue with Apple
           </button>
         </div>

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useUser } from '@clerk/nextjs'
-import Sidebar from '@/app/components/layout/Sidebar'
 import logo from '/public/linkednorth-logo.png'
 import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
 import AuthModals from '@/app/components/modals/AuthModals'
@@ -143,39 +142,31 @@ export default function JobDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-gray-50 mt-[72px]">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
-          <Loader message="Loading job details" size="lg" />
-        </main>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 mt-[72px] px-4">
+        <Loader message="Loading job details" size="lg" />
       </div>
     )
   }
 
   if (error || !job) {
     return (
-      <div className="min-h-screen flex bg-gray-50 mt-[72px]">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center px-4">
-          <div className="bg-white p-8 rounded-none border border-gray-200 text-center max-w-md w-full">
-            <h2 className="text-xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Job Not Found</h2>
-            <p className="text-gray-500 mb-6 text-sm">{error || "The job you're looking for doesn't exist."}</p>
-            <button
-              onClick={() => router.push('/jobs')}
-              className="w-full bg-black text-white py-3 rounded-none font-bold hover:bg-gray-800 transition-all text-sm uppercase tracking-wider"
-            >
-              Back to Job Board
-            </button>
-          </div>
-        </main>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 mt-[72px] px-4">
+        <div className="bg-white p-8 rounded-none border border-gray-200 text-center max-w-md w-full">
+          <h2 className="text-xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Job Not Found</h2>
+          <p className="text-gray-500 mb-6 text-sm">{error || "The job you're looking for doesn't exist."}</p>
+          <button
+            onClick={() => router.push('/jobs')}
+            className="w-full bg-black text-white py-3 rounded-none font-bold hover:bg-gray-800 transition-all text-sm uppercase tracking-wider"
+          >
+            Back to Job Board
+          </button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50 mt-[72px]">
-      <Sidebar />
-
+    <div className="min-h-screen flex flex-col bg-gray-50 mt-[72px]">
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-6">
           <div className="flex items-center justify-between">

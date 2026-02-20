@@ -1,3 +1,4 @@
+'use client';
 import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 const ACCENT = '#5c6bc0'; // subtle professional color

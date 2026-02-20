@@ -7,6 +7,7 @@ import Sidebar from '@/app/components/layout/Sidebar'
 import { useRef } from 'react';
 import { Loader } from '@/app/components/ui/Loader';
 import { validateTextField } from '@/app/lib/formValidators';
+import Image from 'next/image';
 
 export default function CompanyProfileSetup() {
     const router = useRouter();
@@ -164,7 +165,14 @@ export default function CompanyProfileSetup() {
                             <div className="flex items-center gap-3">
                                 <div className="w-14 h-14 bg-[#F1F5F9] rounded-lg flex items-center justify-center border border-gray-100 flex-shrink-0 overflow-hidden">
                                     {logoPreview ? (
-                                        <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
+                                        <Image
+                                            src={logoPreview}
+                                            alt="Company logo preview"
+                                            width={56}
+                                            height={56}
+                                            className="w-full h-full object-cover"
+                                            unoptimized
+                                        />
                                     ) : (
                                         <span className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">No Logo</span>
                                     )}

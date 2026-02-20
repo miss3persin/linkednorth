@@ -1,0 +1,80 @@
+'use client'
+
+import Link from 'next/link'
+import Image from 'next/image'
+import { FiBell, FiMessageSquare } from 'react-icons/fi'
+import { useEffect, useState } from 'react'
+
+export default function AuthNavbarActions({ user, userData, onPostJobClick }) {
+  const [notificationCount, setNotificationCount] = useState(0)
+  const [messageCount, setMessageCount] = useState(0)
+
+  useEffect(() => {
+    if (!user) return
+    let isActive = true
+
+    const fetchCounts = async () => {
+      try {
+        const res = await fetch('/api/user/counts')
+        if (!res.ok) throw new Error('Failed to fetch counts')
+        const data = await res.json()
+        if (!isActive) return
+        setNotificationCount(data.unreadNotifications || 0)
+        setMessageCount(data.unreadMessages || 0)
+      } catch (err) {
+        console.error('Error fetching counts:', err)
+      }
+    }
+
+    fetchCounts()
+    const interval = setInterval(fetchCounts, 30000)
+    return () => {
+      isActive = false
+      clearInterval(interval)
+    }
+  }, [user])
+
+  return (
+    <div className="flex items-center gap-6">
+      <Link
+        href="/dashboard"
+        className="relative hover:opacity-70 transition text-[#868D9B] hover:text-black"
+        onClick={() => setNotificationCount(0)}
+      >
+        <FiBell size={20} />
+        {notificationCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full font-semibold text-[8px]">
+            {notificationCount > 9 ? '9+' : notificationCount}
+          </span>
+        )}
+      </Link>
+      <Link
+        href="/dashboard"
+        className="relative hover:opacity-70 transition text-[#868D9B] hover:text-black"
+        onClick={() => setMessageCount(0)}
+      >
+        <FiMessageSquare size={18} />
+        {messageCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full font-semibold text-[8px]">
+            {messageCount > 9 ? '9+' : messageCount}
+          </span>
+        )}
+      </Link>
+      <Link href="/dashboard" className="hover:opacity-80 transition">
+        <Image
+          src={userData?.imageUrl || user?.imageUrl}
+          alt="profile"
+          width={32}
+          height={32}
+          className="h-8 w-8 rounded-full object-cover border-2 border-transparent hover:border-gray-300"
+        />
+      </Link>
+      <button
+        onClick={onPostJobClick}
+        className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+      >
+        Post A Job
+      </button>
+    </div>
+  )
+}

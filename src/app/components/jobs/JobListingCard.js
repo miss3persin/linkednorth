@@ -289,7 +289,7 @@ export const JobListingCard = ({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="hidden sm:flex flex-col gap-1">
             <Image
               src={save_btn}
               alt="share"
@@ -337,11 +337,20 @@ export const JobListingCard = ({
               e.preventDefault()
               requireAuth(onViewDetails)
             }}
-            className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-3 sm:px-6 md:px-8 py-2 sm:py-3 text-xs sm:text-sm w-full sm:w-auto rounded-sm hover:bg-gray-50 transition"
+            className="border-[#D1D5DB] bg-white text-[#374151] font-semibold border flex items-center justify-center gap-2 px-3 sm:px-6 md:px-8 py-3 sm:py-3 text-xs sm:text-sm w-full sm:w-auto h-12 rounded-sm hover:bg-gray-50 transition"
           >
             View Details
             <Image src={arrow_right_black} alt="arrow" width={20} height={20} className="sm:w-6 sm:h-6" />
           </a>
+
+          <button
+            type="button"
+            onClick={handleShareJob}
+            className="sm:hidden border border-gray-200 rounded-sm px-3 py-3 flex items-center justify-center gap-2 text-xs font-semibold text-[#374151] hover:bg-gray-50 transition"
+          >
+            <Image src={save_btn} alt="share job" width={16} height={16} />
+            Share
+          </button>
         </div>
 
         <AuthModals open={openAuthModal} setOpen={setOpenAuthModal} />

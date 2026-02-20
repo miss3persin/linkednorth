@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 // TemplatesGrid.js
 export default function TemplatesGrid({ templates, onSelect }) {
   return (
@@ -8,7 +10,14 @@ export default function TemplatesGrid({ templates, onSelect }) {
           onClick={() => onSelect(tpl)}
           className="border rounded-lg p-3 hover:shadow cursor-pointer transition-shadow duration-150 ease-in-out"
         >
-          <img src={tpl.thumbnail} alt={tpl.name} className="w-full rounded" />
+          <Image
+            src={tpl.thumbnail}
+            alt={tpl.name}
+            width={360}
+            height={220}
+            className="w-full rounded object-cover"
+            unoptimized
+          />
           <p className="mt-2 sm:mt-3 text-sm font-semibold text-gray-700">
             {tpl.name}
           </p>
