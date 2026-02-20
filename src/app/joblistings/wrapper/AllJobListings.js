@@ -18,6 +18,7 @@ import AuthModals from '../../components/modals/AuthModals'
 import { HiMenu, HiX } from 'react-icons/hi'
 import { stripHtml } from '@/app/lib/cleanDescription'
 import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
+import { buildSaveModalState } from '@/app/lib/saveModalState'
 
 export const dynamic = "force-dynamic";
 
@@ -134,19 +135,16 @@ export default function JobsPage() {
       const resData = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(resData.error || 'Failed to save job')
 
-      const alreadySaved =
-        resData.alreadySaved ||
-        resData.message?.toLowerCase().includes('already saved')
+      const modalOptions = buildSaveModalState(resData, {
+        successTitle: 'Job Bookmarked!',
+        successMessage: 'This job has been saved to your profile library for later.',
+      })
 
       setModalState({
         isOpen: true,
-        type: alreadySaved ? 'already_saved' : 'success',
-        title: alreadySaved ? 'Already Saved' : 'Job Bookmarked!',
-        message: alreadySaved
-          ? resData.message || 'This job is already in your library.'
-          : 'This job has been saved to your profile library for later.',
         emailAddress: '',
         externalLink: '',
+        ...modalOptions,
       })
     } catch (err) {
       console.error('Failed to save job:', err)

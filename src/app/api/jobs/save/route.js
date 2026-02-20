@@ -96,6 +96,21 @@ export async function POST(req) {
     if (saveError) {
       // If duplicate (unique constraint), report that it was already stored
       if (saveError.code === '23505') {
+        let currentStatus = finalStatus
+
+        const { data: existingSavedJob, error: fetchStatusError } = await supabaseAdmin
+          .from('saved_jobs')
+          .select('status')
+          .eq('profile_id', userId)
+          .eq('job_id', jobId)
+          .single()
+
+        if (fetchStatusError) {
+          console.error('Error fetching existing saved job status:', fetchStatusError)
+        } else if (existingSavedJob?.status) {
+          currentStatus = existingSavedJob.status
+        }
+
         if (finalStatus !== 'saved') {
           const { error: statusUpdateError } = await supabaseAdmin
             .from('saved_jobs')
@@ -105,12 +120,15 @@ export async function POST(req) {
 
           if (statusUpdateError) {
             console.error('Status update on duplicate error:', statusUpdateError)
+          } else {
+            currentStatus = finalStatus
           }
         }
 
         return NextResponse.json({
           success: true,
           alreadySaved: true,
+          status: currentStatus,
           message: 'Already saved'
         })
       }
@@ -124,6 +142,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       success: true,
+      status: finalStatus,
       message: 'Job saved'
     })
 

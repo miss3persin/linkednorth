@@ -14,7 +14,7 @@ export default function RecruiterModal({ open, setOpen }) {
     }
 
     return (
-        <Modal open={open} onClose={() => setOpen(false)} size="max-w-[400px]">
+    <Modal open={open} onClose={() => setOpen(false)} size="max-w-[320px]">
             <div className="flex flex-col items-center text-center py-6 px-2">
                 <div className="w-16 h-16 bg-[#F0FDF4] rounded-full flex items-center justify-center mb-6">
                     <div className="w-12 h-12 bg-[#DCFCE7] rounded-full flex items-center justify-center">

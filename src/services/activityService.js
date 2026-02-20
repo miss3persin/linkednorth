@@ -32,6 +32,7 @@ export async function getUserActivity(userId) {
             .from('notifications')
             .select('*')
             .eq('user_id', userId)
+            .eq('is_read', false)
             .order('created_at', { ascending: false })
             .limit(5);
 

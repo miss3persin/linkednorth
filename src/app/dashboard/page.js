@@ -3,12 +3,10 @@ export const dynamic = "force-dynamic";
 
 import Sidebar from "../components/layout/Sidebar";
 import { currentUser } from "@clerk/nextjs/server";
-import Link from "next/link";
 import { FiEye, FiCalendar, FiBriefcase } from "react-icons/fi";
-import { IoMdNotificationsOutline } from "react-icons/io";
 import { getUserActivity } from "@/services/activityService";
-import { Button } from "../components/ui/Button";
 import { Loader } from "../components/ui/Loader";
+import DashboardNotifications from "./components/DashboardNotifications";
 
 export default async function Dashboard() {
   const user = await currentUser();
@@ -32,6 +30,7 @@ export default async function Dashboard() {
   const notifications = activity.notifications
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .map((n) => ({
+      id: n.id,
       title: n.title,
       text: n.message,
       actionLink: n.action_link,
@@ -105,52 +104,14 @@ export default async function Dashboard() {
             <p className="text-xs text-gray-400 mt-1">Active interviews</p>
           </div>
         </div>
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4">
-            <h3 className="font-semibold text-lg">Notifications</h3>
-            <Button
-              text="Mark all as read"
-              variant="ghost"
-              className="text-sm font-normal"
-            />
-          </div>
-
-          {notifications.length === 0 ? (
-            <p className="text-gray-500 text-sm">No notifications yet.</p>
-          ) : (
-            notifications.map((n, i) => (
-              <div
-                key={i}
-                className="py-4 px-4 bg-[#F9FAFB] flex flex-col sm:flex-row gap-3 sm:gap-4 mb-2 rounded-md"
-              >
-                <IoMdNotificationsOutline
-                  className={`text-2xl sm:text-3xl ${n.color}`}
-                />
-
-                <div className="flex-1">
-                  <p className="font-medium">{n.title}</p>
-                  <p className="text-sm text-gray-500 mt-1 break-words">
-                    {n.text}
-                  </p>
-
-                  {n.actionLink && (
-                    <Link
-                      href={n.actionLink}
-                      className="text-blue-600 text-sm mt-2 inline-block font-medium"
-                    >
-                      {n.action}
-                    </Link>
-                  )}
-                  <p className="text-xs text-gray-400 mt-2 sm:hidden">
-                    {n.time}
-                  </p>
-                </div>
-                <p className="hidden sm:block text-xs text-gray-400 ml-auto">
-                  {n.time}
-                </p>
-              </div>
-            ))
-          )}
+        <div
+          className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8 flex flex-col ${
+            notifications.length > 0
+              ? "h-[360px] sm:h-[420px] lg:h-[460px]"
+              : ""
+          }`}
+        >
+          <DashboardNotifications initialNotifications={notifications} />
         </div>
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
           <h3 className="font-semibold text-lg mb-4">

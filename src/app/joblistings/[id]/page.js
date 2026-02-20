@@ -12,6 +12,8 @@ import { MapPin, Clock, Briefcase, Calendar, ExternalLink, Bookmark, ArrowLeft, 
 import { formatPostedTime, titleCaseContract } from '@/app/lib/dateUtils'
 import { Loader } from '@/app/components/ui/Loader'
 import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
+import { buildSaveModalState } from '@/app/lib/saveModalState'
+import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
 
 export default function JobDetailsPage() {
   const params = useParams()
@@ -67,19 +69,15 @@ export default function JobDetailsPage() {
       const resData = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(resData.error || 'Failed')
 
-      const alreadySaved =
-        resData.alreadySaved ||
-        resData.message?.toLowerCase().includes('already saved')
+      const modalOptions = buildSaveModalState(resData, {
+        successMessage: 'Saved to your profile library. You can find it in your Library.',
+      })
 
       setModalState({
         isOpen: true,
-        type: alreadySaved ? 'already_saved' : 'success',
-        title: alreadySaved ? 'Already Saved' : 'Job Saved!',
-        message: alreadySaved
-          ? resData.message || 'This job is already saved in your library.'
-          : 'Saved to your profile library. You can find it in your Library.',
         emailAddress: '',
-        externalLink: ''
+        externalLink: '',
+        ...modalOptions,
       })
     } catch (err) {
       console.error('Save job error:', err)
@@ -113,29 +111,6 @@ export default function JobDetailsPage() {
     }
   }
 
-  const markJobAsApplied = async () => {
-    if (!job || !user?.id) return
-
-    try {
-      const payload = {
-        ...buildSaveJobPayload(job, user.id),
-        status: 'applied',
-      }
-
-      const res = await fetch('/api/jobs/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) {
-        console.error('Failed to record applied job')
-      }
-    } catch (err) {
-      console.error('Failed to record applied job:', err)
-    }
-  }
-
   const handleApply = async () => {
     if (!isSignedIn) { router.push('/?redirect=/joblistings/' + params.id); return }
     if (!job) return
@@ -149,12 +124,12 @@ export default function JobDetailsPage() {
       const data = await res.json()
 
       if (data.success) {
-        markJobAsApplied()
-
         if (data.alreadyApplied) {
           setModalState({ isOpen: true, type: 'already_applied', title: 'Already Applied', message: 'You have already applied for this position.', emailAddress: '', externalLink: '' })
           return
         }
+
+        dispatchNotificationDelta(1)
 
         const link = job.applyLink
 

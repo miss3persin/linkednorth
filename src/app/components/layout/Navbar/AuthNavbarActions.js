@@ -26,11 +26,38 @@ export default function AuthNavbarActions({ user, userData, onPostJobClick }) {
       }
     }
 
+    const handleNotificationUpdate = (event) => {
+      if (!isActive) return
+      const detail = event?.detail
+
+      if (detail?.count !== undefined && typeof detail.count === 'number') {
+        setNotificationCount(detail.count)
+        return
+      }
+
+      if (detail?.delta !== undefined && detail?.delta !== null) {
+        setNotificationCount((prev) =>
+          Math.max(prev + detail.delta, 0)
+        )
+        return
+      }
+
+      fetchCounts()
+    }
+
     fetchCounts()
-    const interval = setInterval(fetchCounts, 30000)
+    const interval = setInterval(fetchCounts, 10000)
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('notificationsUpdated', handleNotificationUpdate)
+    }
+
     return () => {
       isActive = false
       clearInterval(interval)
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('notificationsUpdated', handleNotificationUpdate)
+      }
     }
   }, [user])
 

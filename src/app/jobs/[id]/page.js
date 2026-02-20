@@ -10,6 +10,9 @@ import AuthModals from '@/app/components/modals/AuthModals'
 import JobDescriptionRenderer from '@/app/components/jobs/JobDescriptionRenderer'
 import { MapPin, Clock, Briefcase, Calendar, ExternalLink, Bookmark, ArrowLeft, Share2, Building2 } from 'lucide-react'
 import { formatPostedTime, titleCaseContract } from '@/app/lib/dateUtils'
+import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
+import { buildSaveModalState } from '@/app/lib/saveModalState'
+import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
 import { Loader } from '@/app/components/ui/Loader'
 
 export default function JobDetailsPage() {
@@ -46,27 +49,30 @@ export default function JobDetailsPage() {
 
   const handleSaveJob = async () => {
     if (!isSignedIn) { setOpenAuthModal(true); return }
+    if (!job) return
     setIsSaving(true)
     try {
+      const payload = buildSaveJobPayload(job, user.id)
       const res = await fetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: params.id,
-          userId: user.id,
-        }),
+        body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error('Failed')
+      const resData = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(resData.error || 'Failed')
+
+      const modalOptions = buildSaveModalState(resData, {
+        successMessage: 'This job has been saved to your profile library for later.',
+      })
 
       setModalState({
         isOpen: true,
-        type: 'success',
-        title: 'Job Saved!',
-        message: 'This job has been saved to your profile library for later.',
         emailAddress: '',
-        externalLink: ''
+        externalLink: '',
+        ...modalOptions,
       })
-    } catch {
+    } catch (err) {
+      console.error('Save job error:', err)
       setModalState({
         isOpen: true,
         type: 'error',
@@ -102,15 +108,20 @@ export default function JobDetailsPage() {
     if (!job) return
     try {
       const res = await fetch('/api/applications/create', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId: job.id, jobTitle: job.jobTitle, company: job.company, applyLink: job.applyLink }),
       })
       const data = await res.json()
+
       if (data.success) {
-        if (data.alreadyApplied) {
+    if (data.alreadyApplied) {
           setModalState({ isOpen: true, type: 'already_applied', title: 'Already Applied', message: 'You have already applied for this position.', emailAddress: '', externalLink: '' })
           return
         }
+
+        dispatchNotificationDelta(1)
+
         const link = job.applyLink
         if (link?.startsWith('mailto:')) {
           setModalState({ isOpen: true, type: 'email', title: 'Send Your Application', message: 'Your application has been recorded. Send your resume to:', emailAddress: link.replace('mailto:', ''), externalLink: '' })

@@ -67,9 +67,40 @@ export async function POST(req) {
         user_id: authUserId,
         title: 'Application Submitted',
         message: `Your application for ${jobTitle} at ${company} has been submitted successfully.`,
-        action_link: `/applications`,
+        action_link: `/joblistings/${jobId}`,
         color: 'text-green-500',
       })
+
+    const { error: jobUpsertError } = await supabaseAdmin
+      .from('jobs')
+      .upsert(
+        {
+          id: jobId,
+          title: jobTitle,
+          company,
+          apply_url: applyLink,
+        },
+        { onConflict: 'id' }
+      )
+
+    if (jobUpsertError) {
+      console.error('Error upserting job during application:', jobUpsertError)
+    }
+
+    const { error: savedJobError } = await supabaseAdmin
+      .from('saved_jobs')
+      .upsert(
+        {
+          profile_id: authUserId,
+          job_id: jobId,
+          status: 'applied',
+        },
+        { onConflict: ['profile_id', 'job_id'] }
+      )
+
+    if (savedJobError) {
+      console.error('Failed to upsert applied job record:', savedJobError)
+    }
 
     return NextResponse.json({
       success: true,

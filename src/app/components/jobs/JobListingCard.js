@@ -15,6 +15,7 @@ import logo from '/public/linkednorth-logo.png'
 import { Button } from '../ui/Button'
 import JobApplicationModal from '../modals/JobApplicationModal'
 import { stripHtml } from '../../lib/cleanDescription'
+import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
 const inter = Inter({ subsets: ['latin'] })
@@ -122,6 +123,8 @@ export const JobListingCard = ({
           })
           return
         }
+
+        dispatchNotificationDelta(1)
 
         // Check if it's a mailto link
         if (applyLink && applyLink.startsWith('mailto:')) {

@@ -124,7 +124,8 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     try {
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: '/sso-callback',
+        redirectUrl: `${window.location.origin}/sso-callback`,
+        redirectUrlComplete: `${window.location.origin}/sso-callback`,
       })
     } catch (err) {
       console.error('OAuth error:', err)
@@ -136,7 +137,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   if (verifying) {
     return (
       <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
-        <div className="text-left px-1 sm:px-0">
+        <div className="text-left px-1 sm:px-0 py-1 sm:py-2">
           <h2 className="text-lg sm:text-xl font-bold mb-1">Verify your email</h2>
           <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
             We sent a code to {email}
@@ -196,7 +197,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   
   return (
     <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
-      <div className="text-left px-1 sm:px-0">
+        <div className="text-left px-1 sm:px-0 py-1 sm:py-2">
         <h2 className="text-lg sm:text-xl font-bold mb-1">Join LinkedNorth</h2>
         <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
           Make the most of your professional life
