@@ -122,10 +122,17 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
   const handleOAuthSignUp = async (strategy) => {
     try {
+      const redirectUrl = `${window.location.origin}/sso-callback`
+
+      const redirectAfterLogin =
+        localStorage.getItem('redirectAfterLogin') || '/dashboard'
+
+      localStorage.setItem('redirectAfterLogin', redirectAfterLogin)
+
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: `${window.location.origin}/sso-callback`,
-        redirectUrlComplete: `${window.location.origin}/sso-callback`,
+        redirectUrl,
+        redirectUrlComplete: redirectUrl,
       })
     } catch (err) {
       console.error('OAuth error:', err)

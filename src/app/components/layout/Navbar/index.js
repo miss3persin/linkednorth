@@ -6,7 +6,13 @@ import PublicNavbar from "./PublicNavbar";
 import AuthNavbar from "./AuthNavbar";
 
 export default async function NavbarWrapper() {
-  const user = await currentUser();
+  let user = null
+
+  try {
+    user = await currentUser();
+  } catch (err) {
+    console.error('Failed to load Clerk user for Navbar:', err);
+  }
 
   if (!user) return <PublicNavbar />;
 

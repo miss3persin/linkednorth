@@ -83,10 +83,15 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
 
   const handleOAuthSignIn = async (strategy) => {
     try {
+      const redirectUrl = `${window.location.origin}/sso-callback`
+      const redirectAfterLogin = `/joblistings${window.location.search}`
+
+      localStorage.setItem('redirectAfterLogin', redirectAfterLogin)
+
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: `${window.location.origin}/joblistings${window.location.search}`,
-        redirectUrlComplete: `${window.location.origin}/joblistings${window.location.search}`,
+        redirectUrl,
+        redirectUrlComplete: redirectUrl,
       })
     } catch (err) {
       console.error('OAuth error:', err)
