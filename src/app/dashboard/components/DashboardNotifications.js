@@ -91,7 +91,7 @@ export default function DashboardNotifications({ initialNotifications = [] }) {
 
       <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 thin-scroll">
         {notifications.length === 0 ? (
-          <p className="text-gray-500 text-sm">You're all caught up.</p>
+          <p className="text-gray-500 text-sm">You&apos;re all caught up.</p>
         ) : (
           notifications.map((n) => (
             <div
