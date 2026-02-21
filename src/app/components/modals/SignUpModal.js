@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useSignUp } from "@clerk/nextjs"
+import { useSignIn, useSignUp } from '@clerk/nextjs'
 import Modal from '../ui/Modal'
 import {
   validateName,
@@ -11,7 +11,8 @@ import {
 import Image from 'next/image'
 
 export default function SignUpModal({ open, setOpen, switchToSignIn }) {
-  const { isLoaded, signUp, setActive } = useSignUp()
+  const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp()
+  const { isLoaded: isSignInLoaded, signIn } = useSignIn()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -54,7 +55,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   }
 
   if (!open) return null
-  if (!isLoaded) return null
+  if (!isSignUpLoaded || !isSignInLoaded) return null
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -129,7 +130,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
 
       localStorage.setItem('redirectAfterLogin', redirectAfterLogin)
 
-      await signUp.authenticateWithRedirect({
+      await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl,
         redirectUrlComplete: redirectUrl,

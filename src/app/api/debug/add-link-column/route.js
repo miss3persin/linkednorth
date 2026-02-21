@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
+import { ensureDebugAccess } from '@/app/lib/debugGuard';
 
 export async function GET() {
+    const guardResponse = ensureDebugAccess();
+    if (guardResponse) {
+        return guardResponse;
+    }
+
     try {
         const sql = `ALTER TABLE public.internal_jobs ADD COLUMN IF NOT EXISTS application_link TEXT;`;
 

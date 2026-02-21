@@ -37,18 +37,37 @@ export default function DashboardNotifications({ initialNotifications = [] }) {
   }
 
   const handleView = async (notification) => {
+    const currentIndex = notifications.findIndex((n) => n.id === notification.id)
+    let removed = false
+
+    if (currentIndex > -1) {
+      removed = true
+      setNotifications((prev) => prev.filter((n) => n.id !== notification.id))
+      dispatchNotificationDelta(-1)
+    }
+
     try {
       const res = await fetch(`/api/notifications/${notification.id}/mark-read`, {
         method: 'PATCH',
       })
-      if (res.ok) {
-        setNotifications((prev) =>
-          prev.filter((n) => n.id !== notification.id)
-        )
-        dispatchNotificationDelta(-1)
+
+      if (!res.ok) {
+        throw new Error('Failed to mark notification read')
       }
     } catch (err) {
       console.error('Failed to mark notification read', err)
+      if (removed) {
+        setNotifications((prev) => {
+          const restored = [...prev]
+          restored.splice(
+            Math.min(currentIndex, restored.length),
+            0,
+            notification
+          )
+          return restored
+        })
+        dispatchNotificationDelta(1)
+      }
     } finally {
       if (notification.actionLink) {
         router.push(notification.actionLink)
@@ -57,8 +76,8 @@ export default function DashboardNotifications({ initialNotifications = [] }) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4 flex-shrink-0">
         <h3 className="font-semibold text-lg">Notifications</h3>
         <button
           type="button"
@@ -72,11 +91,11 @@ export default function DashboardNotifications({ initialNotifications = [] }) {
 
       <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 thin-scroll">
         {notifications.length === 0 ? (
-          <p className="text-gray-500 text-sm">You’re all caught up.</p>
+          <p className="text-gray-500 text-sm">You're all caught up.</p>
         ) : (
-          notifications.map((n, i) => (
+          notifications.map((n) => (
             <div
-              key={i}
+              key={n.id}
               className="py-4 px-4 bg-[#F9FAFB] flex flex-col sm:flex-row gap-3 sm:gap-4 mb-2 rounded-md"
             >
               <IoMdNotificationsOutline

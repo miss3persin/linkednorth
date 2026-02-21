@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
+import { ensureDebugAccess } from '@/app/lib/debugGuard';
 
 export async function GET() {
+    const guardResponse = ensureDebugAccess();
+    if (guardResponse) return guardResponse;
+
     try {
         const sql = `
       -- Create internal_jobs table

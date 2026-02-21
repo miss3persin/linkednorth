@@ -5,14 +5,22 @@ export async function createRecruiterProfile(userId, companyData) {
     const client = await clerkClient();
 
     try {
-        // Update Clerk metadata to store recruiter info
+        const user = await client.users.getUser(userId);
+        const existingPublicMetadata = user.publicMetadata || {};
+        const existingPrivateMetadata = user.privateMetadata || {};
+        const existingRecruiterProfile = existingPrivateMetadata.recruiterProfile || {};
+
+        // Update Clerk metadata to store recruiter info while preserving existing keys
         await client.users.updateUser(userId, {
             publicMetadata: {
+                ...existingPublicMetadata,
                 isRecruiter: true
             },
             privateMetadata: {
+                ...existingPrivateMetadata,
                 isRecruiter: true,
                 recruiterProfile: {
+                    ...existingRecruiterProfile,
                     companyName,
                     location,
                     industry,

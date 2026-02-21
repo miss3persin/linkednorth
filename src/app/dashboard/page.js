@@ -105,7 +105,7 @@ export default async function Dashboard() {
           </div>
         </div>
         <div
-          className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8 flex flex-col ${
+          className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8 flex flex-col min-h-0 overflow-hidden ${
             notifications.length > 0
               ? "max-h-[360px] sm:max-h-[420px] lg:max-h-[460px]"
               : ""
