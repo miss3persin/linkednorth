@@ -14,7 +14,7 @@ export default function RecruiterModal({ open, setOpen }) {
     }
 
     return (
-    <Modal open={open} onClose={() => setOpen(false)} size="max-w-[320px]">
+    <Modal open={open} onClose={() => setOpen(false)} size="max-w-[420px]">
             <div className="flex flex-col items-center text-center py-6 px-2">
                 <div className="w-16 h-16 bg-[#F0FDF4] rounded-full flex items-center justify-center mb-6">
                     <div className="w-12 h-12 bg-[#DCFCE7] rounded-full flex items-center justify-center">
@@ -22,7 +22,7 @@ export default function RecruiterModal({ open, setOpen }) {
                     </div>
                 </div>
                 <h2 className="text-2xl font-bold mb-3 text-gray-900 tracking-tight">Ready to Hire?</h2>
-                <p className="text-[#6B7280] text-[14px] leading-relaxed max-w-[300px] mb-8">
+                <p className="text-[#6B7280] text-[14px] leading-relaxed max-w-[360px] mb-8">
                     To post a job, you first need to set up a Recruiter Profile to manage your company brand and applicants.
                 </p>
                 <div className="w-full flex flex-col items-center justify-center space-y-4 px-4">

@@ -3,14 +3,15 @@
 import React, { useState } from 'react';
 import { Upload, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/app/components/layout/Sidebar'
 import { useRef } from 'react';
 import { Loader } from '@/app/components/ui/Loader';
 import { validateTextField } from '@/app/lib/formValidators';
 import Image from 'next/image';
+import { useAuthFetch } from '@/app/lib/useAuthFetch';
 
 export default function CompanyProfileSetup() {
     const router = useRouter();
+    const authFetch = useAuthFetch();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
@@ -59,7 +60,7 @@ export default function CompanyProfileSetup() {
             const formDataToUpload = new FormData();
             formDataToUpload.append('file', file);
 
-            const res = await fetch('/api/recruiter/upload-logo', {
+            const res = await authFetch('/api/recruiter/upload-logo', {
                 method: 'POST',
                 body: formDataToUpload,
             });
@@ -106,7 +107,7 @@ export default function CompanyProfileSetup() {
         setError(null);
 
         try {
-            const res = await fetch('/api/recruiter/setup', {
+            const res = await authFetch('/api/recruiter/setup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -128,7 +129,6 @@ export default function CompanyProfileSetup() {
 
     return (
         <div className="min-h-screen flex bg-[#F8F9FB] mt-[72px]">
-            <Sidebar />
             <main className="flex-1 flex flex-col items-center pt-12 md:pt-20 px-4">
                 <div className="text-center mb-8">
                     <h1 className="text-2xl md:text-[28px] font-bold text-[#0F172A] mb-3">

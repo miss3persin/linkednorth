@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
+import { getSupabaseUser } from '@/app/lib/authHelpers'
 export async function POST(req) {
   try {
-    const { userId: authUserId } = await auth()
+    const user = await getSupabaseUser(req)
 
-    if (!authUserId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -15,24 +15,23 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Job ID is required' }, { status: 400 })
     }
 
-    // Ensure user exists in Supabase
-    const user = await currentUser()
-    if (user) {
-      await supabaseAdmin
-        .from('users')
-        .upsert({
+    await supabaseAdmin
+      .from('users')
+      .upsert(
+        {
           id: user.id,
-          email: user.emailAddresses[0]?.emailAddress,
-          first_name: user.firstName,
-          last_name: user.lastName,
-        }, { onConflict: 'id' })
-    }
+          email: user.email,
+          first_name: user.user_metadata?.first_name || user.user_metadata?.firstName || null,
+          last_name: user.user_metadata?.last_name || user.user_metadata?.lastName || null,
+        },
+        { onConflict: 'id' }
+      )
 
     // Check if user already applied to this job
     const { data: existingApp } = await supabaseAdmin
       .from('applications')
       .select('id')
-      .eq('profile_id', authUserId)
+      .eq('profile_id', user.id)
       .eq('job_id', jobId)
       .single()
 
@@ -50,7 +49,7 @@ export async function POST(req) {
       .from('applications')
       .insert({
         job_id: jobId,
-        profile_id: authUserId,
+        profile_id: user.id,
         status: 'pending',
       })
       .select()
@@ -64,7 +63,7 @@ export async function POST(req) {
     await supabaseAdmin
       .from('notifications')
       .insert({
-        user_id: authUserId,
+        user_id: user.id,
         title: 'Application Submitted',
         message: `Your application for ${jobTitle} at ${company} has been submitted successfully.`,
         action_link: `/joblistings/${jobId}`,
@@ -91,7 +90,7 @@ export async function POST(req) {
       .from('saved_jobs')
       .upsert(
         {
-          profile_id: authUserId,
+          profile_id: user.id,
           job_id: jobId,
           status: 'applied',
         },

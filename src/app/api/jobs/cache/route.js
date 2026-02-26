@@ -1,16 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
-import { auth } from '@clerk/nextjs/server'
 
 export async function POST(req) {
-  const { userId } = auth()
-
-  if (!userId) {
-    return NextResponse.json(
-      { error: 'Authentication required to update the jobs cache.' },
-      { status: 401 }
-    )
-  }
 
   try {
     const { jobs } = await req.json()

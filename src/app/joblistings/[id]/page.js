@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { useUser } from '@clerk/nextjs'
+import { useSessionContext } from '@/app/lib/supabaseAuthContext'
 import Sidebar from '@/app/components/layout/Sidebar'
 import logo from '/public/linkednorth-logo.png'
 import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
@@ -14,11 +14,15 @@ import { Loader } from '@/app/components/ui/Loader'
 import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
 import { buildSaveModalState } from '@/app/lib/saveModalState'
 import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
+import { useAuthFetch } from '@/app/lib/useAuthFetch'
 
 export default function JobDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const { isSignedIn, user } = useUser()
+  const { session } = useSessionContext()
+  const isSignedIn = Boolean(session)
+  const user = session?.user
+  const authFetch = useAuthFetch()
 
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -28,6 +32,8 @@ export default function JobDetailsPage() {
   const [modalState, setModalState] = useState({
     isOpen: false, type: 'success', title: '', message: '', emailAddress: '', externalLink: '',
   })
+  const isReadOnlyView = !isSignedIn
+  const isSaveDisabled = isReadOnlyView || isSaving
 
   useEffect(() => {
     async function fetchJobDetails() {
@@ -38,10 +44,10 @@ export default function JobDetailsPage() {
         setJob(data.job)
 
         if (isSignedIn && user) {
-          fetch('/api/jobs/track-view', {
+          authFetch('/api/jobs/track-view', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.id, jobId: params.id, jobTitle: data.job.jobTitle, company: data.job.company }),
+            body: JSON.stringify({ jobId: params.id, jobTitle: data.job.jobTitle, company: data.job.company }),
           }).catch(err => console.error('Failed to track view:', err))
         }
       } catch (err) {
@@ -52,7 +58,7 @@ export default function JobDetailsPage() {
       }
     }
     if (params.id) fetchJobDetails()
-  }, [params.id, isSignedIn, user])
+  }, [params.id, isSignedIn, user, authFetch])
 
   const handleSaveJob = async () => {
     if (!isSignedIn) { router.push('/?redirect=/joblistings/' + params.id); return }
@@ -60,7 +66,7 @@ export default function JobDetailsPage() {
 
     setIsSaving(true)
     try {
-      const res = await fetch('/api/jobs/save', {
+      const res = await authFetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildSaveJobPayload(job, user.id)),
@@ -72,6 +78,8 @@ export default function JobDetailsPage() {
       const modalOptions = buildSaveModalState(resData, {
         successMessage: 'Saved to your profile library. You can find it in your Library.',
       })
+
+      dispatchNotificationDelta(1)
 
       setModalState({
         isOpen: true,
@@ -116,7 +124,7 @@ export default function JobDetailsPage() {
     if (!job) return
 
     try {
-      const res = await fetch('/api/applications/create', {
+      const res = await authFetch('/api/applications/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId: job.id, jobTitle: job.jobTitle, company: job.company, applyLink: job.applyLink }),
@@ -165,7 +173,7 @@ export default function JobDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex bg-gray-50 mt-[72px]">
-        <Sidebar />
+        {isSignedIn && <Sidebar />}
         <main className="flex-1 flex items-center justify-center">
           <Loader message="Loading job details" size="lg" />
         </main>
@@ -176,7 +184,7 @@ export default function JobDetailsPage() {
   if (error || !job) {
     return (
       <div className="min-h-screen flex bg-gray-50 mt-[72px]">
-        <Sidebar />
+        {isSignedIn && <Sidebar />}
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="bg-white p-8 rounded-none border border-gray-200 text-center max-w-md w-full">
             <h2 className="text-xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Job Not Found</h2>
@@ -195,7 +203,7 @@ export default function JobDetailsPage() {
 
   return (
     <div className="joblistings-page min-h-screen flex bg-gray-50 mt-[72px]">
-      <Sidebar />
+      {isSignedIn && <Sidebar />}
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-6">
@@ -248,20 +256,36 @@ export default function JobDetailsPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 min-w-[180px]">
+                <div className="flex flex-col gap-3 min-w-[180px]">
                 <button
                   onClick={handleApply}
-                  className="w-full bg-black text-white rounded-none px-6 py-4 font-bold text-sm hover:bg-gray-800 transition-all border border-black shadow-none"
+                  disabled={isReadOnlyView}
+                  aria-disabled={isReadOnlyView}
+                  className={`w-full rounded-none px-6 py-4 font-bold text-sm transition-all border border-black shadow-none ${
+                    isReadOnlyView
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-black text-white hover:bg-gray-800'
+                  }`}
                 >
-                  Apply Now
+                  {isSignedIn ? 'Apply Now' : 'Sign in to apply'}
                 </button>
                 <button
                   onClick={handleSaveJob}
-                  disabled={isSaving}
-                  className="w-full bg-white text-black rounded-none px-6 py-4 font-bold text-sm hover:bg-gray-50 transition-all border border-gray-200"
+                  disabled={isSaveDisabled}
+                  aria-disabled={isSaveDisabled}
+                  className={`w-full rounded-none px-6 py-4 font-bold text-sm border transition-all ${
+                    isSaveDisabled
+                      ? 'border-gray-200 bg-white text-gray-400 cursor-not-allowed'
+                      : 'border-gray-200 bg-white text-black hover:bg-gray-50'
+                  }`}
                 >
-                  {isSaving ? 'Saving...' : 'Bookmark'}
+                  {isSaving ? 'Saving...' : isSignedIn ? 'Save' : 'Sign in to save'}
                 </button>
+                {isReadOnlyView && (
+                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-400 text-center">
+                    Sign in to apply or save this job.
+                  </p>
+                )}
               </div>
             </div>
           </div>

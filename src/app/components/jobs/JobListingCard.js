@@ -1,11 +1,8 @@
 'use client'
 
 import { useState } from "react"
-import { useUser } from "@clerk/nextjs"
+import { useSessionContext } from '@/app/lib/supabaseAuthContext'
 import AuthModals from "../modals/AuthModals"
-import { useSearchParams, usePathname } from 'next/navigation'
-import { saveJobsRedirect } from '../../lib/authRedirect'
-import React from 'react'
 import Image from 'next/image'
 import { Inter, Open_Sans } from 'next/font/google'
 import arrow_right from '/public/chevron right.png'
@@ -16,11 +13,11 @@ import { Button } from '../ui/Button'
 import JobApplicationModal from '../modals/JobApplicationModal'
 import { stripHtml } from '../../lib/cleanDescription'
 import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
+import { useAuthFetch } from '@/app/lib/useAuthFetch'
+import { formatPostedTime } from '../../lib/dateUtils'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
 const inter = Inter({ subsets: ['latin'] })
-
-import { formatPostedTime } from '../../lib/dateUtils'
 
 
 
@@ -39,7 +36,10 @@ export const JobListingCard = ({
   detailsLink,
   onViewDetails = () => { },
 }) => {
-  const { isSignedIn, user } = useUser()
+  const { session } = useSessionContext()
+  const authFetch = useAuthFetch()
+  const isSignedIn = Boolean(session)
+  const user = session?.user
   const [openAuthModal, setOpenAuthModal] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -53,23 +53,9 @@ export const JobListingCard = ({
     externalLink: '',
   })
 
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-
 
   const requireAuth = (action) => {
     if (!isSignedIn) {
-      // Save redirect ONLY when coming from jobs page
-      if (pathname === '/jobs') {
-        saveJobsRedirect(searchParams)
-      }
-
-      localStorage.setItem(
-        'redirectAfterLogin',
-        window.location.pathname + window.location.search
-        // `${pathname}?${searchParams.toString()}`
-      )
-
       setOpenAuthModal(true)
       return
     }
@@ -98,7 +84,7 @@ export const JobListingCard = ({
 
     try {
       // Track application in database
-      const res = await fetch('/api/applications/create', {
+      const res = await authFetch('/api/applications/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

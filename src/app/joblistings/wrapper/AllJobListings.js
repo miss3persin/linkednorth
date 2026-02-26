@@ -11,7 +11,6 @@ import overlay from '/public/Overlay.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
 import logo from '/public/linkednorth-logo.png'
-import { useUser } from "@clerk/nextjs"
 import Sidebar from '@/app/components/layout/Sidebar'
 import JobApplicationModal from '../../components/modals/JobApplicationModal'
 import AuthModals from '../../components/modals/AuthModals'
@@ -19,6 +18,8 @@ import { HiMenu, HiX } from 'react-icons/hi'
 import { stripHtml } from '@/app/lib/cleanDescription'
 import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
 import { buildSaveModalState } from '@/app/lib/saveModalState'
+import { useSessionContext } from '@/app/lib/supabaseAuthContext'
+import { useAuthFetch } from '@/app/lib/useAuthFetch'
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 import { formatPostedTime } from '@/app/lib/dateUtils'
 
 import { Pagination } from '../../components/ui/Pagination'
+import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([])
@@ -46,7 +48,10 @@ export default function JobsPage() {
   const jobTitleQuery = searchParams.get('search') || ''
   const countryQuery = searchParams.get('geo') || ''
 
-  const { isSignedIn, user } = useUser()
+  const { session } = useSessionContext()
+  const isSignedIn = Boolean(session)
+  const user = session?.user
+  const authFetch = useAuthFetch()
 
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -126,7 +131,7 @@ export default function JobsPage() {
     setIsSaving(true)
 
     try {
-      const res = await fetch('/api/jobs/save', {
+      const res = await authFetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildSaveJobPayload(job, user.id)),
@@ -136,9 +141,11 @@ export default function JobsPage() {
       if (!res.ok) throw new Error(resData.error || 'Failed to save job')
 
       const modalOptions = buildSaveModalState(resData, {
-        successTitle: 'Job Bookmarked!',
+        successTitle: 'Job Saved!',
         successMessage: 'This job has been saved to your profile library for later.',
       })
+
+      dispatchNotificationDelta(1)
 
       setModalState({
         isOpen: true,

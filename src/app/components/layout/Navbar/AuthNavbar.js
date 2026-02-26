@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from 'next/image';
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { HiMenu, HiX } from "react-icons/hi";
 import logo from '/public/linkednorth-logo.png';
 import dynamic from 'next/dynamic';
@@ -11,9 +12,9 @@ const AuthModals = dynamic(() => import('@/app/components/modals/AuthModals'), {
 const RecruiterModal = dynamic(() => import('@/app/components/modals/RecruiterModal'), { ssr: false });
 const AuthNavbarActions = dynamic(() => import('./AuthNavbarActions'), { ssr: false });
 
-import { useUser } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+import { useSessionContext } from '@/app/lib/supabaseAuthContext';
 import { Open_Sans } from 'next/font/google';
+import { useAuthFetch } from '@/app/lib/useAuthFetch';
 
 const openSans = Open_Sans({ subsets: ['latin'] });
 
@@ -21,17 +22,50 @@ export default function AuthNavbar({ userData }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [recruiterModalOpen, setRecruiterModalOpen] = useState(false);
 
-  const { user } = useUser();
+  const { session } = useSessionContext();
   const pathname = usePathname();
-  const isRecruiter = !!user?.publicMetadata?.isRecruiter;
+  const router = useRouter();
+  const userSession = session?.user;
+  const isRecruiter = !!userSession?.user_metadata?.isRecruiter;
+  const authFetch = useAuthFetch();
+  const [hasRecruiterProfile, setHasRecruiterProfile] = useState(isRecruiter);
 
   const handlePostJobClick = () => {
-    if (isRecruiter) {
-      window.location.href = '/recruiter/post-job';
+    if (hasRecruiterProfile) {
+      router.push('/recruiter/post-job');
     } else {
       setRecruiterModalOpen(true);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!userSession) {
+      setHasRecruiterProfile(false);
+      return;
+    }
+
+    const fetchStatus = async () => {
+      try {
+        const res = await authFetch('/api/user/recruiter-status');
+        if (!res.ok) throw new Error('Failed to fetch recruiter status');
+        const data = await res.json();
+        if (!isMounted) return;
+        if (Boolean(data?.isRecruiter)) {
+          setHasRecruiterProfile(true);
+        }
+      } catch (error) {
+        console.error('Recruiter status fetch failed:', error);
+      }
+    };
+
+    void fetchStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userSession, authFetch]);
 
   const isActive = (path) => {
     if (path === '/joblistings' && (pathname === '/joblistings' || pathname.startsWith('/joblistings/'))) {
@@ -84,7 +118,6 @@ export default function AuthNavbar({ userData }) {
         </div>
         <div className="hidden lg:flex items-center gap-8 ml-8">
           <AuthNavbarActions
-            user={user}
             userData={userData}
             onPostJobClick={handlePostJobClick}
           />

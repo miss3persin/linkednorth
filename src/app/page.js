@@ -2,7 +2,7 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
+import { useSessionContext } from '@/app/lib/supabaseAuthContext'
 import AuthModals from './components/modals/AuthModals'
 import { Inter, Open_Sans } from 'next/font/google'
 import { SearchBar } from './components/ui/SearchBar'
@@ -25,6 +25,7 @@ import discord_img from '/public/discord.png'
 import feedback_img from '/public/feedback_img.png'
 import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
+import Loader from './components/ui/Loader'
 
 const openSans = Open_Sans({ subsets: ['latin'] })
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -90,16 +91,16 @@ export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   // const searchParams = useSearchParams()
   const router = useRouter()
-  const { isLoaded, isSignedIn } = useUser()
+  const { session, isLoading } = useSessionContext()
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && window.location.pathname === '/') {
+    if (!isLoading && session && window.location.pathname === '/') {
       router.push('/dashboard');
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoading, session, router]);
 
   // Show loading while checking auth
-  if (!isLoaded) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center mt-30">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
@@ -108,11 +109,18 @@ export default function HomePage() {
   }
 
   // Don't render anything if user is signed in (will redirect)
-  if (isSignedIn) {
+  if (session) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center mt-30">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-        <div className=" text-center text-xl text-black">Redirecting...</div>
+      <div className="flex flex-col min-h-screen items-center justify-center gap-6">
+              <Loader
+                variant="loading"
+                size="lg"
+                spinnerColor="#e5e7eb"
+                accentColor="#1a1354"
+                showMessage={false}
+                className="animate-pulse"
+              />
+        <div className="text-sm uppercase tracking-[0.35em] text-gray-500">Redirecting...</div>
       </div>
     )
   }

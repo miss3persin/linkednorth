@@ -1,27 +1,65 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
 
-// Define which routes need login
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/joblistings', // Main page protected
-  '/library(.*)',
-  '/resumebuilder(.*)',
-  '/premium(.*)',
-  '/post-job(.*)',
-  '/recruiter(.*)',
-]);
+const protectedRoutes = [
+  '/dashboard',
+  '/joblistings',
+  '/library',
+  '/resumebuilder',
+  '/premium',
+  '/post-job',
+  '/recruiter',
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+const isJobDetailRoute = (pathname = '') => /^\/joblistings\/[^/]+\/?$/.test(pathname);
 
-  // If the user isn't logged in and tries to access a protected route
-  if (!userId && isProtectedRoute(req)) {
-    // Redirect to home page instead of Clerk login
+const isProtectedRoute = (pathname = '') => {
+  if (isJobDetailRoute(pathname)) {
+    return false;
+  }
+  return protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+};
+
+const extractAccessToken = (req) => {
+  const authHeader = req.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+
+  const tokenCookie = req.cookies.get('sb-access-token');
+  if (tokenCookie?.value) {
+    return tokenCookie.value;
+  }
+
+  return null;
+};
+
+const isAuthenticated = async (req) => {
+  const token = extractAccessToken(req);
+  if (!token) return false;
+
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !data?.user) {
+    console.error('Unauthorized middleware access:', error?.message ?? 'no user');
+    return false;
+  }
+
+  return true;
+};
+
+export default async function middleware(req) {
+  if (!isProtectedRoute(req.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  const authorized = await isAuthenticated(req);
+  if (!authorized) {
     return NextResponse.redirect(new URL('/', req.url));
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: ['/', '/((?!api|trpc|.*\\..*|_next).*)'],
 };

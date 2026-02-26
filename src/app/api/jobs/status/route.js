@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
+import { getSupabaseUser } from '@/app/lib/authHelpers'
 
 export async function PATCH(req) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
+    const user = await getSupabaseUser(req)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -15,7 +15,7 @@ export async function PATCH(req) {
       .from('saved_jobs')
       .update({ status })
       .eq('job_id', jobId)
-      .eq('profile_id', userId)
+      .eq('profile_id', user.id)
 
     if (error) {
       console.error('Status update error:', error)

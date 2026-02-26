@@ -6,7 +6,6 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
 import { JobListingCard } from '../../components/jobs/JobListingCard'
-import { saveJobsRedirect } from '../../lib/authRedirect'
 import { SearchBar } from '../../components/ui/SearchBar'
 import { HiMenu, HiX } from 'react-icons/hi'
 import { stripHtml } from '../../lib/cleanDescription'
@@ -14,7 +13,8 @@ import { Inter } from 'next/font/google'
 import overlay from '/public/Overlay.png'
 import { Button } from '../../components/ui/Button'
 import arrow_right from '/public/chevron right.png'
-import { useUser } from "@clerk/nextjs"
+import { useSessionContext } from '@/app/lib/supabaseAuthContext'
+import { useAuthFetch } from '@/app/lib/useAuthFetch'
 const JobApplicationModal = dynamicImport(() => import('@/app/components/modals/JobApplicationModal'), { ssr: false })
 const AuthModals = dynamicImport(() => import('@/app/components/modals/AuthModals'), { ssr: false })
 
@@ -27,6 +27,7 @@ import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
 import { buildSaveModalState } from '@/app/lib/saveModalState'
 
 import { Pagination } from '../../components/ui/Pagination'
+import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
 export default function JobsPage() {
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,7 +44,10 @@ export default function JobsPage() {
   const jobTitleQuery = searchParams.get('search') || ''
   const countryQuery = searchParams.get('geo') || ''
 
-  const { isSignedIn, user } = useUser()
+  const { session } = useSessionContext()
+  const isSignedIn = Boolean(session)
+  const user = session?.user
+  const authFetch = useAuthFetch()
 
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -133,7 +137,7 @@ export default function JobsPage() {
     setIsSaving(true)
 
     try {
-      const res = await fetch('/api/jobs/save', {
+      const res = await authFetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildSaveJobPayload(job, user.id)),
@@ -143,9 +147,11 @@ export default function JobsPage() {
       if (!res.ok) throw new Error(resData.error || 'Failed to save job')
 
       const modalOptions = buildSaveModalState(resData, {
-        successTitle: 'Job Bookmarked!',
+        successTitle: 'Job Saved!',
         successMessage: 'This job has been saved to your profile library for later.',
       })
+
+      dispatchNotificationDelta(1)
 
       setModalState({
         isOpen: true,

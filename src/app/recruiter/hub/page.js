@@ -1,7 +1,9 @@
 'use client'
+
 import React, { useState, useEffect } from "react";
-import Sidebar from "@/app/components/layout/Sidebar"; // adjust path if needed
-import { useUser } from "@clerk/nextjs";
+import Sidebar from "@/app/components/layout/Sidebar";
+import { useSessionContext } from '@/app/lib/supabaseAuthContext';
+import { useAuthFetch } from '@/app/lib/useAuthFetch';
 import {
     Briefcase,
     Users,
@@ -11,14 +13,15 @@ import {
     Trash2,
     Edit,
     Eye,
-    ExternalLink
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader } from "@/app/components/ui/Loader";
 
 export default function RecruiterHub() {
-    const { user, isLoaded } = useUser();
+    const { session, isLoading } = useSessionContext();
+    const user = session?.user;
+    const authFetch = useAuthFetch();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [jobs, setJobs] = useState([]);
@@ -34,14 +37,13 @@ export default function RecruiterHub() {
 
     useEffect(() => {
         async function fetchRecruiterData() {
-            if (!isLoaded || !user) return;
+            if (isLoading || !user) return;
 
             try {
-                const res = await fetch("/api/recruiter/jobs");
-                if (!res.ok) throw new Error("Failed to fetch jobs");
+                const res = await authFetch("/api/recruiter/jobs");
+                if (!res.ok) throw new Error("Failed to fetch recruiter data");
                 const data = await res.json();
 
-                // Use enriched data from backend
                 setJobs(data.jobs || []);
                 if (data.stats) {
                     setStatsData(data.stats);
@@ -58,9 +60,8 @@ export default function RecruiterHub() {
         }
 
         fetchRecruiterData();
-    }, [isLoaded, user]);
+    }, [isLoading, user, authFetch]);
 
-    // Handle outside click to close dropdown
     useEffect(() => {
         const handleClickOutside = () => setActiveMenuId(null);
         window.addEventListener('click', handleClickOutside);
@@ -68,39 +69,35 @@ export default function RecruiterHub() {
     }, []);
 
     const handleDeleteJob = async (id, e) => {
-        e.stopPropagation(); // prevent closing menu immediately if clicked inside (though structured differently)
+        e.stopPropagation();
         if (!confirm("Are you sure you want to delete this job? This action cannot be undone.")) return;
 
         try {
-            const res = await fetch(`/api/jobs/delete?id=${id}`, { method: 'DELETE' });
+            const res = await authFetch(`/api/jobs/delete?id=${id}`, {
+                method: 'DELETE',
+            });
             if (!res.ok) throw new Error("Failed to delete job");
 
-            // Update local state
             setJobs(prev => prev.filter(j => j.id !== id));
             setActiveMenuId(null);
         } catch (err) {
-            alert("Error deleting job: " + err.message);
+            alert(`Error deleting job: ${err.message}`);
         }
     };
 
     const handleEditJob = (id) => {
-        // For now, redirect to post-job with edit param (assuming post-job handles it eventually)
-        // Or just alert "Edit functionality coming soon" if strict "no UI changes" implies no new pages.
-        // But requirement was "make everything work". I'll push to edit page for now.
         router.push(`/recruiter/post-job?mode=edit&jobId=${id}`);
     };
 
     const handleViewApplicants = (id) => {
-        // Redirect to a dedicated applicants page (even if I haven't built it yet, the link logic is correct)
         router.push(`/recruiter/jobs/${id}`);
     };
 
-    // Stats based on fetched jobs
     const stats = [
         {
             label: "Active Job Posts",
             value: statsData.activeJobs || 0,
-            change: "+0 vs last month", // Placeholder logic
+            change: "+0 vs last month",
             color: "text-green-600",
             icon: <Briefcase size={20} className="text-green-600" />
         },
@@ -127,16 +124,16 @@ export default function RecruiterHub() {
         },
     ];
 
-    if (!isLoaded || loading) {
-    return (
-        <div className="recruiter-hub-page flex min-h-screen bg-white">
-            <Sidebar />
-            <main className="flex-1 flex items-center justify-center">
-                <Loader message="Loading recruiter hub" size="lg" />
-            </main>
-        </div>
-    );
-}
+    if (isLoading || !user || loading) {
+        return (
+            <div className="recruiter-hub-page flex min-h-screen bg-white">
+                <Sidebar />
+                <main className="flex-1 flex items-center justify-center">
+                    <Loader message="Loading recruiter hub" size="lg" />
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="recruiter-hub-page flex min-h-screen mt-[72px] bg-white">
@@ -152,19 +149,12 @@ export default function RecruiterHub() {
                     </div>
 
                     <button
-                        onClick={() => {
-                            const isRecruiter = user?.publicMetadata?.isRecruiter; // Updated to match earlier fixes
-                            if (isRecruiter) {
-                                window.location.href = "/recruiter/post-job";
-                            } else {
-                                // Fallback or handle if strictly not recruiter despite page access
-                            }
-                        }}
+                        type="button"
+                        onClick={() => router.push("/recruiter/post-job")}
                         className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors skip-squared"
                     >
                         <span>+</span> Post a Job
                     </button>
-
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {stats.map((stat, idx) => (
@@ -258,7 +248,6 @@ export default function RecruiterHub() {
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                // handle pause/active toggle could go here
                                                             }}
                                                             className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                                         >

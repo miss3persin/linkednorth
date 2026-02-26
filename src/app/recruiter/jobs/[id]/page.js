@@ -1,19 +1,29 @@
 import Sidebar from "@/app/components/layout/Sidebar";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
-import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { ChevronLeft, Mail, Phone, Calendar } from "lucide-react";
+import { ChevronLeft, Mail, Calendar } from "lucide-react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function JobApplicantsPage({ params }) {
-    const { id: jobId } = await params;
-    const { userId } = await auth();
+    const { id: jobId } = params;
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("sb-access-token")?.value;
+    if (!accessToken) {
+        return redirect("/");
+    }
+
+    const { data } = await supabaseAdmin.auth.getUser(accessToken);
+    if (!data?.user) {
+        return redirect("/");
+    }
 
     // 1. Fetch Job Details (Verify ownership)
     const { data: job, error: jobError } = await supabaseAdmin
         .from('internal_jobs')
         .select('*')
         .eq('id', jobId)
-        //.eq('user_id', userId) // Security check
+        .eq('user_id', data.user.id)
         .single();
 
     if (jobError || !job) {
@@ -27,27 +37,13 @@ export default async function JobApplicantsPage({ params }) {
         );
     }
 
-    // Security check: ensure the current user owns this job
-    if (job.user_id !== userId) {
-        return (
-            <div className="min-h-screen bg-white flex">
-                <Sidebar />
-                <div className="flex-1 p-8 flex items-center justify-center">
-                    <p>Unauthorized access.</p>
-                </div>
-            </div>
-        );
-    }
-
     // 2. Fetch Applications
-    // job_id in applications is TEXT, matching the uuid string of internal_jobs
-    const { data: applications, error: appError } = await supabaseAdmin
+    const { data: applications } = await supabaseAdmin
         .from('applications')
         .select('*')
         .in('job_id', [jobId, `internal-${jobId}`])
         .order('created_at', { ascending: false });
 
-    // 3. Fetch User Profiles for these applications
     let applicants = [];
     if (applications && applications.length > 0) {
         const profileIds = [...new Set(applications.map(app => app.profile_id))];
@@ -62,14 +58,14 @@ export default async function JobApplicantsPage({ params }) {
         }
 
         applicants = applications.map(app => {
-            const user = usersMap[app.profile_id] || {};
+            const candidate = usersMap[app.profile_id] || {};
             return {
                 appId: app.id,
                 appliedAt: new Date(app.created_at).toLocaleDateString(),
                 status: app.status,
-                name: user.first_name ? `${user.first_name} ${user.last_name}` : 'Unknown Candidate',
-                email: user.email,
-                clerkId: app.profile_id
+                name: candidate.first_name ? `${candidate.first_name} ${candidate.last_name}` : 'Unknown Candidate',
+                email: candidate.email,
+                profileId: app.profile_id
             };
         });
     }

@@ -16,24 +16,29 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: '**.s3.amazonaws.com', // allow any S3 bucket
+                hostname: '**.s3.amazonaws.com',
                 port: '',
                 pathname: '/**',
             },
             {
                 protocol: 'https',
-                hostname: 'some.otherhost.com', // add any other external hosts you need
+                hostname: 'some.otherhost.com',
                 port: '',
                 pathname: '/**',
             },
             {
                 protocol: 'https',
-                hostname: 'img.clerk.com',
+                hostname: 'npnfuaxuxdyroswxjsvn.supabase.co',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'lh3.googleusercontent.com',
                 port: '',
                 pathname: '/**',
             },
         ],
-        domains: ['npnfuaxuxdyroswxjsvn.supabase.co', 'img.clerk.com'],
     },
 };
 

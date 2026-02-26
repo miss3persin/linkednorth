@@ -1,20 +1,22 @@
 export const dynamic = 'force-dynamic'
 
-import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import LibraryClient from "./LibraryClient"
+import { cookies } from 'next/headers'
+import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
 
 export default async function LibraryPage() {
-  let user;
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('sb-access-token')?.value
 
-  try {
-    user = await currentUser();
-  } catch (err) {
-    console.error("Error fetching current user:", err);
-    return redirect("/"); // fallback if user cannot be fetched
+  if (!accessToken) {
+    return redirect("/")
   }
 
-  if (!user) return redirect("/");
+  const { data } = await supabaseAdmin.auth.getUser(accessToken)
+  if (!data?.user) {
+    return redirect("/")
+  }
 
   return <LibraryClient />
 }

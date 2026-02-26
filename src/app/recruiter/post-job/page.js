@@ -11,6 +11,7 @@ import {
     validateDescription,
     validateUrlOrEmail,
 } from '@/app/lib/formValidators';
+import { useAuthFetch } from '@/app/lib/useAuthFetch';
 
 export default function PostJobPage() {
     const [step, setStep] = useState(1);
@@ -28,6 +29,7 @@ export default function PostJobPage() {
         applicationLink: '', // Required field
     });
     const [stepErrors, setStepErrors] = useState({});
+    const authFetch = useAuthFetch();
 
     const clearStepError = (...fields) => {
         setStepErrors((prev) => {
@@ -133,7 +135,7 @@ export default function PostJobPage() {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/jobs/create', {
+            const res = await authFetch('/api/jobs/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),

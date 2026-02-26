@@ -1,23 +1,24 @@
 export const dynamic = "force-dynamic";
 
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Sidebar from "../components/layout/Sidebar";
 import { HiCheck, HiLightningBolt } from "react-icons/hi";
 import { FaRegFileAlt, FaChartPie } from "react-icons/fa";
 import PremiumComingSoonOverlay from "./PremiumComingSoonOverlay";
+import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 
 export default async function PremiumPage() {
-  let user;
-
-  try {
-    user = await currentUser();
-  } catch (err) {
-    console.error("Error fetching current user:", err);
-    return redirect("/"); // fallback if user cannot be fetched
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("sb-access-token")?.value;
+  if (!accessToken) {
+    return redirect("/");
   }
 
-  if (!user) return redirect("/");
+  const { data } = await supabaseAdmin.auth.getUser(accessToken);
+  if (!data?.user) {
+    return redirect("/");
+  }
 
   const features = [
     "AI-powered resume optimization",

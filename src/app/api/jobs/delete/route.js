@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
+import { getSupabaseUser } from '@/app/lib/authHelpers';
 
 export async function DELETE(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
+        const user = await getSupabaseUser(req);
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -21,7 +21,7 @@ export async function DELETE(req) {
             .from('internal_jobs')
             .delete()
             .eq('id', jobId)
-            .eq('user_id', userId);
+            .eq('user_id', user.id);
 
         if (error) {
             console.error('Error deleting job:', error);

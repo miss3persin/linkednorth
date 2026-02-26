@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
+import { normalizeJobText } from '@/app/lib/htmlEntities';
 
 const YC_API_URL = "https://free-y-combinator-jobs-api.p.rapidapi.com/active-jb-7d";
 const REMOTIVE_API_URL = "https://remotive.com/api/remote-jobs";
@@ -68,25 +69,27 @@ async function fetchYCJobs() {
     if (!res.ok) throw new Error("YC API failed");
     const rawJobs = await res.json();
 
-    return rawJobs.map((job) => ({
-        id: `yc-${job.id}`,
-        source: "ycombinator",
-        jobTitle: job.title,
-        company: job.organization,
-        location:
-            job.locations_derived?.length > 0
-                ? job.locations_derived.join(" • ")
-                : job.remote_derived
-                    ? "Remote"
-                    : "Not specified",
-        jobType: job.remote_derived ? "Remote" : "On-site / Hybrid",
-        contractType: job.employment_type?.[0] || "UNKNOWN",
-        postedTime: job.date_posted,
-        description: null,
-        imageSrc: job.organization_logo || null,
-        applyLink: job.external_apply_url || job.url,
-        detailsLink: job.url,
-    }));
+    return rawJobs.map((job) =>
+        normalizeJobText({
+            id: `yc-${job.id}`,
+            source: "ycombinator",
+            jobTitle: job.title,
+            company: job.organization,
+            location:
+                job.locations_derived?.length > 0
+                    ? job.locations_derived.join(" • ")
+                    : job.remote_derived
+                        ? "Remote"
+                        : "Not specified",
+            jobType: job.remote_derived ? "Remote" : "On-site / Hybrid",
+            contractType: job.employment_type?.[0] || "UNKNOWN",
+            postedTime: job.date_posted,
+            description: null,
+            imageSrc: job.organization_logo || null,
+            applyLink: job.external_apply_url || job.url,
+            detailsLink: job.url,
+        })
+    );
 }
 
 async function fetchRemotiveJobs(search) {
@@ -101,23 +104,25 @@ async function fetchRemotiveJobs(search) {
     const data = await res.json();
     const rawJobs = data.jobs || [];
 
-    return rawJobs.map((job) => ({
-        id: `remotive-${job.id}`,
-        source: "remotive",
-        jobTitle: job.title,
-        company: job.company_name,
-        location: job.candidate_required_location || "Remote",
-        jobType: "Remote",
-        contractType: job.job_type
-            ? job.job_type.replace("_", " ").toUpperCase()
-            : "UNKNOWN",
-        postedTime: job.publication_date,
-        description: job.description || null,
-        imageSrc: job.company_logo || null,
-        applyLink: job.url,
-        detailsLink: job.url,
-        attribution: { name: "Remotive", url: "https://remotive.com" },
-    }));
+    return rawJobs.map((job) =>
+        normalizeJobText({
+            id: `remotive-${job.id}`,
+            source: "remotive",
+            jobTitle: job.title,
+            company: job.company_name,
+            location: job.candidate_required_location || "Remote",
+            jobType: "Remote",
+            contractType: job.job_type
+                ? job.job_type.replace("_", " ").toUpperCase()
+                : "UNKNOWN",
+            postedTime: job.publication_date,
+            description: job.description || null,
+            imageSrc: job.company_logo || null,
+            applyLink: job.url,
+            detailsLink: job.url,
+            attribution: { name: "Remotive", url: "https://remotive.com" },
+        })
+    );
 }
 
 async function fetchJobicyJobs() {
@@ -129,32 +134,34 @@ async function fetchJobicyJobs() {
     const data = await res.json();
     const rawJobs = data.jobs || data || [];
 
-    return rawJobs.map((job) => ({
-        id: `jobicy-${job.id}`,
-        source: "jobicy",
-        jobTitle: job.jobTitle,
-        company: job.companyName,
-        location: job.jobGeo || "Remote",
-        jobType: "Remote",
-        contractType: Array.isArray(job.jobType)
-            ? job.jobType[0].replace("-", " ").toUpperCase()
-            : typeof job.jobType === "string"
-                ? job.jobType.replace("-", " ").toUpperCase()
-                : "UNKNOWN",
-        postedTime: job.pubDate,
-        description: job.jobDescription || null,
-        imageSrc: job.companyLogo || null,
-        applyLink: job.url,
-        detailsLink: job.url,
-        salary:
-            job.annualSalaryMin || job.annualSalaryMax
-                ? {
-                    min: job.annualSalaryMin || null,
-                    max: job.annualSalaryMax || null,
-                    currency: job.salaryCurrency || null,
-                }
-                : null,
-    }));
+    return rawJobs.map((job) =>
+        normalizeJobText({
+            id: `jobicy-${job.id}`,
+            source: "jobicy",
+            jobTitle: job.jobTitle,
+            company: job.companyName,
+            location: job.jobGeo || "Remote",
+            jobType: "Remote",
+            contractType: Array.isArray(job.jobType)
+                ? job.jobType[0].replace("-", " ").toUpperCase()
+                : typeof job.jobType === "string"
+                    ? job.jobType.replace("-", " ").toUpperCase()
+                    : "UNKNOWN",
+            postedTime: job.pubDate,
+            description: job.jobDescription || null,
+            imageSrc: job.companyLogo || null,
+            applyLink: job.url,
+            detailsLink: job.url,
+            salary:
+                job.annualSalaryMin || job.annualSalaryMax
+                    ? {
+                        min: job.annualSalaryMin || null,
+                        max: job.annualSalaryMax || null,
+                        currency: job.salaryCurrency || null,
+                    }
+                    : null,
+        })
+    );
 }
 
 async function fetchInternalJobs() {
@@ -167,26 +174,28 @@ async function fetchInternalJobs() {
 
         if (error) throw error;
 
-        return data.map(job => ({
-            id: `internal-${job.id}`,
-            source: "internal",
-            jobTitle: job.title,
-            company: job.company_name,
-            location: job.location,
-            jobType: job.job_type,
-            contractType: job.contract_type,
-            postedTime: job.created_at,
-            description: job.description,
-            imageSrc: job.company_logo,
-            applyLink: formatApplicationLink(job.application_link) || `/jobs/${job.id}`,
-            detailsLink: `/jobs/${job.id}`,
-            salary: job.salary_min || job.salary_max ? {
-                min: job.salary_min,
-                max: job.salary_max,
-                currency: 'USD' // Defaulting to USD for now or from profile
-            } : null,
-            skills: job.skills || []
-        }));
+        return data.map(job =>
+            normalizeJobText({
+                id: `internal-${job.id}`,
+                source: "internal",
+                jobTitle: job.title,
+                company: job.company_name,
+                location: job.location,
+                jobType: job.job_type,
+                contractType: job.contract_type,
+                postedTime: job.created_at,
+                description: job.description,
+                imageSrc: job.company_logo,
+                applyLink: formatApplicationLink(job.application_link) || `/jobs/${job.id}`,
+                detailsLink: `/jobs/${job.id}`,
+                salary: job.salary_min || job.salary_max ? {
+                    min: job.salary_min,
+                    max: job.salary_max,
+                    currency: 'USD' // Defaulting to USD for now or from profile
+                } : null,
+                skills: job.skills || []
+            })
+        );
     } catch (err) {
         console.error('[Internal] fetch failed', err);
         return [];
@@ -269,7 +278,7 @@ export async function getJobById(id) {
             .single();
 
         if (internalJob && !internalError) {
-            return {
+            return normalizeJobText({
                 id: `internal-${internalJob.id}`,
                 jobTitle: internalJob.title,
                 company: internalJob.company_name,
@@ -282,7 +291,7 @@ export async function getJobById(id) {
                 imageSrc: internalJob.company_logo,
                 skills: internalJob.skills || [],
                 source: 'internal'
-            };
+            });
         }
     }
 
@@ -294,7 +303,7 @@ export async function getJobById(id) {
         .single();
 
     if (cachedJob && !error) {
-        return {
+        return normalizeJobText({
             id: cachedJob.external_id,
             jobTitle: cachedJob.title,
             company: cachedJob.company,
@@ -306,7 +315,7 @@ export async function getJobById(id) {
             applyLink: cachedJob.apply_link,
             imageSrc: cachedJob.image_url,
             skills: cachedJob.skills || [],
-        };
+        });
     }
 
     // 2. Try live lookup if not in cache (Fallback)
@@ -315,21 +324,21 @@ export async function getJobById(id) {
     const liveJob = jobs.find(j => j.id === id);
 
     if (liveJob) {
-        // Optionally cache it now
+        const normalizedLiveJob = normalizeJobText(liveJob);
         await supabaseAdmin.from('jobs_cache').upsert({
-            external_id: String(liveJob.id),
-            title: liveJob.jobTitle,
-            company: liveJob.company,
-            location: liveJob.location,
-            description: liveJob.description,
-            job_type: liveJob.jobType,
-            contract_type: liveJob.contractType,
-            apply_link: liveJob.applyLink,
-            image_url: liveJob.imageSrc,
-            skills: liveJob.skills || [],
+            external_id: String(normalizedLiveJob.id),
+            title: normalizedLiveJob.jobTitle,
+            company: normalizedLiveJob.company,
+            location: normalizedLiveJob.location,
+            description: normalizedLiveJob.description,
+            job_type: normalizedLiveJob.jobType,
+            contract_type: normalizedLiveJob.contractType,
+            apply_link: normalizedLiveJob.applyLink,
+            image_url: normalizedLiveJob.imageSrc,
+            skills: normalizedLiveJob.skills || [],
         }, { onConflict: 'external_id' });
 
-        return liveJob;
+        return normalizedLiveJob;
     }
 
     return null;

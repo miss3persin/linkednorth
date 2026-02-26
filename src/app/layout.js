@@ -1,7 +1,7 @@
 import "./globals.css";
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
-import { ClerkProvider } from '@clerk/nextjs'
+import SupabaseProvider from './SupabaseProvider'
 import { Open_Sans } from 'next/font/google';
 
 export const openSans = Open_Sans({
@@ -22,14 +22,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`min-h-screen flex flex-col ${openSans.className}`}>
+    <html lang="en">
+      <body className={`min-h-screen flex flex-col ${openSans.className}`}>
+        <SupabaseProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
-        </body>
-      </html>
-    </ClerkProvider>
+        </SupabaseProvider>
+      </body>
+    </html>
   );
 }

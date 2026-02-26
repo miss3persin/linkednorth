@@ -249,8 +249,8 @@ export const SearchBar = () => {
   }
 
   return (
-    <div className="flex items-center justify-center py-4 sm:w-[35rem]">
-      <div className="relative w-full flex flex-col sm:flex-row sm:gap-0 gap-2">
+    <div className="flex items-center justify-center py-4 px-4 sm:px-0 sm:w-[35rem]">
+      <div className="relative w-[calc(100vw-2rem)] max-w-[35rem] flex flex-col sm:flex-row sm:gap-0 gap-2">
 
         <Image src={jobIcon} alt="job icon" className="absolute sm:top-[1.79rem] sm:left-4 top-[1.1rem] left-9" />
         <input
@@ -330,7 +330,7 @@ export const SearchBar = () => {
 
         <div className="h-8 w-[1px] bg-[#E1E1E1] m-auto absolute top-[1.1rem] left-[12.85rem] sm:flex hidden" />
 
-        <Image src={locationIcon} alt="location icon" className="absolute sm:top-[1.75rem] sm:right-[19.8rem] top-[4.4rem] right-[10.7rem]" />
+        <Image src={locationIcon} alt="location icon" className="absolute sm:top-[1.75rem] sm:left-[14.2rem] top-[4.4rem] left-[2.2rem]" />
         <input
           type="text"
           placeholder="Country or timezone"

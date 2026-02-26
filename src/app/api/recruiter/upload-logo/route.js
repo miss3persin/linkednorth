@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
+import { getSupabaseUser } from '@/app/lib/authHelpers';
 
 export async function POST(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
+        const user = await getSupabaseUser(req);
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -21,7 +21,7 @@ export async function POST(req) {
         const buffer = Buffer.from(bytes);
 
         const fileExt = file.name.split('.').pop();
-        const fileName = `${userId}-${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
 
         // Upload using service role key (bypasses RLS)

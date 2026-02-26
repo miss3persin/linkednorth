@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Sidebar from "../components/layout/Sidebar"
 import { HiPlus } from "react-icons/hi"
+import { useAuthFetch } from "@/app/lib/useAuthFetch"
 
 export default function LibraryClient() {
     const [jobColumns, setJobColumns] = useState([
@@ -45,6 +46,7 @@ export default function LibraryClient() {
     ])
 
     const router = useRouter()
+    const authFetch = useAuthFetch()
     const [filterOpen, setFilterOpen] = useState(false)
     const [filterQuery, setFilterQuery] = useState('')
     const [removingJobId, setRemovingJobId] = useState(null)
@@ -72,8 +74,9 @@ export default function LibraryClient() {
         if (!job?.jobId) return
 
         setRemovingJobId(job.jobId)
+
         try {
-            const res = await fetch(`/api/jobs/save?jobId=${encodeURIComponent(job.jobId)}`, {
+            const res = await authFetch(`/api/jobs/save?jobId=${encodeURIComponent(job.jobId)}`, {
                 method: 'DELETE',
             })
             if (!res.ok) throw new Error('Failed to remove job')
@@ -98,7 +101,7 @@ export default function LibraryClient() {
     useEffect(() => {
         async function fetchSavedJobs() {
             try {
-                const res = await fetch('/api/jobs/save')
+                const res = await authFetch('/api/jobs/save')
                 if (!res.ok) return
 
                 const savedJobs = await res.json()
@@ -149,8 +152,8 @@ export default function LibraryClient() {
             }
         }
 
-        fetchSavedJobs()
-    }, [])
+    fetchSavedJobs()
+}, [authFetch])
 
     
 
@@ -187,7 +190,7 @@ export default function LibraryClient() {
             updated[targetColIndex].jobs.push(movedJob)
 
             // 🔥 persist
-            fetch('/api/jobs/status', {
+            authFetch('/api/jobs/status', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

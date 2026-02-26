@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin';
+import { getSupabaseUser } from '@/app/lib/authHelpers';
 
 export async function POST(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
+        const user = await getSupabaseUser(req);
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-        const recruiterProfile = user.privateMetadata?.recruiterProfile;
+        const metadata = user.user_metadata || {};
+        const recruiterProfile = metadata.recruiterProfile;
 
-        if (!user.privateMetadata?.isRecruiter || !recruiterProfile) {
+        if (!metadata.isRecruiter || !recruiterProfile) {
             return NextResponse.json({ error: 'Recruiter profile not found' }, { status: 403 });
         }
 
@@ -24,7 +23,7 @@ export async function POST(req) {
         const { data, error } = await supabaseAdmin
             .from('internal_jobs')
             .insert({
-                user_id: userId,
+                user_id: user.id,
                 title,
                 job_type: jobType,
                 contract_type: contractType,

@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { isUserRecruiter } from '@/services/recruiterService';
+import { getSupabaseUser } from '@/app/lib/authHelpers';
 
-export async function GET() {
+export async function GET(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
+        const user = await getSupabaseUser(req);
+        if (!user) {
             return NextResponse.json({ isRecruiter: false });
         }
 
-        const isRecruiter = await isUserRecruiter(userId);
+        const isRecruiter = await isUserRecruiter(user.id);
 
         return NextResponse.json({ isRecruiter });
     } catch (error) {

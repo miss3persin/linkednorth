@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
 import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
+import { getSupabaseUser } from '@/app/lib/authHelpers'
 
 export async function POST(req) {
   try {
-    const { userId: authUserId } = await auth()
+    const user = await getSupabaseUser(req)
 
-    if (!authUserId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -35,29 +35,26 @@ export async function POST(req) {
     }
 
     // 🔒 Ensure user is saving their own job
-    if (userId !== authUserId) {
+    if (userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Ensure profile exists
-    const user = await currentUser()
-    if (user) {
-      const { error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .upsert(
-          {
-            id: user.id,
-          },
-          { onConflict: 'id' }
-        )
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+        },
+        { onConflict: 'id' }
+      )
 
-      if (profileError) {
-        console.error('Profile upsert error:', profileError)
-        return NextResponse.json(
-          { error: 'Failed to ensure profile exists' },
-          { status: 500 }
-        )
-      }
+    if (profileError) {
+      console.error('Profile upsert error:', profileError)
+      return NextResponse.json(
+        { error: 'Failed to ensure profile exists' },
+        { status: 500 }
+      )
     }
 
     // ✅ Properly upsert full job (title is NOT NULL)
@@ -140,6 +137,20 @@ export async function POST(req) {
       )
     }
 
+    try {
+      await supabaseAdmin
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          title: 'Job Saved',
+          message: `${title} at ${company} has been saved to your library.`,
+          action_link: `/joblistings/${jobId}`,
+          color: 'text-blue-500',
+        })
+    } catch (notifyError) {
+      console.error('Failed to create saved job notification:', notifyError)
+    }
+
     return NextResponse.json({
       success: true,
       status: finalStatus,
@@ -155,11 +166,11 @@ export async function POST(req) {
   }
 }
 
-export async function GET() {
+export async function GET(req) {
   try {
-    const { userId } = await auth()
+    const user = await getSupabaseUser(req)
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -178,7 +189,7 @@ export async function GET() {
           external_source
         )
       `)
-      .eq('profile_id', userId)
+      .eq('profile_id', user.id)
       .order('saved_at', { ascending: false })
 
     if (error) {
@@ -202,9 +213,9 @@ export async function GET() {
 
 export async function DELETE(req) {
   try {
-    const { userId } = await auth()
+    const user = await getSupabaseUser(req)
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -218,7 +229,7 @@ export async function DELETE(req) {
     const { error } = await supabaseAdmin
       .from('saved_jobs')
       .delete()
-      .eq('profile_id', userId)
+      .eq('profile_id', user.id)
       .eq('job_id', jobId)
 
     if (error) {

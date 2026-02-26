@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { saveJobsRedirect } from '../../../lib/authRedirect'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import logo from '/public/linkednorth-logo.png'
 import Image from 'next/image'
@@ -19,15 +18,9 @@ export default function PublicNavbar() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
 
   const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   const handleOpenAuthModal = () => {
     setMenuOpen(false)
-
-    if (pathname === '/jobs') {
-      saveJobsRedirect(searchParams)
-    }
-
     setAuthModalOpen(true)
   }
 

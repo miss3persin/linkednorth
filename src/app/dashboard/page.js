@@ -2,14 +2,26 @@
 export const dynamic = "force-dynamic";
 
 import Sidebar from "../components/layout/Sidebar";
-import { currentUser } from "@clerk/nextjs/server";
 import { FiEye, FiCalendar, FiBriefcase } from "react-icons/fi";
 import { getUserActivity } from "@/services/activityService";
 import { Loader } from "../components/ui/Loader";
 import DashboardNotifications from "./components/DashboardNotifications";
+import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import {
+  HIDDEN_DERIVED_KEY,
+  parseHiddenDerivedIds,
+} from "@/app/lib/hiddenDerivedNotifications";
 
 export default async function Dashboard() {
-  const user = await currentUser();
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("sb-access-token")?.value;
+  let user = null;
+
+  if (accessToken) {
+    const { data } = await supabaseAdmin.auth.getUser(accessToken);
+    user = data?.user ?? null;
+  }
 
   if (!user) {
     return (
@@ -19,7 +31,18 @@ export default async function Dashboard() {
     );
   }
 
-  const activity = await getUserActivity(user.id);
+  const userMetadata = user.user_metadata ?? {};
+  const displayName =
+    userMetadata.full_name ||
+    userMetadata.name ||
+    userMetadata.given_name ||
+    userMetadata.first_name ||
+    userMetadata.firstName ||
+    user.email?.split("@")[0] ||
+    "there";
+  const hiddenDerivedCookie = cookieStore.get(HIDDEN_DERIVED_KEY)?.value;
+  const hiddenDerivedIds = new Set(parseHiddenDerivedIds(hiddenDerivedCookie));
+  const activity = await getUserActivity(user.id, hiddenDerivedIds);
 
   const stats = {
     applications: activity.appliedJobs,
@@ -27,17 +50,7 @@ export default async function Dashboard() {
     interviews: activity.interviews,
   };
 
-  const notifications = activity.notifications
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .map((n) => ({
-      id: n.id,
-      title: n.title,
-      text: n.message,
-      actionLink: n.action_link,
-      action: n.action_link ? "View" : "Open",
-      time: new Date(n.created_at).toLocaleDateString(),
-      color: n.color || "text-blue-500",
-    }));
+  const notifications = activity.notifications || [];
 
   const progressStats = [
     {
@@ -62,7 +75,7 @@ export default async function Dashboard() {
       <Sidebar />
       <main className="flex-1 px-3 py-6 sm:px-5 md:px-8 xl:p-10">
         <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
-          Welcome back, {user.firstName}!
+          Welcome back, {displayName}!
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border">
@@ -105,11 +118,10 @@ export default async function Dashboard() {
           </div>
         </div>
         <div
-          className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8 flex flex-col min-h-0 overflow-hidden ${
-            notifications.length > 0
+          className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border mb-6 sm:mb-8 flex flex-col min-h-0 overflow-hidden ${notifications.length > 0
               ? "max-h-[360px] sm:max-h-[420px] lg:max-h-[460px]"
               : ""
-          }`}
+            }`}
         >
           <DashboardNotifications initialNotifications={notifications} />
         </div>

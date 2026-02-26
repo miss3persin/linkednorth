@@ -1,27 +1,24 @@
 import { NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { upsertUser, getUnreadCounts } from '@/services/userService'
+import { getUnreadCounts } from '@/services/userService'
+import { getSupabaseUser } from '@/app/lib/authHelpers'
+import { extractHiddenDerivedIdsFromRequest } from '@/app/lib/hiddenDerivedNotifications'
 
-export async function GET() {
+export async function GET(req) {
   try {
-    const { userId } = await auth()
+    const user = await getSupabaseUser(req)
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Ensure user exists in Supabase
-    const user = await currentUser()
-    if (user) {
-      await upsertUser({
-        id: user.id,
-        email: user.emailAddresses[0]?.emailAddress,
-        first_name: user.firstName,
-        last_name: user.lastName,
-      })
+    let counts
+    try {
+      const hiddenDerivedIds = extractHiddenDerivedIdsFromRequest(req)
+      counts = await getUnreadCounts(user.id, hiddenDerivedIds)
+    } catch (readError) {
+      console.error('Error reading counts:', readError)
+      return NextResponse.json({ error: 'Failed to read counts' }, { status: 500 })
     }
-
-    const counts = await getUnreadCounts(userId)
 
     return NextResponse.json(counts)
   } catch (error) {

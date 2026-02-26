@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { createRecruiterProfile } from '@/services/recruiterService';
+import { getSupabaseUser } from '@/app/lib/authHelpers';
 
 export async function POST(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
+        const user = await getSupabaseUser(req);
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const companyData = await req.json();
 
-        await createRecruiterProfile(userId, companyData);
+        await createRecruiterProfile(user.id, companyData);
 
         return NextResponse.json({ success: true });
     } catch (error) {

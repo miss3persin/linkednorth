@@ -1,15 +1,15 @@
 'use client'
+
 import { useState, useEffect } from 'react'
-import { useSignIn } from "@clerk/nextjs"
-import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Modal from '../ui/Modal'
 import { validateEmail } from '@/app/lib/formValidators'
-import Image from 'next/image'
+import { useSessionContext, useSupabaseClient } from '@/app/lib/supabaseAuthContext'
+import SocialAuthButtons from '../SocialAuthButtons'
 
 export default function SignInModal({ open, setOpen, switchToSignUp }) {
-  const { isLoaded: userLoaded, isSignedIn } = useUser()
-  const { isLoaded, signIn, setActive } = useSignIn()
+  const { session } = useSessionContext()
+  const supabase = useSupabaseClient()
   const router = useRouter()
 
   const [email, setEmail] = useState('')
@@ -38,19 +38,13 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
   }
 
   useEffect(() => {
-    if (!userLoaded || !isSignedIn || !open) return
+    if (!session || !open) return
 
-    const redirectTo = localStorage.getItem('redirectAfterLogin')
-    if (redirectTo) {
-      localStorage.removeItem('redirectAfterLogin')
-      setOpen(false)
-      router.push(redirectTo)
-    } else {
-      setOpen(false)
-    }
-  }, [isSignedIn, userLoaded, open, router, setOpen])
+    setOpen(false)
+    router.push('/dashboard')
+  }, [session, open, router, setOpen])
 
-  if (!open || !isLoaded || !userLoaded) return null
+  if (!open) return null
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -66,36 +60,28 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
     setError(null)
 
     try {
-      const result = await signIn.create({
-        identifier: email,
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
         password,
       })
 
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId })
+      if (signInError) {
+        setError(signInError.message)
+        return
+      }
+
+      const user = data?.user
+      if (user && !user.user_metadata?.is_verified) {
+        await supabase.auth.signOut()
+        setError(
+          'Please verify your account before signing in. Check your inbox for the 6-digit code.'
+        )
       }
     } catch (err) {
-      setError(err.errors ? err.errors[0].message : 'Something went wrong.')
+      console.error('Sign in error:', err)
+      setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleOAuthSignIn = async (strategy) => {
-    try {
-      const redirectUrl = `${window.location.origin}/sso-callback`
-      const redirectAfterLogin = `/joblistings${window.location.search}`
-
-      localStorage.setItem('redirectAfterLogin', redirectAfterLogin)
-
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl,
-        redirectUrlComplete: redirectUrl,
-      })
-    } catch (err) {
-      console.error('OAuth error:', err)
-      setError('Failed to sign in with social provider')
     }
   }
 
@@ -108,9 +94,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
         </p>
         <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               value={email}
@@ -150,13 +134,9 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
               {error}
             </div>
           )}
-          <div id="clerk-captcha" className="flex items-center" />
 
           <div className="flex flex-col gap-3 sm:gap-4 justify-between text-xs sm:text-sm">
-            <a
-              href="/forgot-password"
-              className="text-blue-600 hover:underline font-medium"
-            >
+            <a href="/forgot-password" className="text-blue-600 hover:underline font-medium">
               Forgot password?
             </a>
             <label className="flex items-center space-x-2 text-gray-600">
@@ -178,31 +158,7 @@ export default function SignInModal({ open, setOpen, switchToSignUp }) {
           <span className="px-2 text-xs sm:text-sm text-gray-500">or</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
-        <div className="space-y-2">
-          <button
-            onClick={() => handleOAuthSignIn('oauth_google')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
-          >
-            <Image src="/google.svg" alt="Google" width={16} height={16} unoptimized />
-            Continue with Google
-          </button>
-
-          <button
-            onClick={() => handleOAuthSignIn('oauth_facebook')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
-          >
-            <Image src="/facebook.svg" alt="Facebook" width={16} height={16} unoptimized />
-            Continue with Facebook
-          </button>
-
-          <button
-            onClick={() => handleOAuthSignIn('oauth_apple')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
-          >
-            <Image src="/apple.svg" alt="Apple" width={16} height={16} unoptimized />
-            Continue with Apple
-          </button>
-        </div>
+        <SocialAuthButtons setError={setError} />
         <p className="text-xs sm:text-sm text-center mt-4 mb-5 sm:mb-6 text-gray-500">
           New to LinkedNorth?
           <span

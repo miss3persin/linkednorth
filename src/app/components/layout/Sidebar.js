@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignOutButton, useUser } from "@clerk/nextjs";
+import { useSessionContext, useSupabaseClient } from '@/app/lib/supabaseAuthContext'
+import { useAuthFetch } from '@/app/lib/useAuthFetch';
 
 // Icons
 import {
@@ -14,19 +16,57 @@ import {
   LogOut,
   Building2
 } from "lucide-react";
-import { useState, useEffect } from "react";
 
 export default function Sidebar() {
   const path = usePathname();
-  const { user } = useUser();
-  const isRecruiter = !!user?.publicMetadata?.isRecruiter;
+  const { session } = useSessionContext();
+  const supabase = useSupabaseClient();
+  const user = session?.user;
+  const metadataRecruiter = !!user?.user_metadata?.isRecruiter;
+  const [isRecruiterStatus, setIsRecruiterStatus] = useState(metadataRecruiter);
+  const authFetch = useAuthFetch();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!user) {
+      setIsRecruiterStatus(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const fetchStatus = async () => {
+      try {
+        const res = await authFetch('/api/user/recruiter-status');
+        if (!res.ok) {
+          throw new Error('Failed to fetch recruiter status');
+        }
+        const data = await res.json();
+        if (!isMounted) return;
+        if (Boolean(data?.isRecruiter)) {
+          setIsRecruiterStatus(true);
+        }
+      } catch (error) {
+        console.error('Recruiter status check failed:', error);
+      }
+    };
+
+    void fetchStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, authFetch]);
 
   const items = [
     { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { href: "/joblistings", label: "Jobs Listings", icon: <Briefcase size={18} /> },
   ];
 
-  if (isRecruiter) {
+  const showRecruiterTab = metadataRecruiter || isRecruiterStatus;
+
+  if (showRecruiterTab) {
     items.push({
       href: "/recruiter/hub",
       label: "Recruiter Hub",
@@ -39,6 +79,11 @@ export default function Sidebar() {
     { href: "/resumebuilder", label: "Resume Builder", icon: <FileText size={18} /> },
     { href: "/premium", label: "Premium Features", icon: <Star size={18} /> },
   );
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   return (
     <aside
@@ -74,15 +119,14 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="border-t px-4 pt-4 mt-auto">
-        <SignOutButton redirectUrl="/">
-          <button
-            title="Logout"
-            className="flex items-center gap-3 text-sm text-gray-600 hover:text-black w-full"
-          >
-            <LogOut size={18} />
-            <span className="hidden xl:inline">Logout</span>
-          </button>
-        </SignOutButton>
+        <button
+          onClick={handleSignOut}
+          title="Logout"
+          className="flex items-center gap-3 text-sm text-gray-600 hover:text-black w-full"
+        >
+          <LogOut size={18} />
+          <span className="hidden xl:inline">Logout</span>
+        </button>
       </div>
     </aside>
   );

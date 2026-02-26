@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
-import { useSignIn, useSignUp } from '@clerk/nextjs'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Modal from '../ui/Modal'
 import {
   validateName,
@@ -8,11 +9,13 @@ import {
   validatePassword,
   validateCode,
 } from '@/app/lib/formValidators'
-import Image from 'next/image'
+import { useSessionContext, useSupabaseClient } from '@/app/lib/supabaseAuthContext'
+import SocialAuthButtons from '../SocialAuthButtons'
 
 export default function SignUpModal({ open, setOpen, switchToSignIn }) {
-  const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp()
-  const { isLoaded: isSignInLoaded, signIn } = useSignIn()
+  const { session } = useSessionContext()
+  const supabase = useSupabaseClient()
+  const router = useRouter()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,6 +25,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
   const [loading, setLoading] = useState(false)
   const [verifying, setVerifying] = useState(false)
   const [code, setCode] = useState('')
+  const [statusMessage, setStatusMessage] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
 
   const clearFieldError = (field) => {
@@ -54,8 +58,24 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     return validationErrors
   }
 
+  useEffect(() => {
+    if (!session || !open) return
+
+    setOpen(false)
+    router.push('/dashboard')
+  }, [session, open, router, setOpen])
+
+  useEffect(() => {
+    if (open) return
+    setVerifying(false)
+    setCode('')
+    setFieldErrors({})
+    setError(null)
+    setStatusMessage('')
+    setLoading(false)
+  }, [open])
+
   if (!open) return null
-  if (!isSignUpLoaded || !isSignInLoaded) return null
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -71,17 +91,33 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     setError(null)
 
     try {
-      await signUp.create({
-        emailAddress: email,
-        password,
-        firstName,
-        lastName,
+      const response = await fetch('/api/auth/email-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+        }),
       })
 
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-      setVerifying(true)
+      const payload = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        setError(payload.error || 'Unable to create your account right now.')
+        setStatusMessage('')
+      } else {
+        setStatusMessage(
+          payload.message || 'A 6-digit code was sent to your email. Enter it below to finish signing up.'
+        )
+        setVerifying(true)
+      }
     } catch (err) {
-      setError(err.errors ? err.errors[0].message : 'Something went wrong.')
+      console.error('Sign up error:', err)
+      setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -101,54 +137,54 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     setError(null)
 
     try {
-      const completeSignUp = await signUp.attemptEmailAddressVerification({ code })
+      const response = await fetch('/api/auth/email-verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          code: code.trim(),
+        }),
+      })
 
-      if (completeSignUp.status === 'complete') {
-        await setActive({ session: completeSignUp.createdSessionId })
+      const payload = await response.json().catch(() => ({}))
 
-        const redirectTo = localStorage.getItem('redirectAfterLogin')
-        if (redirectTo) {
-          localStorage.removeItem('redirectAfterLogin')
-          window.location.href = redirectTo
-        } else {
-          window.location.href = '/dashboard'
-        }
+      if (!response.ok) {
+        setError(payload.error || 'Invalid verification code.')
+        return
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+
+      if (signInError) {
+        console.error('Post-verification sign in error:', signInError)
+        setError('Verified but could not sign in. Try signing in manually.')
       }
     } catch (err) {
-      setError(err.errors ? err.errors[0].message : 'Invalid verification code.')
+      console.error('Verification error:', err)
+      setError('Invalid verification code.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleOAuthSignUp = async (strategy) => {
-    try {
-      const redirectUrl = `${window.location.origin}/sso-callback`
-
-      const redirectAfterLogin =
-        localStorage.getItem('redirectAfterLogin') || '/dashboard'
-
-      localStorage.setItem('redirectAfterLogin', redirectAfterLogin)
-
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl,
-        redirectUrlComplete: redirectUrl,
-      })
-    } catch (err) {
-      console.error('OAuth error:', err)
-      setError('Failed to sign up with social provider')
-    }
-  }
-
-  
   if (verifying) {
     return (
       <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
         <div className="text-left px-1 sm:px-0 py-1 sm:py-2">
           <h2 className="text-lg sm:text-xl font-bold mb-1">Verify your email</h2>
-          <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
-            We sent a code to {email}
+          <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">
+            We sent a 6-digit code to {email}. Enter it below to finish setting up your account.
+          </p>
+          {statusMessage && (
+            <p className="text-[11px] my-2 text-gray-500 leading-tight">{statusMessage}</p>
+          )}
+          <p className="text-[11px] text-gray-400">
+            Check your inbox (and spam folder) for the code—it can land anywhere.
           </p>
 
           <form onSubmit={handleVerify} className="space-y-2 sm:space-y-3">
@@ -164,8 +200,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
                   clearFieldError('code')
                 }}
                 className="w-full border rounded px-3 py-2 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter 6-digit code"
-                required
+                placeholder="Enter 6-digit code if you received one"
               />
               {fieldErrors.code && (
                 <p className="text-[11px] mt-1 text-rose-500">{fieldErrors.code}</p>
@@ -191,6 +226,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
               onClick={() => {
                 setVerifying(false)
                 setFieldErrors({})
+                setStatusMessage('')
               }}
               className="w-full text-blue-600 text-xs sm:text-sm hover:underline skip-squared"
             >
@@ -202,10 +238,9 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
     )
   }
 
-  
   return (
     <Modal open={open} onClose={() => setOpen(false)} size="max-w-sm sm:max-w-md">
-        <div className="text-left px-1 sm:px-0 py-1 sm:py-2">
+      <div className="text-left px-1 sm:px-0 py-1 sm:py-2">
         <h2 className="text-lg sm:text-xl font-bold mb-1">Join LinkedNorth</h2>
         <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
           Make the most of your professional life
@@ -324,31 +359,7 @@ export default function SignUpModal({ open, setOpen, switchToSignIn }) {
           <span className="px-2 text-xs sm:text-sm text-gray-500">or</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
-        <div className="space-y-2">
-          <button
-            onClick={() => handleOAuthSignUp('oauth_google')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
-          >
-            <Image src="/google.svg" alt="Google" width={16} height={16} unoptimized />
-            Continue with Google
-          </button>
-
-          <button
-            onClick={() => handleOAuthSignUp('oauth_facebook')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
-          >
-            <Image src="/facebook.svg" alt="Facebook" width={16} height={16} unoptimized />
-            Continue with Facebook
-          </button>
-
-          <button
-            onClick={() => handleOAuthSignUp('oauth_apple')}
-            className="w-full border border-gray-300 rounded py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium hover:bg-gray-50 transition skip-squared"
-          >
-            <Image src="/apple.svg" alt="Apple" width={16} height={16} unoptimized />
-            Continue with Apple
-          </button>
-        </div>
+        <SocialAuthButtons setError={setError} />
         <p className="text-xs sm:text-sm text-center mt-4 mb-5 sm:mb-6 text-gray-500">
           Already on LinkedNorth?
           <span

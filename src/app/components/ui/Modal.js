@@ -8,7 +8,7 @@ export default function Modal({ open = false, onClose = () => {}, children, size
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-      <div className={`bg-white rounded-lg shadow-lg w-full max-w-full ${size}`}>
+      <div className={`bg-white rounded-lg shadow-lg w-full ${size}`}>
         <div className="px-4 py-5 sm:px-6 sm:py-6">
           <button
             onClick={onClose}

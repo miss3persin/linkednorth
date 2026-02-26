@@ -34,7 +34,7 @@ export async function GET() {
       CREATE POLICY "Allow public view active jobs" ON public.internal_jobs
           FOR SELECT USING (status = 'active');
 
-      -- Allow recruiters to manage their own jobs (using Clerk userId stored in user_id)
+      -- Allow recruiters to manage their own jobs (auth UID stored in user_id)
       CREATE POLICY "Allow recruiters to manage own jobs" ON public.internal_jobs
           FOR ALL USING (auth.uid()::text = user_id OR true); -- Bypassing with service role mostly
     `;

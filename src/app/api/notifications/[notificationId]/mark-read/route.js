@@ -1,29 +1,35 @@
 import { NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin"
 import { getUnreadCounts } from "@/services/userService"
+import { getSupabaseUser } from "@/app/lib/authHelpers"
+import { extractHiddenDerivedIdsFromRequest } from "@/app/lib/hiddenDerivedNotifications"
 
-export async function PATCH(request, { params }) {
+export async function PATCH(request, context) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
+    const user = await getSupabaseUser(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { notificationId } = await params
+    const { notificationId } = context.params || {}
     if (!notificationId) {
-      return NextResponse.json({ error: "Notification ID missing" }, { status: 400 })     
+      return NextResponse.json({ error: "Notification ID missing" }, { status: 400 })
     }
 
     const { error } = await supabaseAdmin
       .from("notifications")
-      .update({ is_read: true })
-      .eq("user_id", userId)
+      .update({
+        is_read: true,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id)
       .eq("id", notificationId)
+      .eq("is_read", false)
 
     if (error) throw error
 
-    const counts = await getUnreadCounts(userId)
+    const hiddenDerivedIds = extractHiddenDerivedIdsFromRequest(request)
+    const counts = await getUnreadCounts(user.id, hiddenDerivedIds)
     return NextResponse.json({ success: true, unreadNotifications: counts.unreadNotifications })
   } catch (error) {
     console.error("Failed to mark notification read:", error)

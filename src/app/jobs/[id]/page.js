@@ -3,32 +3,38 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { useUser } from '@clerk/nextjs'
+import { useSessionContext } from '@/app/lib/supabaseAuthContext'
 import logo from '/public/linkednorth-logo.png'
 import JobApplicationModal from '@/app/components/modals/JobApplicationModal'
-import AuthModals from '@/app/components/modals/AuthModals'
 import JobDescriptionRenderer from '@/app/components/jobs/JobDescriptionRenderer'
 import { MapPin, Clock, Briefcase, Calendar, ExternalLink, Bookmark, ArrowLeft, Share2, Building2 } from 'lucide-react'
 import { formatPostedTime, titleCaseContract } from '@/app/lib/dateUtils'
 import { buildSaveJobPayload } from '@/app/lib/jobSavePayload'
 import { buildSaveModalState } from '@/app/lib/saveModalState'
 import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
+import { useAuthFetch } from '@/app/lib/useAuthFetch'
 import { Loader } from '@/app/components/ui/Loader'
 
 export default function JobDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const { isSignedIn, user } = useUser()
+  const { session } = useSessionContext()
+  const isSignedIn = Boolean(session)
+  const user = session?.user
+  const authFetch = useAuthFetch()
 
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [openAuthModal, setOpenAuthModal] = useState(false)
 
   const [modalState, setModalState] = useState({
     isOpen: false, type: 'success', title: '', message: '', emailAddress: '', externalLink: '',
   })
+  const isReadOnlyView = !isSignedIn
+  const isSaveDisabled = isReadOnlyView || isSaving
+  const showSidebar = isSignedIn
+  const jobGridClasses = `grid grid-cols-1 items-start ${showSidebar ? 'lg:grid-cols-3 gap-6' : 'gap-0'}`
 
   useEffect(() => {
     async function fetchJobDetails() {
@@ -37,6 +43,14 @@ export default function JobDetailsPage() {
         if (!res.ok) throw new Error('Job not found')
         const data = await res.json()
         setJob(data.job)
+
+        if (isSignedIn && user) {
+          authFetch('/api/jobs/track-view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId: params.id, jobTitle: data.job.jobTitle, company: data.job.company }),
+          }).catch(err => console.error('Failed to track view:', err))
+        }
       } catch (err) {
         console.error('Error fetching job:', err)
         setError(err.message)
@@ -44,26 +58,30 @@ export default function JobDetailsPage() {
         setLoading(false)
       }
     }
+
     if (params.id) fetchJobDetails()
-  }, [params.id])
+  }, [params.id, isSignedIn, user, authFetch])
 
   const handleSaveJob = async () => {
-    if (!isSignedIn) { setOpenAuthModal(true); return }
+    if (!isSignedIn) { router.push('/?redirect=/jobs/' + params.id); return }
     if (!job) return
+
     setIsSaving(true)
     try {
-      const payload = buildSaveJobPayload(job, user.id)
-      const res = await fetch('/api/jobs/save', {
+      const res = await authFetch('/api/jobs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(buildSaveJobPayload(job, user.id)),
       })
+
       const resData = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(resData.error || 'Failed')
 
       const modalOptions = buildSaveModalState(resData, {
         successMessage: 'This job has been saved to your profile library for later.',
       })
+
+      dispatchNotificationDelta(1)
 
       setModalState({
         isOpen: true,
@@ -104,10 +122,11 @@ export default function JobDetailsPage() {
   }
 
   const handleApply = async () => {
-    if (!isSignedIn) { setOpenAuthModal(true); return }
+    if (!isSignedIn) { router.push('/?redirect=/jobs/' + params.id); return }
     if (!job) return
+
     try {
-      const res = await fetch('/api/applications/create', {
+      const res = await authFetch('/api/applications/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId: job.id, jobTitle: job.jobTitle, company: job.company, applyLink: job.applyLink }),
@@ -115,7 +134,7 @@ export default function JobDetailsPage() {
       const data = await res.json()
 
       if (data.success) {
-    if (data.alreadyApplied) {
+        if (data.alreadyApplied) {
           setModalState({ isOpen: true, type: 'already_applied', title: 'Already Applied', message: 'You have already applied for this position.', emailAddress: '', externalLink: '' })
           return
         }
@@ -123,6 +142,7 @@ export default function JobDetailsPage() {
         dispatchNotificationDelta(1)
 
         const link = job.applyLink
+
         if (link?.startsWith('mailto:')) {
           setModalState({ isOpen: true, type: 'email', title: 'Send Your Application', message: 'Your application has been recorded. Send your resume to:', emailAddress: link.replace('mailto:', ''), externalLink: '' })
         } else if (link) {
@@ -139,16 +159,23 @@ export default function JobDetailsPage() {
   }
 
   const handleModalPrimaryAction = () => {
-    if (modalState.type === 'email') { window.location.href = `mailto:${modalState.emailAddress}`; setModalState({ ...modalState, isOpen: false }) }
+    if (modalState.type === 'email') {
+      window.location.href = `mailto:${modalState.emailAddress}`
+      setModalState({ ...modalState, isOpen: false })
+    }
   }
+
   const handleModalSecondaryAction = async () => {
     if (modalState.type === 'email') {
       try {
         await navigator.clipboard.writeText(modalState.emailAddress)
         setModalState({ isOpen: true, type: 'success', title: 'Email Copied!', message: `${modalState.emailAddress} has been copied to your clipboard.`, emailAddress: '', externalLink: '' })
-      } catch { setModalState({ ...modalState, isOpen: false }) }
+      } catch {
+        setModalState({ ...modalState, isOpen: false })
+      }
     }
   }
+
   const closeModal = () => setModalState({ ...modalState, isOpen: false })
 
   if (loading) {
@@ -177,22 +204,24 @@ export default function JobDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 mt-[72px]">
+    <div className="min-h-screen flex flex-col bg-gray-50 mt-[78px]">
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-8">
             <button onClick={() => router.back()} className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-black transition-all">
               <ArrowLeft size={14} /> Back to Listings
             </button>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-end gap-2">
               <button
                 onClick={handleShare}
                 className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-black transition-all"
               >
                 Share <Share2 size={14} />
               </button>
+
             </div>
           </div>
+
           <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-10">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
               <div className="flex flex-col sm:flex-row items-start gap-6">
@@ -232,23 +261,39 @@ export default function JobDetailsPage() {
               <div className="flex flex-col gap-3 min-w-[180px]">
                 <button
                   onClick={handleApply}
-                  className="w-full bg-black text-white rounded-none px-6 py-4 font-bold text-sm hover:bg-gray-800 transition-all border border-black shadow-none"
+                  disabled={isReadOnlyView}
+                  aria-disabled={isReadOnlyView}
+                  className={`w-full rounded-none px-6 py-4 font-bold text-sm transition-all border border-black shadow-none ${
+                    isReadOnlyView
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-black text-white hover:bg-gray-800'
+                  }`}
                 >
-                  Apply Now
+                  {isSignedIn ? 'Apply Now' : 'Sign in to apply'}
                 </button>
                 <button
                   onClick={handleSaveJob}
-                  disabled={isSaving}
-                  className="w-full bg-white text-black rounded-none px-6 py-4 font-bold text-sm hover:bg-gray-50 transition-all border border-gray-200"
+                  disabled={isSaveDisabled}
+                  aria-disabled={isSaveDisabled}
+                  className={`w-full rounded-none px-6 py-4 font-bold text-sm border transition-all ${
+                    isSaveDisabled
+                      ? 'border-gray-200 bg-white text-gray-400 cursor-not-allowed'
+                      : 'border-gray-200 bg-white text-black hover:bg-gray-50'
+                  }`}
                 >
-                  {isSaving ? 'Saving...' : 'Bookmark'}
+                  {isSaving ? 'Saving...' : isSignedIn ? 'Save' : 'Sign in to save'}
                 </button>
+                {isReadOnlyView && (
+                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-400 text-center">
+                    Sign in to apply or save this job.
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            <div className="lg:col-span-2 space-y-6">
+          <div className={jobGridClasses}>
+            <div className={`space-y-6 ${showSidebar ? 'lg:col-span-2' : ''}`}>
               <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-10">
                 <h2 className="text-xs font-black text-gray-400 mb-8 uppercase tracking-[0.2em] flex items-center gap-3">
                   Job Description
@@ -273,36 +318,34 @@ export default function JobDetailsPage() {
                 )}
               </div>
             </div>
-            <div className="space-y-6 lg:sticky lg:top-[92px]">
-              <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-8">
-                <h4 className="font-bold text-sm text-gray-900 mb-4">Job Summary</h4>
-                <ul className="space-y-5">
-                  <li className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Company</span>
-                    <span className="text-sm font-bold text-gray-700">{job.company}</span>
-                  </li>
-                  <li className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Category</span>
-                    <span className="text-sm font-bold text-gray-700">{job.jobType || 'General'}</span>
-                  </li>
-                  <li className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Commitment</span>
-                    <span className="text-sm font-bold text-gray-700">{titleCaseContract(job.contractType) || 'Full Time'}</span>
-                  </li>
-                  <li className="flex flex-col gap-1 pt-4 border-t border-gray-50">
-                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Job Identifier</span>
-                    <span className="text-[10px] font-mono text-gray-500 break-all">{params.id}</span>
-                  </li>
-                </ul>
+            {showSidebar && (
+              <div className="space-y-6 lg:sticky lg:top-[92px]">
+                <div className="bg-white rounded-none border border-gray-200 p-6 sm:p-8">
+                  <h4 className="font-bold text-sm text-gray-900 mb-4">Job Summary</h4>
+                  <ul className="space-y-5">
+                    <li className="flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Company</span>
+                      <span className="text-sm font-bold text-gray-700">{job.company}</span>
+                    </li>
+                    <li className="flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Category</span>
+                      <span className="text-sm font-bold text-gray-700">{job.jobType || 'General'}</span>
+                    </li>
+                    <li className="flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Commitment</span>
+                      <span className="text-sm font-bold text-gray-700">{titleCaseContract(job.contractType) || 'Full Time'}</span>
+                    </li>
+                    <li className="flex flex-col gap-1 pt-4 border-t border-gray-50">
+                      <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Job Identifier</span>
+                      <span className="text-[10px] font-mono text-gray-500 break-all">{params.id}</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-
+            )}
           </div>
-
         </div>
       </main>
-
-      <AuthModals open={openAuthModal} setOpen={setOpenAuthModal} />
 
       <JobApplicationModal
         isOpen={modalState.isOpen}
