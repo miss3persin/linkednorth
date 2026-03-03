@@ -60,15 +60,7 @@ export default function PublicNavbar() {
               </li>
               <li>
                 <Link
-                  href="/coming-soon"
-                  className={`${pathname === '/coming-soon' ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
-                >
-                  Career Resources
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/coming-soon"
+                  href="/contact"
                   className={`${pathname === '/contact' ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
                 >
                   Contact Us
@@ -111,10 +103,7 @@ export default function PublicNavbar() {
                 <Link href="/jobs" onClick={() => setMenuOpen(false)}>Job Listings</Link>
               </li>
               <li className="hover:text-black">
-                <Link href="/coming-soon" onClick={() => setMenuOpen(false)}>Career Resources</Link>
-              </li>
-              <li className="hover:text-black">
-                <Link href="/coming-soon" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+                <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
               </li>
             </ul>
             <div className="flex w-full max-w-xs flex-col gap-3 mt-6">

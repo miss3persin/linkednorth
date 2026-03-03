@@ -30,74 +30,52 @@ import Loader from './components/ui/Loader'
 const openSans = Open_Sans({ subsets: ['latin'] })
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
-const jobData = [
-  {
-    jobTitle: 'Frontend Developer',
-    company: 'Apple',
-    location: 'United Kingdom',
-    jobType: 'On-site',
-    description: "We're looking for a skilled frontend developer to join our team in London.",
-    imageSrc: '/apple.png',
-    applyLink: '/jobs'
-  },
-  {
-    jobTitle: 'Backend Developer',
-    company: 'Uber',
-    location: 'United States',
-    jobType: 'Remote',
-    description: 'Join our team to build scalable backend systems.',
-    imageSrc: '/Uber.png',
-    applyLink: '/jobs'
-  },
-  {
-    jobTitle: 'Product Manager',
-    company: 'Microsoft',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/microsoft.png',
-    applyLink: '/jobs'
-  },
-  {
-    jobTitle: 'Product Manager',
-    company: 'Netflix',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/Netflix.png',
-    applyLink: '/jobs'
-  },
-  {
-    jobTitle: 'Product Manager',
-    company: 'Tesla',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/Tesla.png',
-    applyLink: '/jobs'
-  },
-  {
-    jobTitle: 'Product Manager',
-    company: 'Reddit',
-    location: 'Canada',
-    jobType: 'Hybrid',
-    description: 'Lead the product development for next-gen tools.',
-    imageSrc: '/reddit.png',
-    applyLink: '/jobs'
-  }
-]
-
+// hero job cards will be loaded via the jobs API
 export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   // const searchParams = useSearchParams()
   const router = useRouter()
   const { session, isLoading } = useSessionContext()
+  const [heroJobs, setHeroJobs] = useState([])
+  const [isLoadingHeroJobs, setIsLoadingHeroJobs] = useState(true)
 
   useEffect(() => {
     if (!isLoading && session && window.location.pathname === '/') {
       router.push('/dashboard');
     }
   }, [isLoading, session, router]);
+
+  useEffect(() => {
+    let isMounted = true
+    const controller = new AbortController()
+
+    const loadJobs = async () => {
+      try {
+        const res = await fetch('/api/jobs?limit=12&sort=recent', {
+          signal: controller.signal,
+          cache: 'no-store',
+        })
+
+        if (!res.ok) throw new Error('Failed to fetch jobs')
+        const data = await res.json()
+        const jobs = data?.jobs || []
+        if (!isMounted) return
+        const shuffled = [...jobs].sort(() => Math.random() - 0.5)
+        setHeroJobs(shuffled.slice(0, 6))
+      } catch (error) {
+        console.error('Failed to load hero jobs', error)
+      } finally {
+        if (isMounted) setIsLoadingHeroJobs(false)
+      }
+    }
+
+    void loadJobs()
+
+    return () => {
+      isMounted = false
+      controller.abort()
+    }
+  }, [])
 
   // Show loading while checking auth
   if (isLoading) {
@@ -186,8 +164,7 @@ export default function HomePage() {
                 <Image src={startion_3} alt="" className="w-full" />
                 <div className="w-full h-16 sm:h-24 absolute bg-gradient-to-b from-transparent via-white/95 to-white bottom-[0.21rem]"></div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start order-2 sm:order-2">
-                <Button text="Check Career Resources" img={arrow_right} link="/coming-soon" variant="black" />
+              <div className="flex items-center justify-center lg:justify-stretch max-w-none lg:max-w-md">
                 <Button text="Join Our Discord" img={discord_img} link="/coming-soon" variant="white" />
               </div>
             </div>
@@ -241,18 +218,24 @@ export default function HomePage() {
           <div className="mx-auto mb-10 grid w-full max-w-7xl grid-cols-1 gap-4 place-items-center
                 sm:grid-cols-2 lg:grid-cols-3
                 px-4 sm:px-8 md:px-16 xl:px-24">
-            {jobData.map((job, index) => (
-              <JobCard
-                key={index}
-                jobTitle={job.jobTitle}
-                company={job.company}
-                location={job.location}
-                jobType={job.jobType}
-                description={job.description}
-                imageSrc={job.imageSrc}
-                applyLink={job.applyLink}
-              />
-            ))}
+            {isLoadingHeroJobs ? (
+              <div className="col-span-full flex w-full justify-center">
+                <Loader variant="loading" size="lg" spinnerColor="#1d1d1f" accentColor="#1d1d1f" showMessage={false} />
+              </div>
+            ) : (
+              heroJobs.map((job) => (
+                <JobCard
+                  key={job.id || job.jobId || job.jobTitle}
+                  jobTitle={job.jobTitle || job.title || 'Opportunity'}
+                  company={job.company}
+                  location={job.location || 'Remote'}
+                  jobType={job.jobType || 'Remote'}
+                  description={job.description || job.summary || ''}
+                  imageSrc={job.imageSrc || job.companyLogo || null}
+                  applyLink={job.applyLink || job.detailsLink || '/jobs'}
+                />
+              ))
+            )}
           </div>
 
 

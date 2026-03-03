@@ -103,13 +103,7 @@ export default function AuthNavbar({ userData }) {
               Job Listings
             </Link>
             <Link
-              href="/coming-soon"
-              className={`${isActive('/coming-soon') ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
-            >
-              Career Resources
-            </Link>
-            <Link
-              href="/coming-soon"
+              href="/contact"
               className={`${isActive('/contact') ? 'text-black font-semibold' : 'text-[#868D9B]'} hover:text-black transition-colors`}
             >
               Contact Us
@@ -154,8 +148,7 @@ export default function AuthNavbar({ userData }) {
           <div className="flex flex-1 flex-col items-center justify-center gap-5 pt-6">
             <Link href="/" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Home</Link>
             <Link href="/joblistings" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Job Listings</Link>
-            <Link href="/coming-soon" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Career Resources</Link>
-            <Link href="/coming-soon" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Contact Us</Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Contact Us</Link>
             <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Notifications</Link>
             <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-base hover:text-black">Messages</Link>
             <button

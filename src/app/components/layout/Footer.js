@@ -9,8 +9,7 @@ const openSans = Open_Sans({ subsets: ['latin'] })
 const quickLinks = [
   { href: '/', label: 'Home' },
   { href: '/joblistings', label: 'Job Listings' },
-  { href: '/coming-soon', label: 'Contact Us' },
-  { href: '/coming-soon', label: 'Career Resources' },
+  { href: '/contact', label: 'Contact Us' },
 ]
 
 const socialLinks = [

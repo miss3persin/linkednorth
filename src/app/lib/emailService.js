@@ -5,6 +5,80 @@ const MAILJET_FROM_NAME = process.env.MAILJET_FROM_NAME || 'LinkedNorth'
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'LinkedNorth'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://linkednorth.com'
 
+function ensureMailjetConfig() {
+  if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY || !MAILJET_FROM_EMAIL) {
+    throw new Error(
+      'Email delivery is not configured (set MAILJET_API_KEY, MAILJET_SECRET_KEY, and MAILJET_FROM_EMAIL).'
+    )
+  }
+}
+
+function toRecipientObject(candidate) {
+  if (!candidate) return null
+  if (typeof candidate === 'string') {
+    return { Email: candidate }
+  }
+  const email = candidate.Email || candidate.email
+  if (!email) return null
+  return {
+    Email: email,
+    Name: candidate.Name || candidate.name,
+  }
+}
+
+function formatRecipients(recipient) {
+  if (!recipient) return []
+  if (Array.isArray(recipient)) {
+    return recipient.map(toRecipientObject).filter(Boolean)
+  }
+  const formatted = toRecipientObject(recipient)
+  return formatted ? [formatted] : []
+}
+
+async function sendMail({ to, subject, text, html, replyTo }) {
+  ensureMailjetConfig()
+  const basicAuth = Buffer.from(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`).toString('base64')
+  const recipients = formatRecipients(to)
+
+  if (!recipients.length) {
+    throw new Error('No recipients were provided for the email.')
+  }
+
+  const message = {
+    From: {
+      Email: MAILJET_FROM_EMAIL,
+      Name: MAILJET_FROM_NAME,
+    },
+    To: recipients,
+    Subject: subject,
+    TextPart: text,
+    HTMLPart: html,
+  }
+
+  if (replyTo?.email) {
+    message.ReplyTo = {
+      Email: replyTo.email,
+      Name: replyTo.name || replyTo.email,
+    }
+  }
+
+  const response = await fetch('https://api.mailjet.com/v3.1/send', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${basicAuth}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      Messages: [message],
+    }),
+  })
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '')
+    throw new Error(`Failed to send email (${response.status}): ${errorBody}`)
+  }
+}
+
 function buildEmailContent({ firstName, code }) {
   const displayName = firstName?.trim() || 'there'
   const text =
@@ -29,40 +103,11 @@ function buildEmailContent({ firstName, code }) {
 }
 
 export async function sendVerificationEmail({ email, code, firstName }) {
-  if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY || !MAILJET_FROM_EMAIL) {
-    throw new Error(
-      'Email delivery is not configured (set MAILJET_API_KEY, MAILJET_SECRET_KEY, and MAILJET_FROM_EMAIL).'
-    )
-  }
-
-  const basicAuth = Buffer.from(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`).toString('base64')
-
   const { text, html } = buildEmailContent({ firstName, code })
-
-  const response = await fetch('https://api.mailjet.com/v3.1/send', {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${basicAuth}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      Messages: [
-        {
-          From: {
-            Email: MAILJET_FROM_EMAIL,
-            Name: MAILJET_FROM_NAME,
-          },
-          To: [{ Email: email }],
-          Subject: `${APP_NAME} verification code`,
-          TextPart: text,
-          HTMLPart: html,
-        },
-      ],
-    }),
+  await sendMail({
+    to: email,
+    subject: `${APP_NAME} verification code`,
+    text,
+    html,
   })
-
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => '')
-    throw new Error(`Failed to send verification email (${response.status}): ${errorBody}`)
-  }
 }
