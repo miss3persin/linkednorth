@@ -1,11 +1,8 @@
 'use client'
 
-import { Open_Sans } from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-
-const openSans = Open_Sans({ subsets: ['latin'], variable: '--font-open-sans' })
 
 export const Button = ({
   text,

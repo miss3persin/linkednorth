@@ -13,10 +13,9 @@ const RecruiterModal = dynamic(() => import('@/app/components/modals/RecruiterMo
 const AuthNavbarActions = dynamic(() => import('./AuthNavbarActions'), { ssr: false });
 
 import { useSessionContext } from '@/app/lib/supabaseAuthContext';
-import { Open_Sans } from 'next/font/google';
+import { openSans } from '@/lib/fonts';
 import { useAuthFetch } from '@/app/lib/useAuthFetch';
 
-const openSans = Open_Sans({ subsets: ['latin'] });
 
 export default function AuthNavbar({ userData }) {
   const [menuOpen, setMenuOpen] = useState(false);

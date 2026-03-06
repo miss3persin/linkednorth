@@ -6,12 +6,11 @@ import { useState } from 'react'
 import logo from '/public/linkednorth-logo.png'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { Open_Sans } from 'next/font/google'
+import { openSans } from '@/lib/fonts'
 import { Button } from '../../ui/Button'
 import { HiMenu, HiX } from 'react-icons/hi'
 
 const AuthModals = dynamic(() => import('../../modals/AuthModals'), { ssr: false });
-const openSans = Open_Sans({ subsets: ['latin'] })
 
 export default function PublicNavbar() {
   const [menuOpen, setMenuOpen] = useState(false)

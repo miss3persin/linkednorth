@@ -1,5 +1,5 @@
 import { Loader } from '@/app/components/ui/Loader';
-import { openSans } from './layout';
+import { openSans } from '@/lib/fonts';
 
 const statusMessages = [
   'Checking your profile',

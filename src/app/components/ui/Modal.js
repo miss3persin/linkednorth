@@ -1,7 +1,5 @@
 'use client'
-import { Inter, Open_Sans } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+import { inter } from '@/lib/fonts'
 
 export default function Modal({ open = false, onClose = () => {}, children, size = 'max-w-md' }) {
   if (!open) return null

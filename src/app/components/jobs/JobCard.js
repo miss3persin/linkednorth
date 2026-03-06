@@ -2,16 +2,13 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Inter, Open_Sans } from 'next/font/google'
+import { inter, openSans } from '@/lib/fonts'
 import arrow_right_black from '/public/chevron right black.png'
 import job from '/public/work_blue.png'
 import location_icon from '/public/location_blue.png'
 import { stripHtml } from '../../lib/cleanDescription'
 
 import logo from '/public/linkednorth-logo.png'
-
-const openSans = Open_Sans({ subsets: ['latin'] })
-const inter = Inter({ subsets: ['latin'] })
 
 export const JobCard = ({
   jobTitle,

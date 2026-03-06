@@ -20,18 +20,29 @@ export async function POST(request) {
   }
 
   const payload = await request.json().catch(() => ({}))
-  const name = normalizeText(payload.name)
+  const firstName = normalizeText(payload.firstName)
+  const lastName = normalizeText(payload.lastName)
   const email = normalizeText(payload.email)
+  const phone = normalizeText(payload.phone)
+  const company = normalizeText(payload.company)
   const subject = normalizeText(payload.subject)
   const message = normalizeText(payload.message)
+  const fallbackName = `${firstName} ${lastName}`.trim()
+  const name = normalizeText(payload.name || fallbackName)
 
-  if (!name || !email || !subject || !message) {
-    return buildErrorResponse('Please provide name, email, subject, and message.')
+  if (!email || !subject || !message) {
+    return buildErrorResponse(
+      'Please provide an email, subject, and message.'
+    )
   }
 
   const entry = {
-    name,
+    name: name || null,
+    first_name: firstName || null,
+    last_name: lastName || null,
     email,
+    phone: phone || null,
+    company: company || null,
     subject,
     message,
     status: 'new',

@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useSessionContext } from '@/app/lib/supabaseAuthContext'
 import AuthModals from "../modals/AuthModals"
 import Image from 'next/image'
-import { Inter, Open_Sans } from 'next/font/google'
 import arrow_right from '/public/chevron right.png'
 import arrow_right_black from '/public/chevron right black.png'
 import save_btn from '/public/job_save_btn.png'
@@ -15,10 +14,6 @@ import { stripHtml } from '../../lib/cleanDescription'
 import { dispatchNotificationDelta } from '@/app/lib/notificationEvents'
 import { useAuthFetch } from '@/app/lib/useAuthFetch'
 import { formatPostedTime } from '../../lib/dateUtils'
-
-const openSans = Open_Sans({ subsets: ['latin'] })
-const inter = Inter({ subsets: ['latin'] })
-
 
 
 

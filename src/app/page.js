@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSessionContext } from '@/app/lib/supabaseAuthContext'
 import AuthModals from './components/modals/AuthModals'
-import { Inter, Open_Sans } from 'next/font/google'
+import { inter, openSans } from '@/lib/fonts'
 import { SearchBar } from './components/ui/SearchBar'
 import { Button } from './components/ui/Button'
 import { JobCard } from './components/jobs/JobCard'
@@ -26,11 +26,6 @@ import feedback_img from '/public/feedback_img.png'
 import Marquee from 'react-fast-marquee'
 import Image from 'next/image'
 import Loader from './components/ui/Loader'
-
-const openSans = Open_Sans({ subsets: ['latin'] })
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-
-// hero job cards will be loaded via the jobs API
 export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   // const searchParams = useSearchParams()
@@ -48,21 +43,67 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true
     const controller = new AbortController()
+    const TARGET_HERO_JOBS = 6
+    const PAGE_LIMIT = 60
+    const MAX_PAGES = 4
 
     const loadJobs = async () => {
       try {
-        const res = await fetch('/api/jobs?limit=12&sort=recent', {
-          signal: controller.signal,
-          cache: 'no-store',
-        })
+        let offset = 0
+        let jobsWithDescription = []
+        let lastBatchSize = PAGE_LIMIT
 
-        if (!res.ok) throw new Error('Failed to fetch jobs')
-        const data = await res.json()
-        const jobs = data?.jobs || []
+        while (
+          offset < PAGE_LIMIT * MAX_PAGES &&
+          jobsWithDescription.length < TARGET_HERO_JOBS &&
+          lastBatchSize === PAGE_LIMIT
+        ) {
+          const res = await fetch(
+            `/api/jobs?limit=${PAGE_LIMIT}&offset=${offset}&sort=recent`,
+            {
+              signal: controller.signal,
+              cache: 'no-store',
+            }
+          )
+
+          if (!res.ok) throw new Error('Failed to fetch jobs')
+          const data = await res.json()
+          const batch = Array.isArray(data?.jobs) ? data.jobs : []
+          lastBatchSize = batch.length
+
+          const filtered = batch.filter(
+            (job) =>
+              job &&
+              typeof job.description === 'string' &&
+              job.description.trim().length > 0
+          )
+
+          jobsWithDescription = jobsWithDescription.concat(filtered)
+          offset += PAGE_LIMIT
+        }
+
         if (!isMounted) return
-        const shuffled = [...jobs].sort(() => Math.random() - 0.5)
-        setHeroJobs(shuffled.slice(0, 6))
+
+        const shuffled = [...jobsWithDescription].sort(
+          () => Math.random() - 0.5
+        )
+
+        let finalJobs = []
+        if (shuffled.length >= TARGET_HERO_JOBS) {
+          finalJobs = shuffled.slice(0, TARGET_HERO_JOBS)
+        } else if (shuffled.length > 0) {
+          while (finalJobs.length < TARGET_HERO_JOBS) {
+            finalJobs.push(
+              shuffled[finalJobs.length % shuffled.length]
+            )
+          }
+        }
+
+        setHeroJobs(finalJobs)
       } catch (error) {
+        if (error?.name === 'AbortError') {
+          return
+        }
         console.error('Failed to load hero jobs', error)
       } finally {
         if (isMounted) setIsLoadingHeroJobs(false)
@@ -184,7 +225,7 @@ export default function HomePage() {
             <p
               className={`${inter.variable} text-[#333333] text-center lg:text-left text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-7 pt-3 font-bold`}
             >
-              Get Your Resume Reviewed by Top{" "}
+              Build A Standout Resume That Attracts Top{" "}
               <span className="text-[#A0A6B1]">Recruiters</span>
             </p>
             <div className="w-full relative my-4 lg:hidden items-center justify-center flex">
@@ -193,12 +234,11 @@ export default function HomePage() {
             <p
               className={`${openSans.className} mb-5 text-center lg:text-left leading-loose text-[#868D9B] max-sm:text-sm max-w-full lg:max-w-lg`}
             >
-              Receive expert feedback from recruiters who’ve worked with leading
-              brands to elevate your resume.
+              Create a standout resume with our tool, built to impress the recruiters who matter most.
             </p>
             <div className="lg:w-full mx-auto">
               <Button
-                text="Check Resume -$25"
+                text="Build Your Resume"
                 img={arrow_right}
                 onClick={() => setAuthModalOpen(true)}
                 variant="black"
@@ -300,7 +340,7 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start mx-auto lg:mx-0">
               <Button
-                text="Find Your Future Job"
+                text="Subscribe"
                 link="/jobs"
                 variant="black"
               />

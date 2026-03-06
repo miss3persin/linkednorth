@@ -2,12 +2,7 @@ import "./globals.css";
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import SupabaseProvider from './SupabaseProvider'
-import { Open_Sans } from 'next/font/google';
-
-export const openSans = Open_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-});
+import { openSans } from '@/lib/fonts';
 
 export const metadata = {
   title: "Linkednorth | Find Your Next Role, Verified and Secured",
@@ -23,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`min-h-screen flex flex-col ${openSans.className}`}>
+      <body className={`min-h-screen flex flex-col ${openSans.className} ${openSans.variable}`}>
         <SupabaseProvider>
           <Navbar />
           <main className="flex-1">{children}</main>

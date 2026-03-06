@@ -1,10 +1,8 @@
-import { Open_Sans } from 'next/font/google'
+import { openSans } from '@/lib/fonts'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import logo from '/public/linkednorth-logo-white.png'
-
-const openSans = Open_Sans({ subsets: ['latin'] })
 
 const quickLinks = [
   { href: '/', label: 'Home' },
